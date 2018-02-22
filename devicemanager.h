@@ -1,0 +1,51 @@
+#ifndef DEVICEMANAGER_H
+#define DEVICEMANAGER_H
+
+#include <QObject>
+#include "sessmessage.h"
+#include "protomessage.h"
+#include "protoparser.h"
+#include "device.h"
+#include <QMap>
+#include <QList>
+class DeviceManager:public QObject
+{
+Q_OBJECT
+public:
+    DeviceManager();
+    bool start();
+    void stop();
+    void load(int index, int channel);
+    //发送全部设备最近的波形文件
+    bool SendAllWave();
+    void ReadParam();
+    void WriteParam();
+    void SetStation(QString station);
+    void ListDevice(QList<Device*> &devices);
+    Device* GetDevice(quint32 dev_id);
+    void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
+    bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
+public slots:
+    void onWaveMsg(MsgWaveData wvData);
+    void Message(SessMessage msg);
+    void onNotify(QString msg);
+private:
+    int m_dev_num;
+    QMap<quint32,QString> id_name_map;
+    QMap<quint32,Device*> dev_map;
+    QStringList names;
+    QStringList ids;
+    ProtoParser parser;
+    quint16 m_serial_id;
+    quint16 m_session_id;
+signals:
+    void SendData(SessMessage msg);
+    void DevOnline(Device* dev);
+    void DevOffline(Device* dev);
+    void Notify(QString msg);
+    // QObject interface
+protected:
+    void timerEvent(QTimerEvent *);
+};
+
+#endif // DEVICEMANAGER_H

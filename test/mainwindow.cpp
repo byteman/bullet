@@ -1,0 +1,119 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "../protomessage.h"
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    serial_id(0),
+    session_id(0)
+{
+    ui->setupUi(this);
+    this->startTimer(5000);
+    connect(&socket,SIGNAL(readyRead()),this,SLOT(readPendingDatagrams()));
+
+}
+
+void MainWindow::parseMsg(QByteArray& msg)
+{
+    ProtoMessage input_msg;
+
+    if(parser.parseData(msg, input_msg))
+    {
+        if(input_msg.head.cmd_id == MSG_START_WAVE)
+        {
+            on_btnStart_clicked();
+        }
+    }
+}
+void MainWindow::readPendingDatagrams()
+{
+    while (socket.hasPendingDatagrams()) {
+        QByteArray datagram;
+        datagram.resize(socket.pendingDatagramSize());
+        QHostAddress sender;
+        quint16 senderPort;
+
+        socket.readDatagram(datagram.data(), datagram.size(),
+                                &sender, &senderPort);
+
+
+
+    }
+}
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+/*
+    quint8 samplebits;
+    quint8 nchannel;
+    quint32 totalSamples;
+    quint32 startSample;
+    quint16 nSample;
+*/
+void MainWindow::on_btnStart_clicked()
+{
+    int num = ui->edtSampleNum->text().toInt();
+    int count = ui->edtCount->text().toInt();
+    static quint16 v = 0;
+    WaveDataHead wvd;
+
+    wvd.samplebits = 16;
+    wvd.nchannel = 8;
+    wvd.totalSamples = num*count;
+    wvd.startSample = 0;
+    wvd.nSample = 1;
+
+    quint16 ss = session_id++;
+    //n次发送
+    for(int i = 0; i < count; i++)
+    {
+        QByteArray data;
+        wvd.startSample = i*num;
+        wvd.nSample = num;
+        data.append(wvd.samplebits);
+        data.append(wvd.nchannel);
+        data.append((char*)&wvd.totalSamples,4);
+        data.append((char*)&wvd.startSample,4);
+        data.append((char*)&wvd.nSample,2);
+        //n个采样
+        for(int j = 0; j < num; j++)
+        {
+            //一次采样n个通道
+            for(int k =0; k < wvd.nchannel; k++)
+            {
+
+                data.append((char*)&v,2);
+
+            }
+            v++;
+
+        }
+        sendPacket(MSG_WAVE_DATA,ss,data);
+
+    }
+
+}
+
+void MainWindow::sendPacket(quint8 cmd,quint16 sess,QByteArray& data)
+{
+    ProtoMessage msg;
+    msg.head.cmd_id = cmd;
+    msg.head.device_id = ui->edtDevID->text().toInt();
+    msg.head.serial_id = serial_id++;
+    msg.head.sesson_id = sess;
+    msg.data.append(data);
+    QByteArray buf;
+    msg.toByteArray(buf);
+    socket.writeDatagram(buf,QHostAddress(ui->edtIp->text()),ui->edtPort->text().toInt());
+}
+void MainWindow::timerEvent(QTimerEvent *)
+{
+    QByteArray data;
+    sendPacket(MSG_HEART,session_id++,data);
+}
+
+void MainWindow::on_btnStop_clicked()
+{
+    qDebug() << "stop";
+}

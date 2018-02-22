@@ -1,0 +1,8 @@
+Makefile
+debug
+output
+*.wave
+*.user
+ui_mainwindow.h
+*.Debug
+*.Release
