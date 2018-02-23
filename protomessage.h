@@ -10,13 +10,70 @@ enum MessageID{
    MSG_READ_PARAM,
    MSG_WRITE_PARAM
 };
+typedef quint16 INT16U;
+typedef quint8  INT8U;
+
 #pragma pack(push)
 #pragma pack(1)
-struct DevicePara{
-    quint32 host_ip;    //主机ip
-    quint16 host_port; //主机端口
-    quint32 dev_id; //设备唯一编号
+
+/*IP地址*/
+struct sIP_ADDR{
+ unsigned  char addr1;
+ unsigned   char addr2;
+ unsigned   char addr3;
+ unsigned   char addr4;
 };
+
+/*本机MAC地址*/
+struct sMAC_ADDR{
+    char addr1;
+    char addr2;
+    char addr3;
+    char addr4;
+    char addr5;
+    char addr6;
+};
+
+/*本机IP地址*/
+struct Glocal_IP_ADDR{
+    sIP_ADDR ipaddr;                                    /*本机IP地址*/
+    sIP_ADDR SubnetMask;                                /*本机掩码地址*/
+    sIP_ADDR GateWay;                                   /*本机网关地址*/
+};
+
+///*服务器IP地址，和端口号*/
+struct sServerADDR{
+    sIP_ADDR ipaddr;
+    int port;
+};
+
+struct MsgDevicePara
+{
+    INT16U	mWorkMode;	//采集方式
+    INT16U	mWetUp;		//	重量上限值
+    INT16U  mWetDown;		//重量下限值
+
+    Glocal_IP_ADDR Local_IP; //IP 地址
+    sServerADDR Server_ip;	//服务器IP
+    INT8U	mWifiSSID[12];  //ssid 名字
+    INT8U	mWifiPass[12];  //pass 密码
+
+    unsigned char m_year;		//年
+    unsigned char m_month;	//月
+    unsigned char m_day;		//日
+    unsigned char m_hour;		//时
+    unsigned char m_minute;	//分
+    unsigned char m_seconds;	//秒
+
+    INT8U 	checksum;
+    void toByteArray(QByteArray& data)
+    {
+
+        data.append((const char*)this,sizeof(MsgDevicePara));
+    }
+};
+
+//struct MsgDevicePara{};
 
 struct WaveDataHead{
     quint8 samplebits;

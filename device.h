@@ -30,6 +30,9 @@ public:
 
     qint64 SendStartWave(quint16 sess_id);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
+    void ReadParam();
+    void WriteParam(MsgDevicePara &para);
+    qint64 WriteCmd(quint8 cmd, QByteArray &buf);
 private:
     quint32 m_dev_id;
     quint16 m_serial_id;

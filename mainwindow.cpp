@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
             ,SLOT(Message(SessMessage)));
     connect(&dvm,SIGNAL(DevOffline(Device*)),this,SLOT(DevOffline(Device*)));
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
+    connect(&dvm,SIGNAL(onReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
+    connect(&dvm,SIGNAL(onWriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
 
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     menu=new QMenu(this);
@@ -57,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dvm.start();
     dvm.SetStation("工位1");
     loadDeviceUI();
+    ui->rb1->setChecked(true);
     m_waveWdg = new WaveWidget(ui->qwtPlot,8);
 
     this->startTimer(1000);
@@ -77,20 +80,11 @@ void MainWindow::setupRealtimeDataDemo(QwtPlot *qwtplot)
 {
 
 
-    //初始化xdata,x对应长度为5的坐标，y初始全为0
-//    for(int i=1;i<5001;i++){
-//        xdata.append(double(i)/1000-5);
-//        ydata.append(0);
-//    }
-
     demoName = "测力波形";
     qwtplot->setTitle(demoName);
     qwtplot->setCanvasBackground(Qt::gray);//背景
     qwtplot->insertLegend(new QwtLegend(),QwtPlot::RightLegend);//标签
 
-//    curve = new QwtPlotCurve();
-//    curve->setTitle("肌电信号");//曲线名字
-//    curve->setPen( Qt::yellow, 3 );//曲线的颜色 宽度;
 
     QTime curtime;
     curtime=curtime.currentTime();
@@ -108,7 +102,7 @@ void MainWindow::setupRealtimeDataDemo(QwtPlot *qwtplot)
     zoomer->setMousePattern(QwtEventPattern::MouseSelect3,Qt::RightButton );
     QwtPlotMagnifier *magnifier = new QwtPlotMagnifier( qwtplot->canvas() );                 //默认的滑轮及右键缩放功能  图形的整体缩放
 
-    //    magnifier->setMouseButton(Qt::LeftButton);     //设置哪个按钮与滑轮为缩放画布  如果不设置(注册掉当前行)按钮默认为滑轮以及右键为缩放
+    magnifier->setMouseButton(Qt::LeftButton);     //设置哪个按钮与滑轮为缩放画布  如果不设置(注册掉当前行)按钮默认为滑轮以及右键为缩放
 
     QwtPlotGrid *grid = new QwtPlotGrid();
     grid->enableX( true );//设置网格线
@@ -168,6 +162,16 @@ QString MainWindow::FormatHex(QByteArray& data)
 void MainWindow::Message(SessMessage s)
 {
     ui->txtLog->append(FormatHex(s.getData()));
+}
+
+void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
+{
+
+}
+
+void MainWindow::onWritePara(Device *dev, bool result)
+{
+
 }
 
 //void MainWindow::on_btnStart_clicked()
@@ -295,17 +299,26 @@ void MainWindow::on_btnWaveStart_clicked()
         ui->statusBar->showMessage(str);
     }
 }
+void MainWindow::listFiles(quint32 dev_id)
+{
 
+    QStringList wvFiles;
+    dvm.GetDeviceWaveFiles(dev_id,wvFiles);
+    ui->listWidget->clear();
+    ui->listWidget->addItems(wvFiles);
+    m_cur_dev_id = dev_id;
+}
+void MainWindow::readParam(quint32 dev_id)
+{
+    dvm.ReadParam(dev_id);
+}
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
     if(item->childCount() > 0)
     {
         quint32 dev_id = item->data(0,Qt::UserRole).toInt();
-        QStringList wvFiles;
-        dvm.GetDeviceWaveFiles(dev_id,wvFiles);
-        ui->listWidget->clear();
-        ui->listWidget->addItems(wvFiles);
-        m_cur_dev_id = dev_id;
+        listFiles(dev_id);
+        readParam(dev_id);
     }
     else
     {

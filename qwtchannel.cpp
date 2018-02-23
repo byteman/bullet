@@ -1,5 +1,15 @@
 #include "qwtchannel.h"
-static int colors[8];
+//Qt::white	3	White (#ffffff)
+//Qt::black	2	Black (#000000)
+//Qt::red	7	Red (#ff0000)
+//Qt::darkRed	13	Dark red (#800000)
+//Qt::green	8	Green (#00ff00)
+//Qt::darkGreen	14	Dark green (#008000)
+//Qt::blue	9	Blue (#0000ff)
+//Qt::darkBlue	15	Dark blue (#000080)
+//Qt::cyan	10	Cyan (#00ffff)
+//Qt::darkCyan	16	Dark cyan (#008080)
+static int colors[8] = {Qt::white,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 QwtChannel::QwtChannel(int index,QObject *parent):
     QObject(parent),
     m_index(index)

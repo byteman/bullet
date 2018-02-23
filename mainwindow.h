@@ -20,6 +20,7 @@
 #include "sessmessage.h"
 #include "devicemanager.h"
 #include "wavewidget.h"
+#include "protomessage.h"
 namespace Ui {
 class MainWindow;
 }
@@ -55,11 +56,16 @@ private:
     QTreeWidgetItem *findItemById(quint32 id);
     void paintWave(MsgWaveData &wvd, int chan);
     void ShowDeviceChannel(quint32 dev_id, int chan);
+
+    void listFiles(quint32 dev_id);
+    void readParam(quint32 dev_id);
 private slots:
     void onNotify(QString msg);
     void on_menu_click(bool);
     void updatedataSlot();
     void Message(SessMessage msg);
+    void onReadPara(Device* dev, MsgDevicePara para);
+    void onWritePara(Device* dev, bool result);
     //void on_btnStart_clicked();
     void on_btnStop_clicked();
     void on_btnReadWave_clicked();

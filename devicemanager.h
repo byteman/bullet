@@ -18,8 +18,8 @@ public:
     void load(int index, int channel);
     //发送全部设备最近的波形文件
     bool SendAllWave();
-    void ReadParam();
-    void WriteParam();
+    void ReadParam(quint32 dev_id);
+    void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);
     void ListDevice(QList<Device*> &devices);
     Device* GetDevice(quint32 dev_id);
@@ -27,6 +27,7 @@ public:
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
 public slots:
     void onWaveMsg(MsgWaveData wvData);
+
     void Message(SessMessage msg);
     void onNotify(QString msg);
 private:
@@ -39,6 +40,8 @@ private:
     quint16 m_serial_id;
     quint16 m_session_id;
 signals:
+    void onReadParam(Device* dev,MsgDevicePara para);
+    void onWriteParam(Device* dev, bool result);
     void SendData(SessMessage msg);
     void DevOnline(Device* dev);
     void DevOffline(Device* dev);

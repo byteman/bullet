@@ -10,7 +10,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = bullet
 TEMPLATE = app
-
+debug{
+    message("debug");
+    OBJECTS_DIR=debug
+}
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -45,8 +48,9 @@ HEADERS  += mainwindow.h \
     qwtchannel.h
 
 FORMS    += mainwindow.ui
-INCLUDEPATH += C:\Qt\Qt5.5.0\5.5\msvc2012\include\Qwt
-LIBS += -LC:\Qt\Qt5.5.0\5.5\msvc2012\lib -lqwtd -lqwt
+BASEDIR=E:\Qt\Qt5.5.0\5.5\msvc2012
+INCLUDEPATH += $$BASEDIR\include\Qwt
+LIBS += -L$$BASEDIR\lib -lqwtd
 
 RESOURCES += \
     img.qrc

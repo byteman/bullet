@@ -60,6 +60,20 @@ bool DeviceManager::SendAllWave()
     return ok;
 }
 
+void DeviceManager::ReadParam(quint32 dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->ReadParam();
+}
+
+void DeviceManager::WriteParam(quint32 dev_id, MsgDevicePara &para)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->WriteParam(para);
+}
+
 void DeviceManager::SetStation(QString station)
 {
 
