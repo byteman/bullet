@@ -44,9 +44,26 @@ struct Glocal_IP_ADDR{
 ///*服务器IP地址，和端口号*/
 struct sServerADDR{
     sIP_ADDR ipaddr;
-    int port;
+    quint32 port;
 };
-
+struct sDateTime{
+    unsigned char m_year;		//年
+    unsigned char m_month;	//月
+    unsigned char m_day;		//日
+    unsigned char m_hour;		//时
+    unsigned char m_minute;	//分
+    unsigned char m_seconds;	//秒
+    QString toString()
+    {
+        return QString("%1-%2-%3 %4:%5:%6")
+                .arg(m_year)
+                .arg(m_month)
+                .arg(m_day)
+                .arg(m_hour)
+                .arg(m_minute)
+                .arg(m_seconds);
+    }
+};
 struct MsgDevicePara
 {
     INT16U	mWorkMode;	//采集方式
@@ -57,13 +74,8 @@ struct MsgDevicePara
     sServerADDR Server_ip;	//服务器IP
     INT8U	mWifiSSID[12];  //ssid 名字
     INT8U	mWifiPass[12];  //pass 密码
+    sDateTime mDateTime; //时间和日期.
 
-    unsigned char m_year;		//年
-    unsigned char m_month;	//月
-    unsigned char m_day;		//日
-    unsigned char m_hour;		//时
-    unsigned char m_minute;	//分
-    unsigned char m_seconds;	//秒
 
     INT8U 	checksum;
     void toByteArray(QByteArray& data)

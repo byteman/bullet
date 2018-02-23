@@ -163,14 +163,35 @@ void MainWindow::Message(SessMessage s)
 {
     ui->txtLog->append(FormatHex(s.getData()));
 }
+QString  MainWindow::formatIpaddr(sIP_ADDR& ipaddr)
+{
+    return QString("%1.%2.%3.%4").arg(ipaddr.addr1).arg(ipaddr.addr2).arg(ipaddr.addr3).arg(ipaddr.addr4);
+}
 
 void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
 {
+    ui->edtDevId->setText(QString("%1").arg(1));
+    ui->edtPassword->setText((const char*)para.mWifiPass);
+    ui->edtSSID->setText((const char*)para.mWifiSSID);
+    ui->edtWetDown->setText(QString("%1").arg(para.mWetDown));
+    ui->edtWetUp->setText(QString("%1").arg(para.mWetUp));
+
+    ui->cbxMode->setCurrentIndex(para.mWorkMode>1?0:para.mWorkMode);
+
+    ui->edtDevIp->setText(formatIpaddr(para.Local_IP.ipaddr));
+    ui->edtNetmask->setText(formatIpaddr(para.Local_IP.SubnetMask));
+    ui->edtGateway->setText(formatIpaddr(para.Local_IP.GateWay));
+
+
+    ui->edtServerIp->setText(formatIpaddr(para.Server_ip.ipaddr));
+    ui->edtServerIp->setText(QString("%1").arg(para.Server_ip.port));
+
 
 }
 
 void MainWindow::onWritePara(Device *dev, bool result)
 {
+
 
 }
 
@@ -424,5 +445,56 @@ m_waveWdg->DisplayChannel(6);
 
 void MainWindow::on_rb8_clicked()
 {
-m_waveWdg->DisplayChannel(7);
+    m_waveWdg->DisplayChannel(7);
+}
+void MainWindow::toIpAddr(QString ipstr, sIP_ADDR& addr)
+{
+    QHostAddress hostAddr(ipstr);
+    quint32 ipaddr = hostAddr.toIPv4Address();
+    memcpy((void*)&addr, &ipaddr, sizeof(sIP_ADDR));
+
+}
+void MainWindow::toString(QString str, INT8U* dest,int size)
+{
+    std::string s = str.toStdString();
+    for(int i = 0; i < size; i++)
+    {
+        dest[i] = s[i];
+
+    }
+}
+
+void MainWindow::toInt16U(QString str, INT16U &dest)
+{
+dest = str.toInt();
+}
+
+void MainWindow::toInt8U(QString str, INT8U &dest)
+{
+dest = str.toInt();
+}
+
+void MainWindow::toInt32U(QString str, quint32 &dest)
+{
+    dest = str.toInt();
+}
+
+//保存参数.
+void MainWindow::on_btnSavePara_clicked()
+{
+    MsgDevicePara para;
+    toIpAddr(ui->edtGateway->text(), para.Local_IP.GateWay);
+    toIpAddr(ui->edtNetmask->text(), para.Local_IP.SubnetMask);
+    toIpAddr(ui->edtDevIp->text(),   para.Local_IP.ipaddr);
+    toIpAddr(ui->edtServerIp->text(), para.Server_ip.ipaddr);
+
+    toString(ui->edtPassword->text(),para.mWifiPass,sizeof(para.mWifiPass));
+    toString(ui->edtSSID->text(),para.mWifiSSID,sizeof(para.mWifiSSID));
+
+    toInt16U(ui->edtWetUp->text(),para.mWetUp);
+    toInt16U(ui->edtWetDown->text(),para.mWetDown);
+    para.mWorkMode = ui->cbxMode->currentIndex();
+
+    toInt32U(ui->edtServerPort->text(),para.Server_ip.port);
+    dvm.WriteParam(m_cur_dev_id,para);
 }

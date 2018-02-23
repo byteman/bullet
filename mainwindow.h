@@ -59,6 +59,13 @@ private:
 
     void listFiles(quint32 dev_id);
     void readParam(quint32 dev_id);
+    QString formatIpaddr(sIP_ADDR &ipaddr);
+    void toIpAddr(QString ipstr, sIP_ADDR &addr);
+    void toString(QString str, INT8U *dest, int size);
+    void toInt16U(QString str, INT16U &dest);
+    void toInt8U(QString str, INT8U &dest);
+    void toInt32U(QString str, quint32 &dest);
+    QString formatTime();
 private slots:
     void onNotify(QString msg);
     void on_menu_click(bool);
@@ -102,6 +109,8 @@ private slots:
     void on_rb7_clicked();
 
     void on_rb8_clicked();
+
+    void on_btnSavePara_clicked();
 
 protected:
     void timerEvent(QTimerEvent *);
