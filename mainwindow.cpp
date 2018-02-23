@@ -20,13 +20,13 @@ void MainWindow::loadDeviceUI()
         item->setIcon(0,icon_device[1]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
-        for(int j = 0; j < 8; j++)
-        {
-            QTreeWidgetItem* item2= new QTreeWidgetItem(QStringList(QString("通道%1").arg(j+1)));
-            item2->setIcon(0,icon_channel);
-            item->addChild(item2);
-            item2->setData(0,Qt::UserRole,j);
-        }
+//        for(int j = 0; j < 8; j++)
+//        {
+//            QTreeWidgetItem* item2= new QTreeWidgetItem(QStringList(QString("通道%1").arg(j+1)));
+//            item2->setIcon(0,icon_channel);
+//            item->addChild(item2);
+//            item2->setData(0,Qt::UserRole,j);
+//        }
     }
 
 }
@@ -182,16 +182,15 @@ void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
     ui->edtNetmask->setText(formatIpaddr(para.Local_IP.SubnetMask));
     ui->edtGateway->setText(formatIpaddr(para.Local_IP.GateWay));
 
-
+    ui->edtTime->setText(para.mDateTime.toString());
     ui->edtServerIp->setText(formatIpaddr(para.Server_ip.ipaddr));
     ui->edtServerIp->setText(QString("%1").arg(para.Server_ip.port));
 
 
 }
-
+//设置
 void MainWindow::onWritePara(Device *dev, bool result)
 {
-
 
 }
 
@@ -335,19 +334,23 @@ void MainWindow::readParam(quint32 dev_id)
 }
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
-    if(item->childCount() > 0)
-    {
-        quint32 dev_id = item->data(0,Qt::UserRole).toInt();
-        listFiles(dev_id);
-        readParam(dev_id);
-    }
-    else
-    {
-        quint32 dev_id = item->parent()->data(0,Qt::UserRole).toInt();
-        int index = item->data(0,Qt::UserRole).toInt();
+    quint32 dev_id = item->data(0,Qt::UserRole).toInt();
+    listFiles(dev_id);
+    readParam(dev_id);
+
+//    if(item->childCount() > 0)
+//    {
+//        quint32 dev_id = item->data(0,Qt::UserRole).toInt();
+//        listFiles(dev_id);
+//        readParam(dev_id);
+//    }
+//    else
+//    {
+//        quint32 dev_id = item->parent()->data(0,Qt::UserRole).toInt();
+//        int index = item->data(0,Qt::UserRole).toInt();
 
 
-    }
+//    }
 
 
 }
@@ -496,5 +499,12 @@ void MainWindow::on_btnSavePara_clicked()
     para.mWorkMode = ui->cbxMode->currentIndex();
 
     toInt32U(ui->edtServerPort->text(),para.Server_ip.port);
+
     dvm.WriteParam(m_cur_dev_id,para);
+}
+
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    m_waveWdg->CloseAll();
 }

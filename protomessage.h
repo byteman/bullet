@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QDateTime>
 enum MessageID{
    MSG_START_WAVE=0x1,
    MSG_WAVE_DATA,
@@ -62,6 +63,30 @@ struct sDateTime{
                 .arg(m_hour)
                 .arg(m_minute)
                 .arg(m_seconds);
+    }
+    void now()
+    {
+        QDateTime dt = QDateTime::currentDateTime();
+        m_year = dt.date().year()-2000;
+        m_month = dt.date().month();
+        m_day = dt.date().day();
+        m_hour = dt.time().hour();
+        m_minute = dt.time().minute();
+        m_seconds = dt.time().second();
+    }
+    sDateTime()
+    {
+       now();
+    }
+    sDateTime(quint8 year,quint8 month,quint8 day,quint8 hour,quint8 min,quint8 sec):
+        m_year(year),
+        m_month(month),
+        m_day(day),
+        m_hour(hour),
+        m_minute(min),
+        m_seconds(sec)
+    {
+
     }
 };
 struct MsgDevicePara

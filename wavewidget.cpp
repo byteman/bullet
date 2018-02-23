@@ -7,6 +7,11 @@ WaveWidget::WaveWidget(QwtPlot *plot, int num):
     SetChannel(num);
 }
 
+WaveWidget::~WaveWidget()
+{
+
+}
+
 void WaveWidget::DisplayAllChannel()
 {
 //    int num = (chan > wvd.channels.size())?wvd.channels.size():chan;
@@ -52,5 +57,13 @@ void WaveWidget::SetChannel(int num)
         channels.push_back(new QwtChannel(i));
     }
 
+}
+
+void WaveWidget::CloseAll()
+{
+    for(int i = 0; i < channels.size();i++)
+    {
+        channels[i]->Display(m_plot,false);
+    }
 }
 

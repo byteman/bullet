@@ -11,10 +11,12 @@ class WaveWidget:public QObject
 public:
 
     WaveWidget(QwtPlot* plot,int num=1);
+    ~WaveWidget();
     void DisplayChannel(int chan=0);
     void DisplayAllChannel();
     void SetData(MsgWaveData& wvd);
     void SetChannel(int num);
+    void CloseAll();
 
 private:
 

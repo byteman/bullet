@@ -9,7 +9,7 @@
 //Qt::darkBlue	15	Dark blue (#000080)
 //Qt::cyan	10	Cyan (#00ffff)
 //Qt::darkCyan	16	Dark cyan (#008080)
-static int colors[8] = {Qt::white,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+static QColor colors[8] = {Qt::white,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 QwtChannel::QwtChannel(int index,QObject *parent):
     QObject(parent),
     m_index(index)
@@ -17,6 +17,7 @@ QwtChannel::QwtChannel(int index,QObject *parent):
     curve.setTitle(QString("通道%1").arg(index+1));//曲线名字
 
     curve.setPen( colors[index], 3 );//曲线的颜色 宽度;
+
 }
 
 void QwtChannel::SetData(QVector<double> &samples)

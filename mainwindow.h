@@ -116,6 +116,10 @@ protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;
     WaveWidget *m_waveWdg;
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent *);
 };
 
 #endif // MAINWINDOW_H
