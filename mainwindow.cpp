@@ -508,3 +508,8 @@ void MainWindow::closeEvent(QCloseEvent *)
 {
     m_waveWdg->CloseAll();
 }
+
+void MainWindow::on_actionReset_triggered()
+{
+
+}

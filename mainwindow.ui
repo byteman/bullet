@@ -713,6 +713,7 @@
      <addaction name="actionStation2"/>
     </widget>
     <addaction name="menu"/>
+    <addaction name="actionReset"/>
    </widget>
    <addaction name="menu_station"/>
   </widget>
@@ -733,6 +734,11 @@
   <action name="actionStation2">
    <property name="text">
     <string>工位2</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>复位设备</string>
    </property>
   </action>
  </widget>

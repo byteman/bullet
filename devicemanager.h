@@ -18,6 +18,8 @@ public:
     void load(int index, int channel);
     //发送全部设备最近的波形文件
     bool SendAllWave();
+    bool ResetAllDevice(quint8 delay_s);
+    bool ResetDevice(quint32 dev_id,quint8 delay_s);
     void ReadParam(quint32 dev_id);
     void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);
@@ -25,6 +27,7 @@ public:
     Device* GetDevice(quint32 dev_id);
     void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
+
 public slots:
     void onWaveMsg(MsgWaveData wvData);
 

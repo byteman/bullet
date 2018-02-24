@@ -112,6 +112,8 @@ private slots:
 
     void on_btnSavePara_clicked();
 
+    void on_actionReset_triggered();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;

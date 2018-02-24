@@ -60,6 +60,30 @@ bool DeviceManager::SendAllWave()
     return ok;
 }
 
+bool DeviceManager::ResetAllDevice(quint8 delay_s)
+{
+    bool ok = true;
+    QMapIterator<quint32,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+
+        if(i.value()->Reset(delay_s) == false)
+        {
+            ok = false;
+        }
+
+    }
+
+    return ok;
+}
+
+bool DeviceManager::ResetDevice(quint32 dev_id,quint8 delay_s)
+{
+    if(!dev_map.contains(dev_id))
+        return false;
+    return dev_map[dev_id]->Reset(delay_s);
+}
+
 void DeviceManager::ReadParam(quint32 dev_id)
 {
     if(!dev_map.contains(dev_id))

@@ -33,6 +33,8 @@ public:
     void ReadParam();
     void WriteParam(MsgDevicePara &para);
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
+
+    bool Reset(quint8 delay_s);
 private:
     quint32 m_dev_id;
     quint16 m_serial_id;

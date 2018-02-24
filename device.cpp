@@ -3,6 +3,14 @@
 #include <QDebug>
 #include <QDateTime>
 #define MAX_TIMEOUT 10
+
+/*
+波形保存流程
+1.发送启动读取命令后,发送sess_id给设备
+2.设备以收到sess_id发送波形，波形可以分成多次发送，但是每次发送的数据包中的sess_id要和启动发送时收到的sess_id一致
+3.pc软件启动发送后开启一个超时定时器,如果在n秒内没有收到设备的回应，就取消掉此次接收事务.并且关闭文件.
+4.如果在超时范围内收全了最后一个包,也关闭文件并完成此事务.
+*/
 Device::Device():
     m_online(false),
     m_timeout(MAX_TIMEOUT),
@@ -42,7 +50,13 @@ void Device::ReadParam()
 {
     WriteCmd(MSG_READ_PARAM,QByteArray());
 }
-
+bool Device::Reset(quint8 delay_s)
+{
+    QByteArray data;
+    data.append(delay_s);
+    WriteCmd(MSG_RESET,data);
+    return true;
+}
 void Device::WriteParam(MsgDevicePara &para)
 {
 

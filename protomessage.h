@@ -5,11 +5,13 @@
 #include <QVector>
 #include <QDateTime>
 enum MessageID{
-   MSG_START_WAVE=0x1,
-   MSG_WAVE_DATA,
-   MSG_HEART,
-   MSG_READ_PARAM,
-   MSG_WRITE_PARAM
+   MSG_START_WAVE=0x1, //启动发送波形
+   MSG_WAVE_DATA, //设备上报的波形文件
+   MSG_HEART, //设备上报心跳
+   MSG_READ_PARAM, //读取设备参数
+   MSG_WRITE_PARAM, //修改设备厂商
+   MSG_RESET, //复位设备
+   MSG_ENUM_FILES //枚举设备sd卡内的波形文件.
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;
@@ -110,8 +112,6 @@ struct MsgDevicePara
     }
 };
 
-//struct MsgDevicePara{};
-
 struct WaveDataHead{
     quint8 samplebits;
     quint8 nchannel;
@@ -166,10 +166,7 @@ struct MsgStartSendWave:public ProtoMessage{
 };
 //一个通道的数据总和.
 typedef QVector<double> ChannelData;
-//class ChannelData:public QVector<float>
-//{
 
-//};
 struct MsgWaveData:public ProtoMessage{
   QVector<ChannelData> channels; //一个设备包含n个通道的数据.
   QString m_dev_serial;//设备唯一序列号
