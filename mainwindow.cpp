@@ -48,14 +48,30 @@ MainWindow::MainWindow(QWidget *parent) :
             ,SLOT(Message(SessMessage)));
     connect(&dvm,SIGNAL(DevOffline(Device*)),this,SLOT(DevOffline(Device*)));
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
-    connect(&dvm,SIGNAL(onReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
-    connect(&dvm,SIGNAL(onWriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
+    connect(&dvm,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
+    connect(&dvm,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
 
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     menu=new QMenu(this);
     QAction* action = new QAction("读取参数",this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
+
+    action = new QAction("写入参数",this);
+    menu->addAction(action);
+
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
+
+    action = new QAction("复位设备",this);
+    menu->addAction(action);
+
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
+    action = new QAction("枚举设备文件",this);
+    menu->addAction(action);
+
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_list_files_menu_click(bool)));
+
+
     dvm.start();
     dvm.SetStation("工位1");
     loadDeviceUI();
@@ -170,7 +186,7 @@ QString  MainWindow::formatIpaddr(sIP_ADDR& ipaddr)
 
 void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
 {
-    ui->edtDevId->setText(QString("%1").arg(1));
+    ui->edtDevId->setText(QString("%1").arg(m_cur_dev_id));
     ui->edtPassword->setText((const char*)para.mWifiPass);
     ui->edtSSID->setText((const char*)para.mWifiSSID);
     ui->edtWetDown->setText(QString("%1").arg(para.mWetDown));
@@ -184,7 +200,7 @@ void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
 
     ui->edtTime->setText(para.mDateTime.toString());
     ui->edtServerIp->setText(formatIpaddr(para.Server_ip.ipaddr));
-    ui->edtServerIp->setText(QString("%1").arg(para.Server_ip.port));
+    ui->edtServerPort->setText(QString("%1").arg(para.Server_ip.port));
 
 
 }
@@ -245,8 +261,25 @@ void MainWindow::onNotify(QString msg)
 
 void MainWindow::on_menu_click(bool)
 {
-    qDebug() << "menu click";
+
+    if(m_cur_dev_id!=0)
+        readParam(m_cur_dev_id);
 }
+void MainWindow::on_write_menu_click(bool)
+{
+    on_btnSavePara_clicked();
+}
+void MainWindow::on_reset_menu_click(bool)
+{
+    if(m_cur_dev_id!=0)
+        dvm.ResetDevice(m_cur_dev_id,1);
+}
+void MainWindow::on_list_files_menu_click(bool)
+{
+    if(m_cur_dev_id!=0)
+        dvm.ListFiles(m_cur_dev_id);
+}
+
 void MainWindow::DevOffline(Device *dev)
 {
     QTreeWidgetItem* item = findItemById(dev->id());
@@ -454,13 +487,13 @@ void MainWindow::toIpAddr(QString ipstr, sIP_ADDR& addr)
 {
     QHostAddress hostAddr(ipstr);
     quint32 ipaddr = hostAddr.toIPv4Address();
-    memcpy((void*)&addr, &ipaddr, sizeof(sIP_ADDR));
+    addr.fromIp(ipaddr);
 
 }
 void MainWindow::toString(QString str, INT8U* dest,int size)
 {
     std::string s = str.toStdString();
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < s.size(); i++)
     {
         dest[i] = s[i];
 

@@ -46,6 +46,11 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
     }
     return 0;
 }
+
+bool Device::ListFiles()
+{
+    return true;
+}
 void Device::ReadParam()
 {
     WriteCmd(MSG_READ_PARAM,QByteArray());
@@ -115,26 +120,39 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     //启动波形回应.
     if(req.head.cmd_id == MSG_START_WAVE)
     {
+        //ack
         DevNotify("start wave");
 
     }
     //波形数据文件.
     else if(req.head.cmd_id == MSG_WAVE_DATA)
     {
+        //req
         SaveWave(req);
     }
     //注册和心跳包
     else if(req.head.cmd_id == MSG_HEART)
     {
+        //req
+        sDateTime dt;
+        resp.data.append((const char*)&dt,sizeof(sDateTime));
         qDebug() << "heart beart";
+
     }
     else if(req.head.cmd_id == MSG_READ_PARAM)
     {
+        //读取的参数的回应包.
+        MsgDevicePara para;
+        if(req.getData(&para,sizeof(MsgDevicePara)))
+        {
+            emit ReadParam(this,para);
+        }
 
     }
     else if(req.head.cmd_id == MSG_WRITE_PARAM)
     {
-
+        emit WriteParam(this,true);
+        //写入参数结果的回应包.
     }
 }
 quint32 Device::id() const

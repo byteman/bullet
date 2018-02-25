@@ -122,6 +122,10 @@ protected:
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);
+protected slots:
+    void on_reset_menu_click(bool);
+    void on_write_menu_click(bool);
+    void on_list_files_menu_click(bool);
 };
 
 #endif // MAINWINDOW_H

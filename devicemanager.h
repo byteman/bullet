@@ -20,6 +20,7 @@ public:
     bool SendAllWave();
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
+    bool ListFiles(quint32 dev_id);
     void ReadParam(quint32 dev_id);
     void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);
@@ -30,7 +31,8 @@ public:
 
 public slots:
     void onWaveMsg(MsgWaveData wvData);
-
+    void onReadParam(Device* dev,MsgDevicePara para);
+    void onWriteParam(Device* dev, bool result);
     void Message(SessMessage msg);
     void onNotify(QString msg);
 private:
@@ -43,8 +45,8 @@ private:
     quint16 m_serial_id;
     quint16 m_session_id;
 signals:
-    void onReadParam(Device* dev,MsgDevicePara para);
-    void onWriteParam(Device* dev, bool result);
+    void ReadParam(Device* dev,MsgDevicePara para);
+    void WriteParam(Device* dev, bool result);
     void SendData(SessMessage msg);
     void DevOnline(Device* dev);
     void DevOffline(Device* dev);

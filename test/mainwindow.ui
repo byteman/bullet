@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>419</height>
+    <width>367</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,20 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>设备编号</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="edtPort">
+         <property name="text">
+          <string>8888</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="edtIp">
          <property name="text">
@@ -42,31 +56,10 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="edtPort">
-         <property name="text">
-          <string>8888</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>设备编号</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="edtDevID">
          <property name="text">
           <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>样本个数</string>
          </property>
         </widget>
        </item>
@@ -77,10 +70,10 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_6">
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>发送次数</string>
+          <string>样本个数</string>
          </property>
         </widget>
        </item>
@@ -88,6 +81,13 @@
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>定时发送</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>发送次数</string>
          </property>
         </widget>
        </item>
@@ -104,6 +104,9 @@
           <string>5</string>
          </property>
         </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QTextEdit" name="txtLog"/>
        </item>
       </layout>
      </widget>
@@ -133,7 +136,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>350</width>
+     <width>367</width>
      <height>30</height>
     </rect>
    </property>

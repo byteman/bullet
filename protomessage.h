@@ -21,10 +21,35 @@ typedef quint8  INT8U;
 
 /*IP地址*/
 struct sIP_ADDR{
- unsigned  char addr1;
- unsigned   char addr2;
- unsigned   char addr3;
- unsigned   char addr4;
+    sIP_ADDR()
+    {
+        addr1=192;
+        addr2=168;
+        addr3=0;
+        addr4=1;
+    }
+    sIP_ADDR(quint8 a1,quint8 a2,quint8 a3,quint8 a4):
+        addr1(a1),
+        addr2(a2),
+        addr3(a3),
+        addr4(a4)
+    {}
+    QString toString()
+    {
+        return QString::asprintf("%d.%d.%d.%d",addr1,addr2,addr3,addr4);
+    }
+    void fromIp(quint32 ip)
+    {
+        addr1 = ip>>24;
+        addr2 = ip>>16;
+        addr3 = ip>>8;
+        addr4 = ip;
+
+    }
+    quint8 addr1;
+    quint8 addr2;
+    quint8 addr3;
+    quint8 addr4;
 };
 
 /*本机MAC地址*/
@@ -48,6 +73,10 @@ struct Glocal_IP_ADDR{
 struct sServerADDR{
     sIP_ADDR ipaddr;
     quint32 port;
+    sServerADDR()
+    {
+        port = 8888;
+    }
 };
 struct sDateTime{
     unsigned char m_year;		//年
@@ -58,13 +87,7 @@ struct sDateTime{
     unsigned char m_seconds;	//秒
     QString toString()
     {
-        return QString("%1-%2-%3 %4:%5:%6")
-                .arg(m_year)
-                .arg(m_month)
-                .arg(m_day)
-                .arg(m_hour)
-                .arg(m_minute)
-                .arg(m_seconds);
+        return QString::asprintf("%04d-%02d-%02d %02d:%02d:%02d",2000+m_year,m_month,m_day,m_hour,m_minute,m_seconds);
     }
     void now()
     {
@@ -105,6 +128,16 @@ struct MsgDevicePara
 
 
     INT8U 	checksum;
+    MsgDevicePara()
+    {
+        mWorkMode = 0;
+        mWetUp = 0;
+        mWetDown = 0;
+        memset(mWifiSSID,0,12);
+        strcpy((char*)mWifiSSID,"ssid");
+        memset(mWifiPass,0,12);
+        strcpy((char*)mWifiPass,"123456");
+    }
     void toByteArray(QByteArray& data)
     {
 
@@ -142,6 +175,28 @@ public:
         }
         output.append(sum);
     }
+    bool getData(void* dest, int size)
+    {
+        int sz = data.size();
+        if(sz != size)
+        {
+            return false;
+        }
+        memcpy(dest, data.data(),size);
+
+        return true;
+    }
+    bool getDateTime(sDateTime& sdt)
+    {
+
+        if(data.size() != sizeof(sDateTime))
+        {
+            return false;
+        }
+        memcpy(&sdt, data.data(),sizeof(sDateTime));
+
+        return true;
+    }
     void toByteArray(QByteArray& output)
     {
         output.append(0xFE);
@@ -156,6 +211,27 @@ public:
         output.append(data);
         appendSum(output);
     }
+    QByteArray toByteArray()
+    {
+        QByteArray output;
+        output.append(0xFE);
+        output.append(0x7F);
+        head.length = sizeof(ProtoHeader) + 1+ data.size();
+        output.append((const char*)&head.length,sizeof(quint16));
+        output.append((const char*)&head.device_id,sizeof(quint32));
+        output.append((const char*)&head.serial_id,sizeof(quint16));
+        output.append((const char*)&head.sesson_id,sizeof(quint16));
+        output.append((const char*)&head.cmd_id,sizeof(quint8));
+
+        output.append(data);
+        appendSum(output);
+        return output;
+    }
+    void addPara(MsgDevicePara& para)
+    {
+        data.append((const char*)&para,sizeof(MsgDevicePara));
+    }
+
     ProtoHeader head;
     bool is_ack; //是否回应数据.
     QByteArray data; //数据.

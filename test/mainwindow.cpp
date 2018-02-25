@@ -9,11 +9,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->startTimer(5000);
+    socket.bind(9999);
     connect(&socket,SIGNAL(readyRead()),this,SLOT(readPendingDatagrams()));
 
 }
-
-void MainWindow::parseMsg(QByteArray& msg)
+void MainWindow::addLog(QString str)
+{
+    ui->txtLog->append(str);
+}
+void MainWindow::parseMsg(QByteArray& msg,QHostAddress sender,quint16 senderPort)
 {
     ProtoMessage input_msg;
 
@@ -22,6 +26,50 @@ void MainWindow::parseMsg(QByteArray& msg)
         if(input_msg.head.cmd_id == MSG_START_WAVE)
         {
             on_btnStart_clicked();
+        }
+        else if(input_msg.head.cmd_id == MSG_HEART)
+        {
+            sDateTime sdt;
+            input_msg.getDateTime(sdt);
+            addLog(sdt.toString());
+
+        }
+        else if(input_msg.head.cmd_id == MSG_READ_PARAM)
+        {
+            MsgDevicePara para;
+
+            QByteArray data;
+            para.toByteArray(data);
+            addLog("------send param");
+            sendPacket(0x80|MSG_READ_PARAM,session_id,data);
+            //socket.writeDatagram(msg.toByteArray(),sender,senderPort);
+
+        }
+        else if(input_msg.head.cmd_id == MSG_WRITE_PARAM)
+        {
+            MsgDevicePara para;
+            if(input_msg.getData(&para,sizeof(MsgDevicePara)))
+            {
+
+                addLog(QString("workMode=%1").arg(para.mWorkMode));
+                addLog(QString("mDateTime=%1").arg(para.mDateTime.toString()));
+                addLog(QString("mWetDown=%1").arg(para.mWetDown));
+                addLog(QString("mWetUp=%1").arg(para.mWetUp));
+                addLog(QString("GateWay=%1").arg(para.Local_IP.GateWay.toString()));
+                addLog(QString("ipaddr=%1").arg(para.Local_IP.ipaddr.toString()));
+                addLog(QString("SubnetMask=%1").arg(para.Local_IP.SubnetMask.toString()));
+                addLog(QString("mWifiPass=%1").arg((char*)para.mWifiPass));
+                addLog(QString("mWifiSSID=%1").arg((char*)para.mWifiSSID));
+                addLog(QString("Server_ip.ipaddr=%1").arg(para.Server_ip.ipaddr.toString()));
+                addLog(QString("Server_ip.port=%1").arg(para.Server_ip.port));
+
+
+            }
+            else
+            {
+                addLog("write param failed!");
+            }
+
         }
     }
 }
@@ -36,7 +84,7 @@ void MainWindow::readPendingDatagrams()
         socket.readDatagram(datagram.data(), datagram.size(),
                                 &sender, &senderPort);
 
-
+        parseMsg(datagram, sender, senderPort);
 
     }
 }
@@ -105,6 +153,7 @@ void MainWindow::sendPacket(quint8 cmd,quint16 sess,QByteArray& data)
     msg.data.append(data);
     QByteArray buf;
     msg.toByteArray(buf);
+    qDebug() << "send size="  << buf.size();
     socket.writeDatagram(buf,QHostAddress(ui->edtIp->text()),ui->edtPort->text().toInt());
 }
 void MainWindow::timerEvent(QTimerEvent *)

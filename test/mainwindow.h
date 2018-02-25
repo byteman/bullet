@@ -30,8 +30,10 @@ private:
 
     // QObject interface
     void sendPacket(quint8 cmd, QByteArray &data);
-    void parseMsg(QByteArray &msg);
+
     void sendPacket(quint8 cmd, quint16 sess, QByteArray &data);
+    void parseMsg(QByteArray &msg, QHostAddress sender, quint16 senderPort);
+    void addLog(QString str);
 protected:
     void timerEvent(QTimerEvent *);
 protected slots:

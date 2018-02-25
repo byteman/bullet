@@ -33,7 +33,7 @@ public:
     void ReadParam();
     void WriteParam(MsgDevicePara &para);
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
-
+    bool ListFiles();
     bool Reset(quint8 delay_s);
 private:
     quint32 m_dev_id;
@@ -51,6 +51,8 @@ private:
     void DevNotify(QString msg);
 signals:
     void Notify(QString msg);
+    void ReadParam(Device* dev,MsgDevicePara para);
+    void WriteParam(Device* dev, bool result);
 };
 
 #endif // DEVICE_H

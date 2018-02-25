@@ -27,6 +27,9 @@ bool DeviceManager::start()
         id_name_map[ids[i].toInt()] = names[i];
         Device* dev = new Device();
         connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
+        connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
+        connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
+
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
         dev_map[ids[i].toInt()] = dev;
@@ -82,6 +85,13 @@ bool DeviceManager::ResetDevice(quint32 dev_id,quint8 delay_s)
     if(!dev_map.contains(dev_id))
         return false;
     return dev_map[dev_id]->Reset(delay_s);
+}
+
+bool DeviceManager::ListFiles(quint32 dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return false;
+    return dev_map[dev_id]->ListFiles();
 }
 
 void DeviceManager::ReadParam(quint32 dev_id)
@@ -145,6 +155,16 @@ void DeviceManager::onWaveMsg(MsgWaveData wvData)
 {
 
 }
+
+void DeviceManager::onReadParam(Device *dev, MsgDevicePara para)
+{
+    emit ReadParam(dev,para);
+}
+
+void DeviceManager::onWriteParam(Device *dev, bool result)
+{
+    emit WriteParam(dev,result);
+}
 //用UDP更方便点，每个包加一个确认信息.
 //设备上线以后应该有一个上报设备序列号的消息包,建立了一个IP和设备ID的映射关系表.
 //有一个维持心跳的命令.
@@ -171,6 +191,7 @@ void DeviceManager::Message(SessMessage msg)
             {
                 QByteArray arr;
                 output_msg.head = input_msg.head;
+                //请求包的回应，统一置位最高位.
                 output_msg.head.cmd_id|=0x80;
 
                 output_msg.toByteArray(arr);
