@@ -48,7 +48,7 @@ HEADERS  += mainwindow.h \
     qwtchannel.h
 
 FORMS    += mainwindow.ui
-BASEDIR=C:\Qt\Qt5.5.0\5.5\msvc2012
+BASEDIR=E:\Qt\Qt5.5.0\5.5\msvc2012
 INCLUDEPATH += $$BASEDIR\include\Qwt
 LIBS += -L$$BASEDIR\lib -lqwtd
 

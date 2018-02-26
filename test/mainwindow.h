@@ -34,6 +34,7 @@ private:
     void sendPacket(quint8 cmd, quint16 sess, QByteArray &data);
     void parseMsg(QByteArray &msg, QHostAddress sender, quint16 senderPort);
     void addLog(QString str);
+    void enumFiles();
 protected:
     void timerEvent(QTimerEvent *);
 protected slots:

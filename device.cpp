@@ -49,6 +49,7 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 
 bool Device::ListFiles()
 {
+    WriteCmd(MSG_ENUM_FILES,QByteArray());
     return true;
 }
 void Device::ReadParam()
@@ -157,7 +158,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     else if(req.head.cmd_id == MSG_ENUM_FILES)
     {
         QByteArray &data = req.data;
-        int num = (data[0]<<8) + data[1];
+        int num = (data[1]<<8) + data[0];
         QByteArray attr = data.mid(2,num);
         int length = data.size() - 2 - num;
         if(length > 0)

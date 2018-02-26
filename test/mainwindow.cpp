@@ -71,7 +71,30 @@ void MainWindow::parseMsg(QByteArray& msg,QHostAddress sender,quint16 senderPort
             }
 
         }
+        else if(input_msg.head.cmd_id == MSG_ENUM_FILES)
+        {
+            enumFiles();
+        }
     }
+}
+#include <QDir>
+void MainWindow::enumFiles()
+{
+
+    QStringList filist2 = QDir::current().entryList();
+    QString files;
+    files = filist2.join(",");
+
+    quint16 num = filist2.size();
+    QByteArray data;
+    data.append((const char*)&num,2);
+    for(int i = 0; i < num; i++)
+    {
+        data.append(1);
+    }
+    data.append(files);
+    sendPacket(0x80|MSG_ENUM_FILES,session_id,data);
+
 }
 void MainWindow::readPendingDatagrams()
 {
