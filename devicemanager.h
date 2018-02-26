@@ -35,6 +35,7 @@ public slots:
     void onWriteParam(Device* dev, bool result);
     void Message(SessMessage msg);
     void onNotify(QString msg);
+    void onEnumFiles(Device* dev,MsgFileList files);
 private:
     int m_dev_num;
     QMap<quint32,QString> id_name_map;
@@ -51,6 +52,7 @@ signals:
     void DevOnline(Device* dev);
     void DevOffline(Device* dev);
     void Notify(QString msg);
+    void EnumFiles(Device* dev,MsgFileList files);
     // QObject interface
 protected:
     void timerEvent(QTimerEvent *);

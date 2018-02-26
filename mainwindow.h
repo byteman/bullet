@@ -47,6 +47,8 @@ private:
     DeviceManager dvm;
     QIcon icon_device[2];
     QIcon icon_channel;
+    QIcon icon_dir;
+    QIcon icon_file;
     QMenu* menu;
     double getData(double inteval);
 
@@ -71,6 +73,7 @@ private slots:
     void on_menu_click(bool);
     void updatedataSlot();
     void Message(SessMessage msg);
+    void onEnumFiles(Device* dev,MsgFileList files);
     void onReadPara(Device* dev, MsgDevicePara para);
     void onWritePara(Device* dev, bool result);
     //void on_btnStart_clicked();

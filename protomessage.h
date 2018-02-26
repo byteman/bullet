@@ -240,6 +240,11 @@ public:
 struct MsgStartSendWave:public ProtoMessage{
 
 };
+struct MsgFileInfo{
+    QString name;
+    char    attr; //1 file 2 dir
+};
+typedef QList<MsgFileInfo> MsgFileList;
 //一个通道的数据总和.
 typedef QVector<double> ChannelData;
 

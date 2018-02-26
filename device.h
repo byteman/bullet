@@ -53,6 +53,7 @@ signals:
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);
+    void EnumFiles(Device* dev,MsgFileList files);
 };
 
 #endif // DEVICE_H

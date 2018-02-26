@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     icon_device[0].addFile(":image/online.png");
     icon_device[1].addFile(":image/offline.png");
     icon_channel.addFile(":image/channel.png");
+    icon_dir.addFile(":image/dir.png");
+    icon_file.addFile(":image/channel.png");
+
     ui->btnStop->setEnabled(false);
     setupRealtimeDataDemo(ui->qwtPlot);
     srv.setParent(this);
@@ -178,6 +181,20 @@ QString MainWindow::FormatHex(QByteArray& data)
 void MainWindow::Message(SessMessage s)
 {
     ui->txtLog->append(FormatHex(s.getData()));
+}
+
+void MainWindow::onEnumFiles(Device *dev, MsgFileList files)
+{
+    ui->listFile->clear();
+    for(int i =0; i < files.size();i++)
+    {
+        QListWidgetItem* item = NULL;
+        if(files[i].attr == 1)
+            item = new QListWidgetItem(icon_file,files[i].name);
+        else
+            item = new QListWidgetItem(icon_dir,files[i].name);
+        ui->listFile->addItem(item);
+    }
 }
 QString  MainWindow::formatIpaddr(sIP_ADDR& ipaddr)
 {
@@ -370,6 +387,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     quint32 dev_id = item->data(0,Qt::UserRole).toInt();
     listFiles(dev_id);
     readParam(dev_id);
+    dvm.ListFiles(dev_id);
 
 //    if(item->childCount() > 0)
 //    {

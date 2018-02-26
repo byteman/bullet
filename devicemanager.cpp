@@ -29,6 +29,7 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
         connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
         connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
+        connect(dev,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
 
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
@@ -206,6 +207,11 @@ void DeviceManager::Message(SessMessage msg)
 void DeviceManager::onNotify(QString msg)
 {
     emit Notify(msg);
+}
+
+void DeviceManager::onEnumFiles(Device *dev, MsgFileList files)
+{
+    emit EnumFiles(dev,files);
 }
 
 

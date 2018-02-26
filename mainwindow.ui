@@ -109,7 +109,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -687,7 +687,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QListView" name="listView"/>
+         <widget class="QListWidget" name="listFile"/>
         </item>
        </layout>
       </widget>
