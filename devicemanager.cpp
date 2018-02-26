@@ -30,7 +30,7 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
         connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
         connect(dev,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
-
+        connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
         dev_map[ids[i].toInt()] = dev;
@@ -212,6 +212,11 @@ void DeviceManager::onNotify(QString msg)
 void DeviceManager::onEnumFiles(Device *dev, MsgFileList files)
 {
     emit EnumFiles(dev,files);
+}
+
+void DeviceManager::onProgress(Device *dev, QString progress)
+{
+    emit Progress(dev,progress);
 }
 
 

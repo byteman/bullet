@@ -52,6 +52,11 @@
            <string>设备列表</string>
           </property>
          </column>
+         <column>
+          <property name="text">
+           <string>进度</string>
+          </property>
+         </column>
         </widget>
        </item>
        <item>
@@ -711,7 +716,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>30</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

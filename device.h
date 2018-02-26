@@ -49,7 +49,9 @@ private:
     QString CreateDir();
     QString GetFileName();
     void DevNotify(QString msg);
+    void sendProgress(int sample_start, int sample_total);
 signals:
+    void Progress(Device* dev,QString progress);
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);

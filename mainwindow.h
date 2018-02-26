@@ -76,6 +76,7 @@ private slots:
     void onEnumFiles(Device* dev,MsgFileList files);
     void onReadPara(Device* dev, MsgDevicePara para);
     void onWritePara(Device* dev, bool result);
+    void onWaveProgress(Device* dev, QString progress);
     //void on_btnStart_clicked();
     void on_btnStop_clicked();
     void on_btnReadWave_clicked();

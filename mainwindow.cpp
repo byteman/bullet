@@ -16,7 +16,9 @@ void MainWindow::loadDeviceUI()
         QTreeWidgetItem* item = NULL;
         item = new QTreeWidgetItem(QStringList(devices[i]->name()));
 
+        item->setText(1,"100%");
         ui->treeWidget->addTopLevelItem(item);
+
         item->setIcon(0,icon_device[1]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
@@ -54,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&dvm,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
     connect(&dvm,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
     connect(&dvm,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
-
+    connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     menu=new QMenu(this);
     QAction* action = new QAction("读取参数",this);
@@ -226,6 +228,15 @@ void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
 void MainWindow::onWritePara(Device *dev, bool result)
 {
 
+}
+
+void MainWindow::onWaveProgress(Device *dev, QString progress)
+{
+    QTreeWidgetItem* item = findItemById(dev->id());
+    if(item!=NULL)
+    {
+        item->setText(1,progress);
+    }
 }
 
 //void MainWindow::on_btnStart_clicked()

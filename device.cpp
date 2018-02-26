@@ -215,6 +215,10 @@ QString Device::GetFileName()
     QString file = QString("%1/%2.wave").arg(dir).arg(dt);
     return file;
 }
+void Device::sendProgress(int sample_start, int sample_total)
+{
+    emit Progress(this,QString("%1").arg(sample_start*100/sample_total));
+}
 void Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
@@ -241,17 +245,20 @@ void Device::SaveWave(ProtoMessage &msg)
         QString fname = GetFileName();
         qDebug() << "create file " << fname;
         m_file = new WaveFile(fname);
-
+        sendProgress(sample_start, sample_total);
     }
     if(m_file!=NULL)
     {
         int nsize = msg.data.size() - 12;
         qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
         m_file->write(msg.data.mid(12, nsize));
+
     }
     if( (sample_start + sample_num) == sample_total)
     {
+        emit Progress(this,"同步完成");
         m_file->close();
+
     }
 
 }
