@@ -57,7 +57,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&dvm,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
     connect(&dvm,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
     connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
+    connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
     menu=new QMenu(this);
     QAction* action = new QAction("读取参数",this);
     menu->addAction(action);
@@ -120,8 +122,14 @@ void MainWindow::setupRealtimeDataDemo(QwtPlot *qwtplot)
     QwtPlotZoomer *zoomer = new QwtPlotZoomer( qwtplot->canvas() );
     zoomer->setRubberBandPen( QColor( Qt::blue ) );
     zoomer->setTrackerPen( QColor( Qt::black ) );
-    zoomer->setMousePattern(QwtEventPattern::MouseSelect2,Qt::RightButton, Qt::ControlModifier );
-    zoomer->setMousePattern(QwtEventPattern::MouseSelect3,Qt::RightButton );
+//    zoomer->setMousePattern(QwtEventPattern::MouseSelect2,Qt::RightButton, Qt::ControlModifier );
+//    zoomer->setMousePattern(QwtEventPattern::MouseSelect3,Qt::RightButton );
+
+    zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::LeftButton, Qt::ControlModifier );//左键 放大	 ctrl+左键恢复
+      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::RightButton, Qt::ControlModifier );//左键 放大	 ctrl+右键恢复原样
+      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::LeftButton );//左键放大与左键恢复重叠 不推荐使用
+      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::RightButton );//左键放大	右键恢复原样
+
     QwtPlotMagnifier *magnifier = new QwtPlotMagnifier( qwtplot->canvas() );                 //默认的滑轮及右键缩放功能  图形的整体缩放
 
     magnifier->setMouseButton(Qt::LeftButton);     //设置哪个按钮与滑轮为缩放画布  如果不设置(注册掉当前行)按钮默认为滑轮以及右键为缩放
@@ -361,14 +369,7 @@ void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_btnSaveWave_clicked()
 {
-    qDebug() << "stop";
-    if(1)
-    {
-        ui->btnWaveStart->setEnabled(false);
-        ui->btnStop->setEnabled(true);
-        QString str = QString("listen%1").arg(8888);
-        ui->statusBar->showMessage(str);
-    }
+    m_waveWdg->Clear();
 }
 
 void MainWindow::on_btnWaveStart_clicked()
@@ -543,6 +544,12 @@ dest = str.toInt();
 void MainWindow::toInt32U(QString str, quint32 &dest)
 {
     dest = str.toInt();
+}
+
+void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
+{
+   m_waveWdg->AppendData(data);
+   m_waveWdg->DisplayChannel();
 }
 
 //保存参数.

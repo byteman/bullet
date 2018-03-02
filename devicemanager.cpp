@@ -31,6 +31,7 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
         connect(dev,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
         connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
+        connect(dev,SIGNAL(showWave(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
         dev_map[ids[i].toInt()] = dev;
@@ -152,9 +153,9 @@ bool DeviceManager::LoadWaveFile(quint32 dev_id, QString file, MsgWaveData &wvd)
 }
 
 //这里获取到的通道数据必然保护通道所属的设备ID，从而能够区分设备.
-void DeviceManager::onWaveMsg(MsgWaveData wvData)
+void DeviceManager::onWaveMsg(Device* dev,MsgWaveData wvData)
 {
-
+     emit WaveMsg(dev,wvData);
 }
 
 void DeviceManager::onReadParam(Device *dev, MsgDevicePara para)

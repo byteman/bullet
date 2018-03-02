@@ -15,8 +15,10 @@ public:
     void DisplayChannel(int chan=0);
     void DisplayAllChannel();
     void SetData(MsgWaveData& wvd);
+    void AppendData(MsgWaveData& wvd);
     void SetChannel(int num);
     void CloseAll();
+    void Clear();
 
 private:
 

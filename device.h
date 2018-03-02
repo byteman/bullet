@@ -50,7 +50,9 @@ private:
     QString GetFileName();
     void DevNotify(QString msg);
     void sendProgress(int sample_start, int sample_total);
+    void ProcessWave(QByteArray &data);
 signals:
+    void showWave(Device* dev, MsgWaveData wave);
     void Progress(Device* dev,QString progress);
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);

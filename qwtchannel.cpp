@@ -14,6 +14,8 @@ QwtChannel::QwtChannel(int index,QObject *parent):
     QObject(parent),
     m_index(index)
 {
+    m_max = -10000;
+    m_min = 10000;
     curve.setTitle(QString("通道%1").arg(index+1));//曲线名字
 
     curve.setPen( colors[index], 3 );//曲线的颜色 宽度;
@@ -46,6 +48,41 @@ void QwtChannel::SetData(QVector<double> &samples)
     m_min = min;
 
 
+}
+
+void QwtChannel::AppendData(QVector<double> &samples)
+{
+    int size = samples.size();
+
+
+    double max=0,min=0;
+    if(size>0){//有数据传入
+
+        //ydata.erase(ydata.begin(),ydata.begin()+size);//擦除多余的数据
+        max = min= samples[0];
+        double value = 0;
+        for(int i=0;i<size;i++){
+            xdata.append(xdata.size()+1);
+
+            value = samples[i];
+            ydata.append(value);
+            if(value > max) max = value;
+            if(value < min) min = value;
+        }
+
+    }
+    if(max > m_max) m_max = max;
+    if(min < m_min) m_min = min;
+
+
+}
+
+void QwtChannel::Clear()
+{
+    xdata.clear();
+    ydata.clear();
+    m_max = -10000;
+    m_min = 10000;
 }
 
 void QwtChannel::Display(QwtPlot *plot,bool show)

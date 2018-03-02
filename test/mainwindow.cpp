@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "../protomessage.h"
+#include <QThread>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -11,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->startTimer(5000);
     socket.bind(9999);
     connect(&socket,SIGNAL(readyRead()),this,SLOT(readPendingDatagrams()));
+    qDebug() << sizeof(MsgDevicePara);
 
 }
 void MainWindow::addLog(QString str)
@@ -154,12 +156,14 @@ void MainWindow::on_btnStart_clicked()
             for(int k =0; k < wvd.nchannel; k++)
             {
 
+                //data.append((char*)&v,2);
+                //short  v = 1000;
                 data.append((char*)&v,2);
-
             }
             v++;
 
         }
+        QThread::sleep(1);
         sendPacket(MSG_WAVE_DATA,ss,data);
 
     }

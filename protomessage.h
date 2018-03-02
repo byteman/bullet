@@ -168,7 +168,7 @@ public:
     ProtoMessage();
     void appendSum(QByteArray& output)
     {
-        quint8 sum;
+        quint8 sum = 0;
         for(int i = 0; i < output.size(); i++)
         {
             sum += output[i];

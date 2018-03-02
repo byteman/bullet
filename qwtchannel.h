@@ -18,6 +18,8 @@ public:
 
 
     void SetData(QVector<double> &samples);
+    void AppendData(QVector<double> &samples);
+    void Clear();
     void Display(QwtPlot *plot,bool show=true);
     void GetMaxMin(double &max, double &min);
     int  GetSize();

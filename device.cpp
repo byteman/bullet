@@ -219,6 +219,28 @@ void Device::sendProgress(int sample_start, int sample_total)
 {
     emit Progress(this,QString("%1").arg(sample_start*100/sample_total));
 }
+void Device::ProcessWave(QByteArray &data)
+{
+
+    //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
+    int sample_nr = data.size() / (8*2);
+
+    ChannelData cda;
+    MsgWaveData wvd;
+    wvd.channels.reserve(8);
+    wvd.channels.fill(cda,8);
+    for(int i = 0 ; i < sample_nr; i++)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+           quint16 value = (data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
+           wvd.channels[j].push_back( value );
+            //cda[j]
+        }
+    }
+    emit showWave(this,wvd);
+
+}
 void Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
@@ -233,6 +255,8 @@ void Device::SaveWave(ProtoMessage &msg)
     quint32 sample_num = wvh.nSample;
 
     DevNotify(QString("total:%1,start=%2,num=%3").arg(sample_total).arg(sample_start).arg(sample_num));
+
+#if 0
      qDebug() << "ssid" << msg.head.sesson_id << " cur_id" << m_sess_id;
     if(msg.head.sesson_id != m_sess_id)
     {
@@ -252,6 +276,7 @@ void Device::SaveWave(ProtoMessage &msg)
         int nsize = msg.data.size() - 12;
         qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
         m_file->write(msg.data.mid(12, nsize));
+        ProcessWave(msg.data.mid(12, nsize));
 
     }
     if( (sample_start + sample_num) == sample_total)
@@ -260,6 +285,11 @@ void Device::SaveWave(ProtoMessage &msg)
         m_file->close();
 
     }
+#else
+    int nsize = msg.data.size() - 12;
+
+    ProcessWave(msg.data.mid(12, nsize));
+#endif
 
 }
 QString Device::station() const

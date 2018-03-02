@@ -21,6 +21,7 @@
 #include "devicemanager.h"
 #include "wavewidget.h"
 #include "protomessage.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -69,6 +70,7 @@ private:
     void toInt32U(QString str, quint32 &dest);
     QString formatTime();
 private slots:
+    void onWaveMsg(Device*dev, MsgWaveData data);
     void onNotify(QString msg);
     void on_menu_click(bool);
     void updatedataSlot();

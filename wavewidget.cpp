@@ -31,6 +31,15 @@ void WaveWidget::SetData(MsgWaveData &wvd)
     }
 }
 
+void WaveWidget::AppendData(MsgWaveData &wvd)
+{
+    for(int i = 0; i < channels.size();i++)
+    {
+        channels[i]->AppendData(wvd.channels[i]);
+    }
+
+}
+
 void WaveWidget::DisplayChannel(int chan)
 {
     int index = (chan >= channels.size())?0:chan;
@@ -64,6 +73,14 @@ void WaveWidget::CloseAll()
     for(int i = 0; i < channels.size();i++)
     {
         channels[i]->Display(m_plot,false);
+    }
+}
+
+void WaveWidget::Clear()
+{
+    for(int i = 0; i < channels.size();i++)
+    {
+        channels[i]->Clear();
     }
 }
 

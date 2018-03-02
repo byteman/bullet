@@ -30,13 +30,14 @@ public:
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
 
 public slots:
-    void onWaveMsg(MsgWaveData wvData);
+    void onWaveMsg(Device* dev,MsgWaveData wvData);
     void onReadParam(Device* dev,MsgDevicePara para);
     void onWriteParam(Device* dev, bool result);
     void Message(SessMessage msg);
     void onNotify(QString msg);
     void onEnumFiles(Device* dev,MsgFileList files);
     void onProgress(Device* dev,QString progress);
+
 private:
     int m_dev_num;
     QMap<quint32,QString> id_name_map;
@@ -55,6 +56,7 @@ signals:
     void Notify(QString msg);
     void Progress(Device* dev,QString progress);
     void EnumFiles(Device* dev,MsgFileList files);
+    void WaveMsg(Device* dev, MsgWaveData data);
     // QObject interface
 protected:
     void timerEvent(QTimerEvent *);
