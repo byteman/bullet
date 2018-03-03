@@ -6,7 +6,7 @@
 
 QT       += core  gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = bullet
 TEMPLATE = app
@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     udpserver.cpp \
     udpsession.cpp \
     wavewidget.cpp \
-    qwtchannel.cpp
+    qwtchannel.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
     server.h \
@@ -45,11 +46,12 @@ HEADERS  += mainwindow.h \
     udpserver.h \
     udpsession.h \
     wavewidget.h \
-    qwtchannel.h
+    qwtchannel.h \
+    qcustomplot.h
 
 FORMS    += mainwindow.ui
-BASEDIR=E:\Qt\Qt5.5.0\5.5\msvc2012
-INCLUDEPATH += $$BASEDIR\include\Qwt
+BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
+##INCLUDEPATH += $$BASEDIR\include\Qwt
 LIBS += -L$$BASEDIR\lib -lqwtd
 
 RESOURCES += \

@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     icon_file.addFile(":image/channel.png");
 
     ui->btnStop->setEnabled(false);
-    setupRealtimeDataDemo(ui->qwtPlot);
+    setupRealtimeDataDemo(ui->plot);
     srv.setParent(this);
     connect(&srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(&srv,SIGNAL(Message(SessMessage)),&dvm
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dvm.SetStation("工位1");
     loadDeviceUI();
     ui->rb1->setChecked(true);
-    m_waveWdg = new WaveWidget(ui->qwtPlot,8);
+    m_waveWdg = new WaveWidget(ui->plot,8);
 
     this->startTimer(1000);
     qDebug() <<"MainWindow thread id=" << thread();
@@ -100,90 +100,16 @@ MainWindow::~MainWindow()
 
 
 
-void MainWindow::setupRealtimeDataDemo(QwtPlot *qwtplot)
+void MainWindow::setupRealtimeDataDemo(QCustomPlot* plot)
 {
 
 
     demoName = "测力波形";
-    qwtplot->setTitle(demoName);
-    qwtplot->setCanvasBackground(Qt::gray);//背景
-    qwtplot->insertLegend(new QwtLegend(),QwtPlot::RightLegend);//标签
-
-
-    QTime curtime;
-    curtime=curtime.currentTime();
-    qwtplot->setAxisTitle(QwtPlot::xBottom, "时间");
-    qwtplot->setAxisTitle(QwtPlot::yLeft,"AD");
-    qwtplot->setAxisScale(QwtPlot::yLeft,0,100);
-    qwtplot->setAxisScale(QwtPlot::xBottom,0,1);
-
-
-
-    QwtPlotZoomer *zoomer = new QwtPlotZoomer( qwtplot->canvas() );
-    zoomer->setRubberBandPen( QColor( Qt::blue ) );
-    zoomer->setTrackerPen( QColor( Qt::black ) );
-//    zoomer->setMousePattern(QwtEventPattern::MouseSelect2,Qt::RightButton, Qt::ControlModifier );
-//    zoomer->setMousePattern(QwtEventPattern::MouseSelect3,Qt::RightButton );
-
-    zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::LeftButton, Qt::ControlModifier );//左键 放大	 ctrl+左键恢复
-      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::RightButton, Qt::ControlModifier );//左键 放大	 ctrl+右键恢复原样
-      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::LeftButton );//左键放大与左键恢复重叠 不推荐使用
-      zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::RightButton );//左键放大	右键恢复原样
-
-    QwtPlotMagnifier *magnifier = new QwtPlotMagnifier( qwtplot->canvas() );                 //默认的滑轮及右键缩放功能  图形的整体缩放
-
-    magnifier->setMouseButton(Qt::LeftButton);     //设置哪个按钮与滑轮为缩放画布  如果不设置(注册掉当前行)按钮默认为滑轮以及右键为缩放
-
-    QwtPlotGrid *grid = new QwtPlotGrid();
-    grid->enableX( true );//设置网格线
-    grid->enableY( true );
-    grid->setMajorPen( Qt::black, 0, Qt::DotLine );
-    grid->attach(qwtplot);
-
-    //connect(&updateTimer,SIGNAL(timeout()),this,SLOT(updatedataSlot()));
-    //updateTimer.start(0);
-
-
-}
-
-/**
- * @brief getData
- * @param inteval
- * @return
- * 获取一个值  模拟串口接收到的值
- */
-double MainWindow::getData(double time){
-
-    double s = qCos( time * M_PI * 2 ) ;
-    return s;
-}
-
-
-//用于更新ydata,实际情况就是read数据
-void MainWindow::updatedataSlot(){
-    static QTime dataTime(QTime::currentTime());
-    long int eltime = dataTime.elapsed();
-    static int lastpointtime = 0;
-
-    int size = (eltime - lastpointtime);
-
-
-    if(size>0){//有数据传入
-        ydata.erase(ydata.begin(),ydata.begin()+size);//擦除多余的数据
-        for(int i=1;i<size+1;i++){
-            ydata.append(getData((((double)lastpointtime+i)/1000)));
-            xdata.append(0);
-        }
-        lastpointtime = eltime;
-    }
-
-    curve->setSamples(xdata,ydata);
-    curve->attach(ui->qwtPlot);
-    ui->qwtPlot->replot();
 
 
 
 }
+
 
 QString MainWindow::FormatHex(QByteArray& data)
 {
@@ -401,22 +327,6 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     listFiles(dev_id);
     readParam(dev_id);
     dvm.ListFiles(dev_id);
-
-//    if(item->childCount() > 0)
-//    {
-//        quint32 dev_id = item->data(0,Qt::UserRole).toInt();
-//        listFiles(dev_id);
-//        readParam(dev_id);
-//    }
-//    else
-//    {
-//        quint32 dev_id = item->parent()->data(0,Qt::UserRole).toInt();
-//        int index = item->data(0,Qt::UserRole).toInt();
-
-
-//    }
-
-
 }
 
 void MainWindow::on_actionStation1_triggered()
@@ -428,40 +338,13 @@ void MainWindow::on_actionStation2_triggered()
 {
     dvm.SetStation("工位2");
 }
-void MainWindow::paintWave(MsgWaveData& wvd, int chan)
-{
-    xdata.clear();
-    ydata.clear();
-    int size = wvd.channels[chan].size();
-    double max=0,min=0;
-    if(size>0){//有数据传入
-        //ydata.erase(ydata.begin(),ydata.begin()+size);//擦除多余的数据
-        max = min= wvd.channels[chan][0];
-        double value = 0;
-        for(int i=0;i<size;i++){
-            xdata.append(i);
-            ydata.append(wvd.channels[chan][i]);
-            value = wvd.channels[chan][i];
-            if(value > max) max = value;
-            if(value < min) min = value;
-        }
 
-    }
-    ui->qwtPlot->setAxisScale(QwtPlot::yLeft,min,max);
-    ui->qwtPlot->setAxisScale(QwtPlot::xBottom,0,size);
-
-
-    curve->setSamples(xdata,ydata);
-
-    curve->attach(ui->qwtPlot);
-    ui->qwtPlot->replot();
-}
 void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
 {
     MsgWaveData wvd;
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
-    m_waveWdg->DisplayChannel(chan);
+    m_waveWdg->DisplayAllChannel();
 }
 //显示该设备的波形.
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
@@ -549,7 +432,7 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
    m_waveWdg->AppendData(data);
-   m_waveWdg->DisplayChannel();
+   m_waveWdg->DisplayAllChannel();
 }
 
 //保存参数.

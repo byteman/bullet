@@ -4,15 +4,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QTreeWidgetItem>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-#include <qwt_legend.h>
 #include <math.h>
-#include <qwt_plot_zoomer.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_grid.h>
-#include <qwt_scale_draw.h>
 #include <QTcpServer>
 #include <QListWidgetItem>
 #include "server.h"
@@ -33,7 +25,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void setupRealtimeDataDemo(QwtPlot *qwtplot);
+    void setupRealtimeDataDemo(QCustomPlot *qwtplot);
 
 
     void ShowDeviceChannel(quint32 dev_id, QString file, int chan);
@@ -43,7 +35,6 @@ private:
     QVector<double> ydata;
     QTimer updateTimer;
     QString demoName;
-    QwtPlotCurve *curve ;
     UdpServer srv;
     DeviceManager dvm;
     QIcon icon_device[2];
@@ -73,7 +64,6 @@ private slots:
     void onWaveMsg(Device*dev, MsgWaveData data);
     void onNotify(QString msg);
     void on_menu_click(bool);
-    void updatedataSlot();
     void Message(SessMessage msg);
     void onEnumFiles(Device* dev,MsgFileList files);
     void onReadPara(Device* dev, MsgDevicePara para);

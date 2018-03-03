@@ -10,100 +10,76 @@
 //Qt::cyan	10	Cyan (#00ffff)
 //Qt::darkCyan	16	Dark cyan (#008080)
 static QColor colors[8] = {Qt::white,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
-QwtChannel::QwtChannel(int index,QObject *parent):
+QwtChannel::QwtChannel(int index,QCPGraph* graph,QObject *parent):
     QObject(parent),
-    m_index(index)
+    m_index(index),
+    m_graph(graph)
 {
     m_max = -10000;
     m_min = 10000;
-    curve.setTitle(QString("通道%1").arg(index+1));//曲线名字
+    QPen pen(colors[index]);
+    pen.setWidth(2);
+    graph->setPen(pen);
 
-    curve.setPen( colors[index], 3 );//曲线的颜色 宽度;
+    //graph_>setTitle(QString("通道%1").arg(index+1));//曲线名字
+
+    //curve.setPen( colors[index], 3 );//曲线的颜色 宽度;
 
 }
 
 void QwtChannel::SetData(QVector<double> &samples)
 {
-    int size = samples.size();
-
-
-    double max=0,min=0;
-    if(size>0){//有数据传入
-       xdata.clear();
-       ydata.clear();
-        //ydata.erase(ydata.begin(),ydata.begin()+size);//擦除多余的数据
-        max = min= samples[0];
-        double value = 0;
-        for(int i=0;i<size;i++){
-            xdata.append(i);
-
-            value = samples[i];
-            ydata.append(value);
-            if(value > max) max = value;
-            if(value < min) min = value;
-        }
-
+    QVector<double> keys;
+    double key = 0;
+    for(int i = 0; i < samples.size();i++)
+    {
+       keys.push_back(key++);
     }
-    m_max= max;
-    m_min = min;
-
+    qDebug() << "SetData count=" << m_graph->dataCount();
+    m_graph->setData(keys,samples);
 
 }
 
-void QwtChannel::AppendData(QVector<double> &samples)
+void QwtChannel::AppendData(double key, double sample)
 {
-    int size = samples.size();
 
+    m_graph->addData(m_graph->dataCount()+1,sample);
+}
 
-    double max=0,min=0;
-    if(size>0){//有数据传入
-
-        //ydata.erase(ydata.begin(),ydata.begin()+size);//擦除多余的数据
-        max = min= samples[0];
-        double value = 0;
-        for(int i=0;i<size;i++){
-            xdata.append(xdata.size()+1);
-
-            value = samples[i];
-            ydata.append(value);
-            if(value > max) max = value;
-            if(value < min) min = value;
-        }
-
+void QwtChannel::AppendDataArray(QVector<double> &samples)
+{
+    QVector<double> keys;
+    for(int i = 0; i < samples.size();i++)
+    {
+       keys.push_back(m_graph->dataCount()+1);
     }
-    if(max > m_max) m_max = max;
-    if(min < m_min) m_min = min;
-
+    m_graph->addData(keys,samples);
 
 }
 
 void QwtChannel::Clear()
 {
-    xdata.clear();
-    ydata.clear();
-    m_max = -10000;
-    m_min = 10000;
+
 }
 
-void QwtChannel::Display(QwtPlot *plot,bool show)
+void QwtChannel::Display(bool show)
 {
 
-    curve.setSamples(xdata,ydata);
-    if(show)
-        curve.attach(plot);
-    else
-        curve.detach();
+     m_graph->setVisible(show);
+
+     m_graph->rescaleValueAxis();
+
 }
 
 void QwtChannel::GetMaxMin(double &max, double &min)
 {
-    max = m_max;
-    min = m_min;
+
 }
 
 int QwtChannel::GetSize()
 {
-    return xdata.size();
+    int size = m_graph->dataCount();
+    return size;
 }
 
 

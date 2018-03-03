@@ -10,7 +10,7 @@ class WaveWidget:public QObject
     Q_OBJECT
 public:
 
-    WaveWidget(QwtPlot* plot,int num=1);
+    WaveWidget(QCustomPlot* plot,int num=1);
     ~WaveWidget();
     void DisplayChannel(int chan=0);
     void DisplayAllChannel();
@@ -23,7 +23,7 @@ public:
 private:
 
     int m_num;
-    QwtPlot* m_plot;
+    QCustomPlot* m_plot;
     QVector<QwtChannel*> channels;
 
 };
