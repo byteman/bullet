@@ -5,26 +5,29 @@
 #include <QVector>
 #include "protomessage.h"
 #include "qwtchannel.h"
+#include "ilinechart.h"
+
 class WaveWidget:public QObject
 {
     Q_OBJECT
 public:
 
-    WaveWidget(QCustomPlot* plot,int num=1);
+    WaveWidget(QWidget* parent,int num=1);
+    //WaveWidget(QCustomPlot* parent,int num=1);
     ~WaveWidget();
     void DisplayChannel(int chan=0);
     void DisplayAllChannel();
-    void SetData(MsgWaveData& wvd);
-    void AppendData(MsgWaveData& wvd);
+
     void SetChannel(int num);
     void CloseAll();
     void Clear();
 
+    void SetData(MsgWaveData &wvd);
+    void AppendData(MsgWaveData &wvd);
 private:
 
     int m_num;
-    QCustomPlot* m_plot;
-    QVector<QwtChannel*> channels;
+    ILineChart* m_chart;
 
 };
 

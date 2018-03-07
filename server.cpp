@@ -44,11 +44,11 @@ bool Server::init(int port)
 
 void Server::sendData(QString ip, QString data)
 {
-    m_mapClient.value(ip)->send(data.toLatin1());
+
 }
 void Server::sendData(QString ip, uchar *rawData)
 {
-    m_mapClient.value(ip)->send(QByteArray((char*)rawData));
+   // m_mapClient.value(ip)->send(QByteArray((char*)rawData));
 }
 
 void Server::test()

@@ -9,7 +9,8 @@
 //Qt::darkBlue	15	Dark blue (#000080)
 //Qt::cyan	10	Cyan (#00ffff)
 //Qt::darkCyan	16	Dark cyan (#008080)
-static QColor colors[8] = {Qt::white,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+
 QwtChannel::QwtChannel(int index,QCPGraph* graph,QObject *parent):
     QObject(parent),
     m_index(index),
@@ -35,7 +36,13 @@ void QwtChannel::SetData(QVector<double> &samples)
     {
        keys.push_back(key++);
     }
-    qDebug() << "SetData count=" << m_graph->dataCount();
+    qDebug() << "SetData count=" << samples.size();
+    for(int i = 0; i <samples.size(); i++ )
+    {
+        if(samples[i] > 5)
+            samples[i] =5;
+        //qDebug() << samples[i];
+    }
     m_graph->setData(keys,samples);
 
 }
@@ -66,8 +73,8 @@ void QwtChannel::Display(bool show)
 {
 
      m_graph->setVisible(show);
-
-     m_graph->rescaleValueAxis();
+     //if(show)
+     //m_graph->rescaleValueAxis();
 
 }
 

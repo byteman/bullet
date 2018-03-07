@@ -49,12 +49,14 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 
 bool Device::ListFiles()
 {
-    WriteCmd(MSG_ENUM_FILES,QByteArray());
+    QByteArray data;
+    WriteCmd(MSG_ENUM_FILES,data);
     return true;
 }
 void Device::ReadParam()
 {
-    WriteCmd(MSG_READ_PARAM,QByteArray());
+    QByteArray data;
+    WriteCmd(MSG_READ_PARAM,data);
 }
 bool Device::Reset(quint8 delay_s)
 {
@@ -256,7 +258,7 @@ void Device::SaveWave(ProtoMessage &msg)
 
     DevNotify(QString("total:%1,start=%2,num=%3").arg(sample_total).arg(sample_start).arg(sample_num));
 
-#if 0
+#if 1
      qDebug() << "ssid" << msg.head.sesson_id << " cur_id" << m_sess_id;
     if(msg.head.sesson_id != m_sess_id)
     {
@@ -275,8 +277,9 @@ void Device::SaveWave(ProtoMessage &msg)
     {
         int nsize = msg.data.size() - 12;
         qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
-        m_file->write(msg.data.mid(12, nsize));
-        ProcessWave(msg.data.mid(12, nsize));
+        QByteArray data = msg.data.mid(12, nsize);
+        m_file->write(data);
+        ProcessWave(data);
 
     }
     if( (sample_start + sample_num) == sample_total)
@@ -321,7 +324,10 @@ bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
 
         for(int j = 0; j < 8; j++)
         {
-           quint16 value = (data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
+
+           quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
+           memcpy(&value, data.data() + i*8 + j*2,2);
+
            wvd.channels[j].push_back( value );
             //cda[j]
         }

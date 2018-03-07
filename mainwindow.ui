@@ -139,7 +139,7 @@
           <property name="title">
            <string>通道选择</string>
           </property>
-          <widget class="QRadioButton" name="rb1">
+          <widget class="QCheckBox" name="rb1">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -152,7 +152,7 @@
             <string>通道1</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb2">
+          <widget class="QCheckBox" name="rb2">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -165,7 +165,7 @@
             <string>通道2</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb3">
+          <widget class="QCheckBox" name="rb3">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -178,7 +178,7 @@
             <string>通道3</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb4">
+          <widget class="QCheckBox" name="rb4">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -191,7 +191,7 @@
             <string>通道4</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb5">
+          <widget class="QCheckBox" name="rb5">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -204,7 +204,7 @@
             <string>通道5</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb6">
+          <widget class="QCheckBox" name="rb6">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -217,7 +217,7 @@
             <string>通道6</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb7">
+          <widget class="QCheckBox" name="rb7">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -230,7 +230,7 @@
             <string>通道7</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="rb8">
+          <widget class="QCheckBox" name="rb8">
            <property name="geometry">
             <rect>
              <x>6</x>
@@ -747,7 +747,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>30</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

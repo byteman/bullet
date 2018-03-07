@@ -6,7 +6,7 @@
 
 QT       += core  gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport  charts
 
 TARGET = bullet
 TEMPLATE = app
@@ -28,8 +28,14 @@ SOURCES += main.cpp\
     udpserver.cpp \
     udpsession.cpp \
     wavewidget.cpp \
-    qwtchannel.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    igraphicchannel.cpp \
+    qchartchannel.cpp \
+    qchartlinechart.cpp \
+    ilinechart.cpp \
+    qcustomchart.cpp \
+    qcustomplotchannel.cpp \
+    ifilter.cpp
 
 HEADERS  += mainwindow.h \
     server.h \
@@ -47,12 +53,19 @@ HEADERS  += mainwindow.h \
     udpsession.h \
     wavewidget.h \
     qwtchannel.h \
-    qcustomplot.h
+    qcustomplot.h \
+    igraphicchannel.h \
+    qchartchannel.h \
+    ilinechart.h \
+    qchartlinechart.h \
+    qcustomchart.h \
+    qcustomplotchannel.h \
+    ifilter.h
 
 FORMS    += mainwindow.ui
-BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
+#BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
-LIBS += -L$$BASEDIR\lib -lqwtd
+#LIBS += -L$$BASEDIR\lib -lqwtd
 
 RESOURCES += \
     img.qrc

@@ -114,6 +114,7 @@ struct sDateTime{
 
     }
 };
+#define MAX_WIFI_BUF 18
 struct MsgDevicePara
 {
     INT16U	mWorkMode;	//采集方式
@@ -122,8 +123,8 @@ struct MsgDevicePara
 
     Glocal_IP_ADDR Local_IP; //IP 地址
     sServerADDR Server_ip;	//服务器IP
-    INT8U	mWifiSSID[12];  //ssid 名字
-    INT8U	mWifiPass[12];  //pass 密码
+    INT8U	mWifiSSID[MAX_WIFI_BUF];  //ssid 名字
+    INT8U	mWifiPass[MAX_WIFI_BUF];  //pass 密码
     sDateTime mDateTime; //时间和日期.
 
 
@@ -133,9 +134,9 @@ struct MsgDevicePara
         mWorkMode = 0;
         mWetUp = 0;
         mWetDown = 0;
-        memset(mWifiSSID,0,12);
+        memset(mWifiSSID,0,MAX_WIFI_BUF);
         strcpy((char*)mWifiSSID,"ssid");
-        memset(mWifiPass,0,12);
+        memset(mWifiPass,0,MAX_WIFI_BUF);
         strcpy((char*)mWifiPass,"123456");
     }
     void toByteArray(QByteArray& data)

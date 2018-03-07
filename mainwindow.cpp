@@ -22,13 +22,6 @@ void MainWindow::loadDeviceUI()
         item->setIcon(0,icon_device[1]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
-//        for(int j = 0; j < 8; j++)
-//        {
-//            QTreeWidgetItem* item2= new QTreeWidgetItem(QStringList(QString("通道%1").arg(j+1)));
-//            item2->setIcon(0,icon_channel);
-//            item->addChild(item2);
-//            item2->setData(0,Qt::UserRole,j);
-//        }
     }
 
 }
@@ -431,8 +424,8 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
-   m_waveWdg->AppendData(data);
-   m_waveWdg->DisplayAllChannel();
+  // m_waveWdg->AppendData(data);
+   //m_waveWdg->DisplayAllChannel();
 }
 
 //保存参数.

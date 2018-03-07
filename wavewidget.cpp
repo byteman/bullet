@@ -1,93 +1,52 @@
 #include "wavewidget.h"
-
-
-WaveWidget::WaveWidget(QCustomPlot *plot, int num):
-    m_plot(plot)
+#include <QValueAxis>
+#include "qchartlinechart.h"
+#include "qcustomchart.h"
+#include "ifilter.h"
+WaveWidget::WaveWidget(QWidget *parent, int num)
 {
-//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-//    timeTicker->setTimeFormat("%h:%m:%s");
-//    m_plot->xAxis->setTicker(timeTicker);
-    m_plot->axisRect()->setupFullAxesBox();
-    m_plot->legend->setVisible(true);
-    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 
-    SetChannel(num);
+    m_chart = new QChartLineChart(parent,num);
+    m_chart->SetFilter(new IValueFilter(8));
+    //m_chart = new QCustomChart(parent,num);
+
 }
-
+//WaveWidget::WaveWidget(QCustomPlot* parent,int num)
+//{
+//    m_chart = new QCustomChart(parent,num);
+//}
 WaveWidget::~WaveWidget()
 {
 
 }
-
-
 void WaveWidget::SetData(MsgWaveData &wvd)
 {
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->SetData(wvd.channels[i]);
-    }
+    m_chart->SetDataArray(wvd.channels);
+
 }
 
 void WaveWidget::AppendData(MsgWaveData &wvd)
 {
-    for(int i = 0; i < channels.size();i++)
-    {
-
-        channels[i]->AppendDataArray(wvd.channels[i]);
-    }
-
-
+    m_chart->AppendDataArray(wvd.channels);
 }
 void WaveWidget::DisplayAllChannel()
 {
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->Display(true);
-        m_plot->xAxis->setRange(0,channels[i]->GetSize());
-    }
-    m_plot->replot();
+    m_chart->DisplayAllChannel();
 }
 
 void WaveWidget::DisplayChannel(int chan)
 {
-    int index = (chan >= channels.size())?0:chan;
-
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->Display(index==i);
-    }
-    //channels[index]->GetMaxMin(max,min);
-
-    //m_plot->xAxis->setRange(0, channels[0]->GetSize(), Qt::AlignLeft);
-
-    m_plot->replot();
-
-}
-
-void WaveWidget::SetChannel(int num)
-{
-
-    channels.clear();
-    for(int i = 0; i < num; i++)
-    {
-        channels.push_back(new QwtChannel(i,m_plot->addGraph()));
-    }
+    m_chart->DisplayChannel(chan);
 
 }
 
 void WaveWidget::CloseAll()
 {
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->Display(false);
-    }
+    m_chart->CloseAll();
 }
 
 void WaveWidget::Clear()
 {
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->Clear();
-    }
+    m_chart->Clear();
 }
 
