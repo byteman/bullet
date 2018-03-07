@@ -12,12 +12,16 @@ void QChartChannel::SetDataArray(QVector<double> &values)
 {
     m_min = m_max = values[0];
     double v = 0;
+    m_filter->Reset();
     QVector<QPointF> points;
     points.reserve(values.size());
     for(int i = 0; i < values.size();i++)
     {
         v = values[i];
-
+        if(m_filter!=NULL)
+        {
+            v = m_filter->filter(v);
+        }
         points.push_back(QPoint(i,v));
         if(v < m_min){
             m_min = v;

@@ -326,7 +326,7 @@ bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
         {
 
            quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
-           memcpy(&value, data.data() + i*8 + j*2,2);
+           memcpy(&value, data.data() + i*16 + j*2,2);
 
            wvd.channels[j].push_back( value );
             //cda[j]

@@ -6,3 +6,4 @@ output
 ui_mainwindow.h
 *.Debug
 *.Release
+release

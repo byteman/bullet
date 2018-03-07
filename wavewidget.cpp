@@ -29,14 +29,14 @@ void WaveWidget::AppendData(MsgWaveData &wvd)
 {
     m_chart->AppendDataArray(wvd.channels);
 }
-void WaveWidget::DisplayAllChannel()
+void WaveWidget::DisplayAllChannel(bool show)
 {
-    m_chart->DisplayAllChannel();
+    m_chart->DisplayAllChannel(show);
 }
 
-void WaveWidget::DisplayChannel(int chan)
+void WaveWidget::DisplayChannel(int chan,bool bshow)
 {
-    m_chart->DisplayChannel(chan);
+    m_chart->DisplayChannel(chan,bshow);
 
 }
 

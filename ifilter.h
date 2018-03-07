@@ -7,6 +7,7 @@ class IValueFilter
 public:
     IValueFilter(int size=8);
     virtual void setLength(int size);
+    virtual void Reset();
     virtual double filter(double v);
 private:
     QVector<double> buffer;

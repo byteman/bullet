@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dvm.start();
     dvm.SetStation("工位1");
     loadDeviceUI();
-    ui->rb1->setChecked(true);
+
     m_waveWdg = new WaveWidget(ui->plot,8);
 
     this->startTimer(1000);
@@ -337,7 +337,9 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     MsgWaveData wvd;
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
-    m_waveWdg->DisplayAllChannel();
+    m_waveWdg->DisplayAllChannel(true);
+    checkAll(true);
+    ui->rball->setChecked(true);
 }
 //显示该设备的波形.
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
@@ -351,45 +353,6 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
     //updatedataSlot();
 }
 
-void MainWindow::on_rb1_clicked()
-{
-     m_waveWdg->DisplayChannel(0);
-}
-
-void MainWindow::on_rb2_clicked()
-{
-    m_waveWdg->DisplayChannel(1);
-}
-
-void MainWindow::on_rb3_clicked()
-{
-m_waveWdg->DisplayChannel(2);
-}
-
-void MainWindow::on_rb4_clicked()
-{
-m_waveWdg->DisplayChannel(3);
-}
-
-void MainWindow::on_rb5_clicked()
-{
-m_waveWdg->DisplayChannel(4);
-}
-
-void MainWindow::on_rb6_clicked()
-{
-m_waveWdg->DisplayChannel(5);
-}
-
-void MainWindow::on_rb7_clicked()
-{
-m_waveWdg->DisplayChannel(6);
-}
-
-void MainWindow::on_rb8_clicked()
-{
-    m_waveWdg->DisplayChannel(7);
-}
 void MainWindow::toIpAddr(QString ipstr, sIP_ADDR& addr)
 {
     QHostAddress hostAddr(ipstr);
@@ -458,4 +421,82 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::on_actionReset_triggered()
 {
 
+}
+
+void MainWindow::on_rb1_clicked(bool checked)
+{
+    m_waveWdg->DisplayChannel(0,checked);
+    isAllCheck();
+}
+void MainWindow::checkAll(bool checked)
+{
+    ui->rb1->setChecked(checked);
+    ui->rb2->setChecked(checked);
+    ui->rb3->setChecked(checked);
+    ui->rb4->setChecked(checked);
+    ui->rb5->setChecked(checked);
+    ui->rb6->setChecked(checked);
+    ui->rb7->setChecked(checked);
+    ui->rb8->setChecked(checked);
+}
+void MainWindow::on_rball_clicked(bool checked)
+{
+    m_waveWdg->DisplayAllChannel(checked);
+    checkAll(checked);
+}
+
+void MainWindow::on_rb2_clicked(bool checked)
+{
+    m_waveWdg->DisplayChannel(1,checked);
+    isAllCheck();
+}
+
+void MainWindow::on_rb3_clicked(bool checked)
+{
+m_waveWdg->DisplayChannel(2,checked);
+}
+
+void MainWindow::on_rb4_clicked(bool checked)
+{
+m_waveWdg->DisplayChannel(3,checked);
+isAllCheck();
+}
+
+void MainWindow::on_rb5_clicked(bool checked)
+{
+m_waveWdg->DisplayChannel(4,checked);
+isAllCheck();
+}
+
+void MainWindow::on_rb6_clicked(bool checked)
+{
+m_waveWdg->DisplayChannel(5,checked);
+isAllCheck();
+}
+
+void MainWindow::on_rb7_clicked(bool checked)
+{
+    m_waveWdg->DisplayChannel(6,checked);
+    isAllCheck();
+}
+
+void MainWindow::on_rb8_clicked(bool checked)
+{
+
+    m_waveWdg->DisplayChannel(7,checked);
+
+isAllCheck();
+}
+void MainWindow::isAllCheck()
+{
+    bool isAll = false;
+    isAll = ui->rb1->isChecked()&
+            ui->rb2->isChecked()&
+            ui->rb3->isChecked()&
+            ui->rb4->isChecked()&
+            ui->rb5->isChecked()&
+            ui->rb6->isChecked()&
+            ui->rb7->isChecked()&
+            ui->rb8->isChecked();
+    ui->rball->setChecked(isAll);
 }

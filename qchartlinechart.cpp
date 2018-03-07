@@ -38,9 +38,9 @@ QChartLineChart::QChartLineChart(QWidget *parent, int num)
 
 
 
-void QChartLineChart::DisplayChannel(int chan)
+void QChartLineChart::DisplayChannel(int chan,bool show)
 {
-    ILineChart::DisplayChannel(chan);
+    ILineChart::DisplayChannel(chan,show);
     double min,max;
     channels[chan]->GetValueRange(min,max);
     axisY->setRange(min,max);
@@ -48,10 +48,10 @@ void QChartLineChart::DisplayChannel(int chan)
     axisX->setRange(min,max);
 }
 #include <QDebug>
-void QChartLineChart::DisplayAllChannel()
+void QChartLineChart::DisplayAllChannel(bool show)
 {
     double min,max;
-    ILineChart::DisplayAllChannel();
+    ILineChart::DisplayAllChannel(show);
 
     channels[0]->GetKeyRange(min,max);
 

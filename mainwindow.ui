@@ -139,110 +139,71 @@
           <property name="title">
            <string>通道选择</string>
           </property>
-          <widget class="QCheckBox" name="rb1">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>62</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道1</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb2">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>129</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道2</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb3">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>196</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道3</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb4">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>263</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道4</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb5">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>330</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道5</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb6">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>397</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道6</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb7">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>464</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道7</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="rb8">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>531</y>
-             <width>78</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>通道8</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="rball">
+             <property name="text">
+              <string>全选</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb1">
+             <property name="text">
+              <string>通道1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb2">
+             <property name="text">
+              <string>通道2</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb3">
+             <property name="text">
+              <string>通道3</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb4">
+             <property name="text">
+              <string>通道4</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb5">
+             <property name="text">
+              <string>通道5</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb6">
+             <property name="text">
+              <string>通道6</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb7">
+             <property name="text">
+              <string>通道7</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="rb8">
+             <property name="text">
+              <string>通道8</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -310,7 +271,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>重量上限值：</string>
+                <string>开始力值：</string>
                </property>
               </widget>
              </item>
@@ -339,7 +300,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>重量上限值：</string>
+                <string>结束力值：</string>
                </property>
               </widget>
              </item>
@@ -747,7 +708,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>17</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

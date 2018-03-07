@@ -1,11 +1,11 @@
 #include "ilinechart.h"
 
-void ILineChart::DisplayAllChannel()
+void ILineChart::DisplayAllChannel(bool show)
 {
 
     for(int i = 0; i < channels.size();i++)
     {
-        channels[i]->Display(true);
+        channels[i]->Display(show);
 
     }
 
@@ -74,15 +74,14 @@ void ILineChart::InitChannel(QWidget *parent, int num)
 
 }
 
-void ILineChart::DisplayChannel(int chan)
+void ILineChart::DisplayChannel(int chan,bool bshow)
 {
     int index = (chan >= channels.size())?0:chan;
 
-    for(int i = 0; i < channels.size();i++)
-    {
-        channels[i]->Display(index==i);
 
-    }
+    channels[index]->Display(bshow);
+
+
 }
 void ILineChart::CloseAll()
 {

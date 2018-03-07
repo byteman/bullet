@@ -8,14 +8,21 @@ IValueFilter::IValueFilter(int size):
 
 void IValueFilter::setLength(int size)
 {
-    buffer.clear();
+    Reset();
     buffer.reserve(size);
     m_size = size;
 }
 
+void IValueFilter::Reset()
+{
+    buffer.clear();
+
+}
+
 double IValueFilter::filter(double v)
 {
-    qDebug() << "fi " <<v;
+    //qDebug() << "fi " <<v;
+    buffer.push_back(v);
     while(buffer.size() > m_size)
     {
         buffer.pop_front();

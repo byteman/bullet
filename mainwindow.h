@@ -60,6 +60,8 @@ private:
     void toInt8U(QString str, INT8U &dest);
     void toInt32U(QString str, quint32 &dest);
     QString formatTime();
+    void checkAll(bool checked);
+    void isAllCheck();
 private slots:
     void onWaveMsg(Device*dev, MsgWaveData data);
     void onNotify(QString msg);
@@ -90,25 +92,28 @@ private slots:
 
     void on_listWidget_itemClicked(QListWidgetItem *item);
 
-    void on_rb1_clicked();
 
-    void on_rb2_clicked();
-
-    void on_rb3_clicked();
-
-    void on_rb4_clicked();
-
-    void on_rb5_clicked();
-
-    void on_rb6_clicked();
-
-    void on_rb7_clicked();
-
-    void on_rb8_clicked();
 
     void on_btnSavePara_clicked();
 
     void on_actionReset_triggered();
+    void on_rb1_clicked(bool checked);
+
+    void on_rball_clicked(bool checked);
+
+    void on_rb2_clicked(bool checked);
+
+    void on_rb3_clicked(bool checked);
+
+    void on_rb4_clicked(bool checked);
+
+    void on_rb5_clicked(bool checked);
+
+    void on_rb6_clicked(bool checked);
+
+    void on_rb7_clicked(bool checked);
+
+    void on_rb8_clicked(bool checked);
 
 protected:
     void timerEvent(QTimerEvent *);

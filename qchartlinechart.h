@@ -33,8 +33,8 @@ private:
 
     // ILineChart interface
 public:
-    virtual void DisplayChannel(int chan);
-    virtual void DisplayAllChannel();
+    virtual void DisplayChannel(int chan=0,bool bshow=true);
+    virtual void DisplayAllChannel(bool bshow);
 };
 
 #endif // QCHARTLINECHART_H

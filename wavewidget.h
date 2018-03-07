@@ -15,8 +15,8 @@ public:
     WaveWidget(QWidget* parent,int num=1);
     //WaveWidget(QCustomPlot* parent,int num=1);
     ~WaveWidget();
-    void DisplayChannel(int chan=0);
-    void DisplayAllChannel();
+    void DisplayChannel(int chan=0,bool bshow=false);
+    void DisplayAllChannel(bool show);
 
     void SetChannel(int num);
     void CloseAll();
