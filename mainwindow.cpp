@@ -339,6 +339,7 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     m_waveWdg->SetData(wvd);
     m_waveWdg->DisplayAllChannel(true);
     checkAll(true);
+
     ui->rball->setChecked(true);
 }
 //显示该设备的波形.
@@ -499,4 +500,14 @@ void MainWindow::isAllCheck()
             ui->rb7->isChecked()&
             ui->rb8->isChecked();
     ui->rball->setChecked(isAll);
+}
+
+void MainWindow::on_btnStart_clicked()
+{
+    dvm.StartAll(true);
+}
+
+void MainWindow::on_btnStop_2_clicked()
+{
+    dvm.StartAll(false);
 }

@@ -77,24 +77,10 @@
           <string>通信参数</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="btnWaveStart">
+          <item row="0" column="2">
+           <widget class="QPushButton" name="btnStart">
             <property name="text">
-             <string>启动</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="btnStop">
-            <property name="text">
-             <string>停止</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="btnReadWave">
-            <property name="text">
-             <string>读取波形</string>
+             <string>开始记录</string>
             </property>
            </widget>
           </item>
@@ -102,6 +88,34 @@
            <widget class="QPushButton" name="btnSaveWave">
             <property name="text">
              <string>保存波形</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="btnWaveStart">
+            <property name="text">
+             <string>启动</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="btnStop_2">
+            <property name="text">
+             <string>停止记录</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="btnReadWave">
+            <property name="text">
+             <string>读取波形</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="btnStop">
+            <property name="text">
+             <string>停止</string>
             </property>
            </widget>
           </item>
@@ -708,7 +722,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>23</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

@@ -29,6 +29,7 @@ public:
     void setSess(ISession *sess);
 
     qint64 SendStartWave(quint16 sess_id);
+    qint64 StartRecWave(quint16 sess_id,bool start);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     void ReadParam();
     void WriteParam(MsgDevicePara &para);

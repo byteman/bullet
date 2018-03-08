@@ -90,6 +90,26 @@ qint64 Device::SendStartWave(quint16 sess_id)
     return 0;
 }
 
+qint64 Device::StartRecWave(quint16 sess_id,bool start)
+{
+    ProtoMessage msg;
+    if(start)
+        msg.head.cmd_id = MSG_START_REC_WAVE;
+    else
+        msg.head.cmd_id = MSG_STOP_REC_WAVE;
+    msg.head.device_id = m_dev_id;
+    msg.head.serial_id = m_serial_id++;
+    msg.head.sesson_id = sess_id;
+    msg.is_ack = false;
+    QByteArray data;
+    msg.toByteArray(data);
+    if(m_sess)
+    {
+        return m_sess->send(data);
+    }
+    return 0;
+}
+
 void Device::checkOnline()
 {
     if(m_timeout > 0)

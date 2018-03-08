@@ -65,6 +65,23 @@ bool DeviceManager::SendAllWave()
     return ok;
 }
 
+bool DeviceManager::StartAll(bool start)
+{
+    bool ok = false;
+    QMapIterator<quint32,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+
+        if(i.value()->StartRecWave(m_session_id++,start) == 0)
+        {
+            ok = false;
+        }
+
+    }
+
+    return ok;
+}
+
 bool DeviceManager::ResetAllDevice(quint8 delay_s)
 {
     bool ok = true;

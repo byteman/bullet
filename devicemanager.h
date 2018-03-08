@@ -18,6 +18,8 @@ public:
     void load(int index, int channel);
     //发送全部设备最近的波形文件
     bool SendAllWave();
+    bool StartAll(bool start);
+
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
     bool ListFiles(quint32 dev_id);
