@@ -18,7 +18,7 @@ public:
     // IGraphicChannel interface
 public:
     virtual void SetDataArray(QVector<double> &values);
-    virtual void AddDataArray(QVector<double> &keys, QVector<double> &values);
+    virtual void AddDataArray(QVector<double> &values);
     virtual void AddData(double key, double value);
     virtual void Display(bool isShow);
     virtual void Clear();

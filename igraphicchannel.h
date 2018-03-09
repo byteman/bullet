@@ -7,7 +7,7 @@ struct IGraphicChannel
 public:
     virtual void SetFilter(IValueFilter* filter);
     virtual void SetDataArray(QVector<double> &values)=0;
-    virtual void AddDataArray(QVector<double> &keys, QVector<double> &values)=0;
+    virtual void AddDataArray(QVector<double> &values)=0;
     virtual void AddData(double key, double value)=0;
     virtual void Display(bool isShow)=0;
     virtual void Clear()=0;

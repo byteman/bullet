@@ -119,6 +119,8 @@ private slots:
 
     void on_btnStop_2_clicked();
 
+
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;

@@ -15,12 +15,24 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
 {
 
     QVector<double> keys;
+    QVector<double> values2;
     keys.reserve(values.size());
     for(int i = 0; i < values.size();i++)
     {
         keys.append(i);
+
     }
-    m_graph->setData(keys,values,true);
+    for(int i = 0; i < values.size();i++)
+    {
+        double v = values[i];
+        if(m_filter!=NULL)
+        {
+            v = m_filter->filter(v);
+        }
+        values2.push_back(v);
+    }
+
+    m_graph->setData(keys,values2,true);
 }
 
 void QCustomPlotChannel::AddData(double key, double value)
@@ -28,9 +40,14 @@ void QCustomPlotChannel::AddData(double key, double value)
 
 }
 
-void QCustomPlotChannel::AddDataArray(QVector<double> &keys, QVector<double> &samples)
+void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
 {
 
+    QVector<double> keys;
+    for(int i = 0; i < samples.size(); i++)
+    {
+        keys.push_back(i);
+    }
     m_graph->addData(keys,samples);
 
 }

@@ -388,8 +388,8 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
-  // m_waveWdg->AppendData(data);
-   //m_waveWdg->DisplayAllChannel();
+   m_waveWdg->AppendData(data);
+   m_waveWdg->DisplayAllChannel(true);
 }
 
 //保存参数.
@@ -504,6 +504,7 @@ void MainWindow::isAllCheck()
 
 void MainWindow::on_btnStart_clicked()
 {
+    qDebug() << "on_btnStart_clicked";
     dvm.StartAll(true);
 }
 

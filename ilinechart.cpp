@@ -16,8 +16,8 @@ void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
 {
     for(int i = 0; i < channels.size();i++)
     {
-        QVector<double>  keys;
-        channels[i]->AddDataArray(keys,samples[i]);
+
+        channels[i]->AddDataArray(samples[i]);
     }
 }
 #if 0

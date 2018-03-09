@@ -35,8 +35,30 @@ void QChartChannel::SetDataArray(QVector<double> &values)
 
 }
 
-void QChartChannel::AddDataArray(QVector<double> &keys, QVector<double> &values)
+void QChartChannel::AddDataArray(QVector<double> &values)
 {
+    m_min = m_max = values[0];
+    double v = 0;
+    //m_filter->Reset();
+    QList<QPointF> points;
+    points.reserve(values.size());
+    for(int i = 0; i < values.size();i++)
+    {
+        v = values[i];
+//        if(m_filter!=NULL)
+//        {
+//            v = m_filter->filter(v);
+//        }
+        points.push_back(QPoint(i,v));
+        if(v < m_min){
+            m_min = v;
+        }
+        if(v > m_max){
+            m_max = v;
+        }
+    }
+    //批量的替换比一个一个的append快多了.
+    m_series->append(points);
 }
 
 void QChartChannel::AddData(double key, double value)

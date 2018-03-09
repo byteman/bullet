@@ -12,7 +12,7 @@ enum MessageID{
    MSG_WRITE_PARAM, //修改设备厂商
    MSG_RESET, //复位设备
    MSG_ENUM_FILES, //枚举设备sd卡内的波形文件.
-   MSG_START_REC_WAVE,
+   MSG_START_REC_WAVE=8,
    MSG_STOP_REC_WAVE,
 };
 typedef quint16 INT16U;

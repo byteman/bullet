@@ -14,7 +14,7 @@ debug{
     message("debug");
     OBJECTS_DIR=debug
 }
-
+DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
         mainwindow.cpp \
     server.cpp \
@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     ilinechart.cpp \
     qcustomchart.cpp \
     qcustomplotchannel.cpp \
-    ifilter.cpp
+    ifilter.cpp \
+    shiftfilter.cpp
 
 HEADERS  += mainwindow.h \
     server.h \
@@ -60,13 +61,16 @@ HEADERS  += mainwindow.h \
     qchartlinechart.h \
     qcustomchart.h \
     qcustomplotchannel.h \
-    ifilter.h
+    ifilter.h \
+    shiftfilter.h
 
 FORMS    += mainwindow.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd
-
+LIBS += -lOpengl32 \
+                -lglu32 \
+                -lglut
 RESOURCES += \
     img.qrc
 RC_FILE=icon.rc

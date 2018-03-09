@@ -2,13 +2,14 @@
 #include <QValueAxis>
 #include "qchartlinechart.h"
 #include "qcustomchart.h"
-#include "ifilter.h"
+#include "shiftfilter.h"
 WaveWidget::WaveWidget(QWidget *parent, int num)
 {
 
-    m_chart = new QChartLineChart(parent,num);
-    m_chart->SetFilter(new IValueFilter(8));
-    //m_chart = new QCustomChart(parent,num);
+    //m_chart = new QChartLineChart(parent,num);
+
+    m_chart = new QCustomChart((QCustomPlot*)parent,num);
+    m_chart->SetFilter(new ShiftFilter(6));
 
 }
 //WaveWidget::WaveWidget(QCustomPlot* parent,int num)

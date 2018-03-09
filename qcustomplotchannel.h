@@ -8,7 +8,7 @@ class QCustomPlotChannel:public IGraphicChannel
 public:
     QCustomPlotChannel(int index,QCPGraph* graph);
     virtual void SetDataArray(QVector<double> &values);
-    virtual void AddDataArray(QVector<double> &keys, QVector<double> &values);
+    virtual void AddDataArray(QVector<double> &values);
     virtual void AddData(double key, double value);
     virtual void Display(bool isShow);
     virtual void Clear();

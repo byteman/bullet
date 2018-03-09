@@ -13,7 +13,10 @@ private:
     // ILineChart interface
     void SetChannel(int num);
 public:
-    virtual void DisplayChannel(int chan);
+    virtual void DisplayChannel(int chan=0,bool bshow=true);
+    virtual void DisplayAllChannel(bool show);
+    // ILineChart interface
+
 };
 
 #endif // QCUSTOMCHART_H
