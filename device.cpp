@@ -239,9 +239,9 @@ QString Device::GetFileName()
 }
 void Device::sendProgress(int sample_start, int sample_total)
 {
-    emit Progress(this,QString("%1").arg(sample_start*100/sample_total));
+    emit Progress(this,QString("%1").arg(sample_start*100/sample_total)+"%");
 }
-void Device::ProcessWave(QByteArray &data)
+void Device::ProcessWave(int index,QByteArray &data)
 {
 
     //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
@@ -251,6 +251,10 @@ void Device::ProcessWave(QByteArray &data)
     MsgWaveData wvd;
     wvd.channels.reserve(8);
     wvd.channels.fill(cda,8);
+    if(index == 0)
+    {
+        wvd.m_first = true;
+    }
     for(int i = 0 ; i < sample_nr; i++)
     {
         for(int j = 0; j < 8; j++)
@@ -291,7 +295,7 @@ void Device::SaveWave(ProtoMessage &msg)
         QString fname = GetFileName();
         qDebug() << "create file " << fname;
         m_file = new WaveFile(fname);
-        sendProgress(sample_start, sample_total);
+
     }
     if(m_file!=NULL)
     {
@@ -299,7 +303,7 @@ void Device::SaveWave(ProtoMessage &msg)
         qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
         QByteArray data = msg.data.mid(12, nsize);
         m_file->write(data);
-        ProcessWave(data);
+        ProcessWave(sample_start, data);
 
     }
     if( (sample_start + sample_num) == sample_total)
@@ -308,6 +312,10 @@ void Device::SaveWave(ProtoMessage &msg)
         m_file->close();
 
     }
+    else{
+        sendProgress(sample_start, sample_total);
+    }
+
 #else
     int nsize = msg.data.size() - 12;
 

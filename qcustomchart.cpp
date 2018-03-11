@@ -40,3 +40,12 @@ void QCustomChart::DisplayAllChannel(bool show)
     m_plot->replot();
 
 }
+
+
+void QCustomChart::Clear()
+{
+    ILineChart::Clear();
+
+    m_plot->replot();
+
+}

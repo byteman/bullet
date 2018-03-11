@@ -339,6 +339,7 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     m_waveWdg->SetData(wvd);
     m_waveWdg->DisplayAllChannel(true);
     checkAll(true);
+    ui->statusBar->showMessage(QString("count=%1").arg( wvd.channels[0].size()));
 
     ui->rball->setChecked(true);
 }
@@ -388,6 +389,10 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
+   if(data.m_first)
+   {
+       m_waveWdg->Clear();
+   }
    m_waveWdg->AppendData(data);
    m_waveWdg->DisplayAllChannel(true);
 }

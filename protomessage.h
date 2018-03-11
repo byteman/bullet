@@ -255,5 +255,9 @@ struct MsgWaveData:public ProtoMessage{
   QVector<ChannelData> channels; //一个设备包含n个通道的数据.
   QString m_dev_serial;//设备唯一序列号
   bool m_first; //是否是某次采集数据的首包数据.
+  MsgWaveData()
+  {
+      m_first = false;
+  }
 };
 #endif // PROTOMESSAGE_H

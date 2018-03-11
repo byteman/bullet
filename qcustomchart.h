@@ -17,6 +17,10 @@ public:
     virtual void DisplayAllChannel(bool show);
     // ILineChart interface
 
+
+    // ILineChart interface
+public:
+    virtual void Clear();
 };
 
 #endif // QCUSTOMCHART_H
