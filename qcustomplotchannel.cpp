@@ -44,13 +44,19 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
 {
 
     QVector<double> keys;
-
+    QVector<double> values;
     int index = m_graph->dataCount();
     for(int i = 0; i < samples.size(); i++)
     {
         keys.push_back(index++);
+        if(m_filter!=NULL)
+        {
+            values.push_back(m_filter->filter(samples[i]));
+        }else{
+            values.push_back(samples[i]);
+        }
     }
-    m_graph->addData(keys,samples);
+    m_graph->addData(keys,values);
 
 }
 

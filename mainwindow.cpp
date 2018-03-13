@@ -391,7 +391,7 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
    if(data.m_first)
    {
-       m_waveWdg->Clear();
+       //m_waveWdg->Clear();
    }
    m_waveWdg->AppendData(data);
    m_waveWdg->DisplayAllChannel(true);

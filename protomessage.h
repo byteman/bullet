@@ -178,6 +178,10 @@ public:
         }
         output.append(sum);
     }
+    void clear()
+    {
+        data.clear();
+    }
     bool getData(void* dest, int size)
     {
         int sz = data.size();

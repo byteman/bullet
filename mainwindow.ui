@@ -87,7 +87,7 @@
           <item row="1" column="1">
            <widget class="QPushButton" name="btnSaveWave">
             <property name="text">
-             <string>保存波形</string>
+             <string>清除波形</string>
             </property>
            </widget>
           </item>
@@ -722,7 +722,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>17</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

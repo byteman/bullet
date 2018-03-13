@@ -198,7 +198,9 @@ void DeviceManager::Message(SessMessage msg)
 {
     ProtoMessage input_msg;
     ProtoMessage output_msg;
-    if(parser.parseData(msg.getData(), input_msg))
+    parser.pushData(msg.getData());
+
+    while(parser.parseData(input_msg))
     {
         quint32 dev_id = input_msg.head.device_id;
         if(dev_map.contains(dev_id))
@@ -217,6 +219,7 @@ void DeviceManager::Message(SessMessage msg)
                 msg.getSession()->send(arr);
             }
         }
+        input_msg.clear();
 
     }
 

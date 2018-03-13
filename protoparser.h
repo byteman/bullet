@@ -9,7 +9,12 @@ class ProtoParser:public QObject
 public:
     ProtoParser();
     bool parseData(QByteArray &data,ProtoMessage& prot_msg);
+    bool parseData(ProtoMessage& prot_msg);
+    void pushData(QByteArray &data);
+private:
+    QByteArray m_data;
 
+    bool checkSum(QByteArray &data, int size);
 };
 
 #endif // PROTOPARSER_H

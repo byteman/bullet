@@ -284,7 +284,7 @@ void Device::SaveWave(ProtoMessage &msg)
 
 #if 1
      qDebug() << "ssid" << msg.head.sesson_id << " cur_id" << m_sess_id;
-    if(msg.head.sesson_id != m_sess_id)
+    if(msg.head.sesson_id != m_sess_id && sample_total != 0)
     {
         m_sess_id = msg.head.sesson_id ;
         if(m_file!=NULL)
@@ -294,27 +294,29 @@ void Device::SaveWave(ProtoMessage &msg)
         }
         QString fname = GetFileName();
         qDebug() << "create file " << fname;
+
         m_file = new WaveFile(fname);
 
     }
+    int nsize = msg.data.size() - 12;
+    qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
+    QByteArray wvData = msg.data.mid(12, nsize);
+
     if(m_file!=NULL)
     {
-        int nsize = msg.data.size() - 12;
-        qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
-        QByteArray data = msg.data.mid(12, nsize);
-        m_file->write(data);
-        ProcessWave(sample_start, data);
+        m_file->write(wvData);
+        if( (sample_start + sample_num) == sample_total)
+        {
+            emit Progress(this,"同步完成");
+            m_file->close();
+            m_file = NULL;
+        }
+    }
 
-    }
-    if( (sample_start + sample_num) == sample_total)
-    {
-        emit Progress(this,"同步完成");
-        m_file->close();
 
-    }
-    else{
-        sendProgress(sample_start, sample_total);
-    }
+    sendProgress(sample_start, sample_total);
+
+    ProcessWave(sample_start, wvData);
 
 #else
     int nsize = msg.data.size() - 12;
