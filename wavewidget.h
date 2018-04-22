@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVector>
 #include "protomessage.h"
-#include "qwtchannel.h"
+//#include "qwtchannel.h"
 #include "ilinechart.h"
 
 class WaveWidget:public QObject
@@ -12,12 +12,12 @@ class WaveWidget:public QObject
     Q_OBJECT
 public:
 
-    WaveWidget(QWidget* parent,int num=1);
+    WaveWidget(QWidget* parent,int num=1,int shift=0);
     //WaveWidget(QCustomPlot* parent,int num=1);
     ~WaveWidget();
     void DisplayChannel(int chan=0,bool bshow=false);
     void DisplayAllChannel(bool show);
-
+    void Display();
     void SetChannel(int num);
     void CloseAll();
     void Clear();

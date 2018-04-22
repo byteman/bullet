@@ -5,6 +5,7 @@
 #include "protomessage.h"
 #include "wavefile.h"
 #include "session.h"
+#include <QTimer>
 class Device:public QObject
 {
     Q_OBJECT
@@ -27,7 +28,7 @@ public:
 
     ISession *sess() const;
     void setSess(ISession *sess);
-
+    void setHostPort(QHostAddress host,quint16 port);
     qint64 SendStartWave(quint16 sess_id);
     qint64 StartRecWave(quint16 sess_id,bool start);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
@@ -42,8 +43,12 @@ private:
     QString m_name;
     QString m_station;
     QString m_dir;
+    QHostAddress m_host;
+    quint16 m_port;
+    bool m_start_send;
     bool m_online; //设备是否在线
     int  m_timeout; //在线超时定时器.
+    int  m_packet_count; //接收包计数器。
     quint16 m_sess_id; //波形回应中的当前会话.
     WaveFile *m_file;
     ISession* m_sess;
@@ -52,6 +57,8 @@ private:
     void DevNotify(QString msg);
     void sendProgress(int sample_start, int sample_total);
     void ProcessWave(int index, QByteArray &data);
+    qint64 SendData(QByteArray &data);
+    QTimer timer;
 signals:
     void showWave(Device* dev, MsgWaveData wave);
     void Progress(Device* dev,QString progress);
@@ -59,6 +66,8 @@ signals:
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);
     void EnumFiles(Device* dev,MsgFileList files);
+private slots:
+    void timeout();
 };
 
 #endif // DEVICE_H

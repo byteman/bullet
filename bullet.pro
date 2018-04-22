@@ -6,7 +6,7 @@
 
 QT       += core  gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport  charts
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = bullet
 TEMPLATE = app
@@ -14,10 +14,12 @@ debug{
     message("debug");
     OBJECTS_DIR=debug
 }
+INCLUDEPATH+=./ext/
+LIBS+=-L./ext/lib -lPocoNetd -lPocoFoundationd
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
         mainwindow.cpp \
-    server.cpp \
+    tcpserver.cpp \
     device.cpp \
     devicemanager.cpp \
     tcpsession.cpp \
@@ -30,16 +32,18 @@ SOURCES += main.cpp\
     wavewidget.cpp \
     qcustomplot.cpp \
     igraphicchannel.cpp \
-    qchartchannel.cpp \
-    qchartlinechart.cpp \
     ilinechart.cpp \
     qcustomchart.cpp \
     qcustomplotchannel.cpp \
     ifilter.cpp \
-    shiftfilter.cpp
+    shiftfilter.cpp \
+    utils.cpp \
+    gpserver.cpp \
+    gpsession.cpp \
+    mysocket.cpp
 
 HEADERS  += mainwindow.h \
-    server.h \
+    tcpserver.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
@@ -53,24 +57,24 @@ HEADERS  += mainwindow.h \
     udpserver.h \
     udpsession.h \
     wavewidget.h \
-    qwtchannel.h \
     qcustomplot.h \
     igraphicchannel.h \
-    qchartchannel.h \
     ilinechart.h \
-    qchartlinechart.h \
     qcustomchart.h \
     qcustomplotchannel.h \
     ifilter.h \
-    shiftfilter.h
+    shiftfilter.h \
+    utils.h \
+    gpserver.h \
+    gpsession.h \
+    mysocket.h
 
 FORMS    += mainwindow.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd
 LIBS += -lOpengl32 \
-                -lglu32 \
-                -lglut
+                -lglu32
 RESOURCES += \
     img.qrc
 RC_FILE=icon.rc

@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->startTimer(5000);
-    socket.bind(9999);
+    //socket.bind(9999);
     connect(&socket,SIGNAL(readyRead()),this,SLOT(readPendingDatagrams()));
     timer.setInterval(50);
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));

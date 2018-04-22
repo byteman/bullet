@@ -1,15 +1,15 @@
 #include "wavewidget.h"
-#include <QValueAxis>
-#include "qchartlinechart.h"
+//#include <QValueAxis>
+//#include "qchartlinechart.h"
 #include "qcustomchart.h"
 #include "shiftfilter.h"
-WaveWidget::WaveWidget(QWidget *parent, int num)
+WaveWidget::WaveWidget(QWidget *parent, int num,int shift)
 {
 
     //m_chart = new QChartLineChart(parent,num);
 
     m_chart = new QCustomChart((QCustomPlot*)parent,num);
-    m_chart->SetFilter(new ShiftFilter(6));
+    m_chart->SetFilter(new ShiftFilter(shift));
 
 }
 //WaveWidget::WaveWidget(QCustomPlot* parent,int num)
@@ -33,6 +33,11 @@ void WaveWidget::AppendData(MsgWaveData &wvd)
 void WaveWidget::DisplayAllChannel(bool show)
 {
     m_chart->DisplayAllChannel(show);
+}
+
+void WaveWidget::Display()
+{
+    m_chart->Display();
 }
 
 void WaveWidget::DisplayChannel(int chan,bool bshow)

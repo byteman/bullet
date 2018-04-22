@@ -8,6 +8,7 @@ struct ILineChart{
     virtual void InitChannel(QWidget* parent,int num);
     virtual void DisplayChannel(int chan=0,bool bshow=true);
     virtual void DisplayAllChannel(bool bshow);
+    virtual void Display();
     virtual void SetDataArray(QVector<QVector<double>> &samples);
     virtual void AppendDataArray(QVector<QVector<double>> &samples);
     virtual void CloseAll();

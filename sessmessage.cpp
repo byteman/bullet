@@ -37,4 +37,24 @@ void SessMessage::setData(const QByteArray &data)
 {
     m_data = data;
 }
+QHostAddress SessMessage::getHost() const
+{
+    return m_host;
+}
+
+void SessMessage::setHost(const QHostAddress &host)
+{
+    m_host = host;
+}
+quint16 SessMessage::getPort() const
+{
+    return m_port;
+}
+
+void SessMessage::setPort(const quint16 &port)
+{
+    m_port = port;
+}
+
+
 

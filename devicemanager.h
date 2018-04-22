@@ -42,6 +42,7 @@ public slots:
 
 private:
     int m_dev_num;
+
     QMap<quint32,QString> id_name_map;
     QMap<quint32,Device*> dev_map;
     QStringList names;

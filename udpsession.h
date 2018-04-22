@@ -10,6 +10,7 @@ public:
     virtual QString id();
     void setHostPort(QHostAddress addr, quint16 port);
     virtual qint64 send(QByteArray &data);
+    virtual qint64 send(QHostAddress host,quint16 port,QByteArray &data);
 private:
     QUdpSocket* m_socket;
     QHostAddress m_host;

@@ -52,11 +52,6 @@
            <string>设备列表</string>
           </property>
          </column>
-         <column>
-          <property name="text">
-           <string>进度</string>
-          </property>
-         </column>
         </widget>
        </item>
        <item>
@@ -77,17 +72,10 @@
           <string>通信参数</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="2">
+          <item row="0" column="1">
            <widget class="QPushButton" name="btnStart">
             <property name="text">
              <string>开始记录</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="btnSaveWave">
-            <property name="text">
-             <string>清除波形</string>
             </property>
            </widget>
           </item>
@@ -98,17 +86,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="1">
            <widget class="QPushButton" name="btnStop_2">
             <property name="text">
              <string>停止记录</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="btnReadWave">
-            <property name="text">
-             <string>读取波形</string>
             </property>
            </widget>
           </item>
@@ -163,6 +144,10 @@
            </item>
            <item>
             <widget class="QCheckBox" name="rb1">
+             <property name="styleSheet">
+              <string notr="true">border-color: rgb(0, 170, 255);
+border-bottom:2px;</string>
+             </property>
              <property name="text">
               <string>通道1</string>
              </property>
@@ -710,6 +695,57 @@
         <item>
          <widget class="QTextEdit" name="txtLog"/>
         </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_8">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <widget class="QPushButton" name="pushButton">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>121</width>
+             <height>51</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>清空</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>10</y>
+             <width>121</width>
+             <height>51</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>暂停</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -722,7 +758,7 @@
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

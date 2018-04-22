@@ -11,6 +11,11 @@ void ILineChart::DisplayAllChannel(bool show)
 
 }
 
+void ILineChart::Display()
+{
+
+}
+
 
 void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
 {
@@ -115,5 +120,5 @@ void ILineChart::SetFilter(IValueFilter *filter)
 
 double ILineChart::filter(double value)
 {
-
+    return 0;
 }

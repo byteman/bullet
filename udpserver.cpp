@@ -3,7 +3,7 @@
 UdpServer::UdpServer()
 {
     udp_sess = new UdpSession(&socket);
-    msg.setSession(udp_sess);
+
 }
 
 bool UdpServer::start(int port)
@@ -16,6 +16,8 @@ bool UdpServer::start(int port)
 
     connect(&socket, SIGNAL(readyRead()),
                this, SLOT(readPendingDatagrams()));
+    connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
+    timer.start(1000);
 
 }
 
@@ -37,10 +39,21 @@ void UdpServer::readPendingDatagrams()
         socket.readDatagram(datagram.data(), datagram.size(),
                                 &sender, &senderPort);
 
-        udp_sess->setHostPort(sender,senderPort);
+        SessMessage msg;
+        msg.setSession(udp_sess);
         msg.setData(datagram);
+        msg.setHost(sender);
+        msg.setPort(senderPort);
+        //qDebug() << "sender:" << sender.toString() + " port:" << senderPort << datagram.toHex();
 
         emit Message(msg);
 
     }
 }
+
+void UdpServer::timeout()
+{
+    qDebug() << "timeout";
+    readPendingDatagrams();
+}
+

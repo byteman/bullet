@@ -197,15 +197,26 @@ void DeviceManager::onWriteParam(Device *dev, bool result)
 void DeviceManager::Message(SessMessage msg)
 {
     ProtoMessage input_msg;
+    ProtoMessage temp_msg;
     ProtoMessage output_msg;
     parser.pushData(msg.getData());
 
+    if(parser.parseData(msg.getData(),temp_msg))
+    {
+        quint32 dev_id = temp_msg.head.device_id;
+        if(dev_map.contains(dev_id))
+        {
+            //dev_map[dev_id]->setSess(msg.getSession());
+            dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
+        }
+    }
     while(parser.parseData(input_msg))
     {
         quint32 dev_id = input_msg.head.device_id;
         if(dev_map.contains(dev_id))
         {
             dev_map[dev_id]->setSess(msg.getSession());
+            //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
             dev_map[dev_id]->onMessage(input_msg,output_msg);
 
             if(!input_msg.is_ack)

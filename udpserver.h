@@ -4,6 +4,7 @@
 #include <QUdpSocket>
 #include "sessmessage.h"
 #include "udpsession.h"
+#include <QTimer>
 class UdpServer:public QObject
 {
     Q_OBJECT
@@ -17,10 +18,12 @@ signals:
     void Message(SessMessage msg);
 protected slots:
     void readPendingDatagrams();
+    void timeout();
 private:
     QUdpSocket  socket;
     UdpSession* udp_sess;
-    SessMessage msg;
+    QTimer timer;
+
 };
 
 #endif // UDPSERVER_H

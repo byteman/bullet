@@ -17,3 +17,8 @@ qint64 TcpSession::send(QByteArray &data)
     return data.size();
 }
 
+qint64 TcpSession::send(QHostAddress, quint16 port, QByteArray &data)
+{
+    return 0;
+}
+

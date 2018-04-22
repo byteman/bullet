@@ -1,3 +1,7 @@
+#include "gpserver.h"
+
+#include "qcustomplot.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QThread>
@@ -6,7 +10,7 @@
 void MainWindow::loadDeviceUI()
 {
 
-
+    pause = false;
     QList<Device*> devices;
     ui->treeWidget->clear();
     ui->treeWidget->setIconSize(QSize(48,48));
@@ -22,6 +26,10 @@ void MainWindow::loadDeviceUI()
         item->setIcon(0,icon_device[1]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
+        if(i == 0){
+            ui->treeWidget->setCurrentItem(item);
+            m_cur_dev_id = devices[i]->id();
+        }
     }
 
 }
@@ -32,6 +40,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cur_dev_id = 0;
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
+
+    QSettings config("bullet.ini", QSettings::IniFormat);
+
+
+    m_debug_bytes = config.value("/device/debug",20).toInt();
+    m_refresh_count = config.value("/device/refresh",20).toInt();
+
     icon_device[0].addFile(":image/online.png");
     icon_device[1].addFile(":image/offline.png");
     icon_channel.addFile(":image/channel.png");
@@ -40,10 +55,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->btnStop->setEnabled(false);
     setupRealtimeDataDemo(ui->plot);
-    srv.setParent(this);
-    connect(&srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
-    connect(&srv,SIGNAL(Message(SessMessage)),&dvm
+    checkAll(true);
+    ui->rball->setChecked(true);
+    //srv->setParent(this);
+//    connect(&srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
+//    connect(&srv,SIGNAL(Message(SessMessage)),&dvm
+//            ,SLOT(Message(SessMessage)));
+
+    srv = new GPServer();
+    connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
+    connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
+
+    connect(&dvm,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
     connect(&dvm,SIGNAL(DevOffline(Device*)),this,SLOT(DevOffline(Device*)));
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
     connect(&dvm,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
@@ -80,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_waveWdg = new WaveWidget(ui->plot,8);
 
     this->startTimer(1000);
+
     qDebug() <<"MainWindow thread id=" << thread();
 }
 
@@ -87,7 +112,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    srv.stop();
+    srv->stop();
     delete ui;
 }
 
@@ -110,7 +135,9 @@ QString MainWindow::FormatHex(QByteArray& data)
 }
 void MainWindow::Message(SessMessage s)
 {
-    ui->txtLog->append(FormatHex(s.getData()));
+    if(pause)return;
+    if(s.getData().size() <   m_debug_bytes)
+        ui->txtLog->append(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
 }
 
 void MainWindow::onEnumFiles(Device *dev, MsgFileList files)
@@ -181,7 +208,7 @@ void MainWindow::onWaveProgress(Device *dev, QString progress)
 
 void MainWindow::on_btnStop_clicked()
 {
-    if(srv.stop()){
+    if(srv->stop()){
         ui->btnWaveStart->setEnabled(true);
         ui->btnStop->setEnabled(false);
     }
@@ -212,7 +239,7 @@ QTreeWidgetItem* MainWindow::findItemById(quint32 id)
 
 void MainWindow::onNotify(QString msg)
 {
-    ui->txtLog->append(msg);
+    ui->txtLog->append("send--> "+ msg);
 }
 
 void MainWindow::on_menu_click(bool)
@@ -293,7 +320,7 @@ void MainWindow::on_btnSaveWave_clicked()
 
 void MainWindow::on_btnWaveStart_clicked()
 {
-    if(srv.start(8888))
+    if(srv->start(8888))
     {
         ui->btnWaveStart->setEnabled(false);
         ui->btnStop->setEnabled(true);
@@ -312,6 +339,17 @@ void MainWindow::listFiles(quint32 dev_id)
 }
 void MainWindow::readParam(quint32 dev_id)
 {
+    ui->edtDevId->clear();
+    ui->edtDevIp->clear();
+    ui->edtGateway->clear();
+    ui->edtNetmask->clear();
+    ui->edtPassword->clear();
+    ui->edtSSID->clear();
+    ui->edtTime->clear();
+    ui->edtWetDown->clear();
+    ui->edtWetUp->clear();
+    ui->edtServerIp->clear();
+    ui->edtServerPort->clear();
     dvm.ReadParam(dev_id);
 }
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
@@ -320,6 +358,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     listFiles(dev_id);
     readParam(dev_id);
     dvm.ListFiles(dev_id);
+    m_waveWdg->Clear();
 }
 
 void MainWindow::on_actionStation1_triggered()
@@ -337,7 +376,10 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     MsgWaveData wvd;
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
+
     m_waveWdg->DisplayAllChannel(true);
+
+
     checkAll(true);
     ui->statusBar->showMessage(QString("count=%1").arg( wvd.channels[0].size()));
 
@@ -393,8 +435,19 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
    {
        //m_waveWdg->Clear();
    }
+   if(dev->id() != m_cur_dev_id)
+   {
+       return;
+   }
    m_waveWdg->AppendData(data);
-   m_waveWdg->DisplayAllChannel(true);
+   static int count = 0;
+   if( (count++ % m_refresh_count) == 0)
+   {
+
+       m_waveWdg->Display();
+
+   }
+
 }
 
 //保存参数.
@@ -510,10 +563,37 @@ void MainWindow::isAllCheck()
 void MainWindow::on_btnStart_clicked()
 {
     qDebug() << "on_btnStart_clicked";
+    m_waveWdg->Clear();
     dvm.StartAll(true);
 }
 
 void MainWindow::on_btnStop_2_clicked()
 {
     dvm.StartAll(false);
+    QTreeWidgetItem* item = ui->treeWidget->currentItem();
+    if(item!=NULL)
+    {
+
+        quint32 dev_id = item->data(0,Qt::UserRole).toInt();
+        listFiles(dev_id);
+    }
+
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    ui->txtLog->clear();
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+
+    if(pause){
+        ui->pushButton_2->setText("暂停");
+        pause = false;
+    }else{
+        ui->pushButton_2->setText("继续");
+        pause = true;
+    }
+
 }

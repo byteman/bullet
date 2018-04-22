@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QMainWindow>
 #include <QTimer>
 #include <QTime>
@@ -7,17 +8,19 @@
 #include <math.h>
 #include <QTcpServer>
 #include <QListWidgetItem>
-#include "server.h"
+#include "tcpserver.h"
 #include "udpserver.h"
 #include "sessmessage.h"
 #include "devicemanager.h"
 #include "wavewidget.h"
 #include "protomessage.h"
 
+
 namespace Ui {
 class MainWindow;
 }
-
+class GPServer;
+class QCustomPlot;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -35,7 +38,8 @@ private:
     QVector<double> ydata;
     QTimer updateTimer;
     QString demoName;
-    UdpServer srv;
+    //UdpServer srv;
+    GPServer *srv;
     DeviceManager dvm;
     QIcon icon_device[2];
     QIcon icon_channel;
@@ -43,7 +47,8 @@ private:
     QIcon icon_file;
     QMenu* menu;
     double getData(double inteval);
-
+    int m_debug_bytes;
+    int m_refresh_count;
 
     QString FormatHex(QByteArray &data);
     void loadDeviceUI();
@@ -121,11 +126,15 @@ private slots:
 
 
 
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;
     WaveWidget *m_waveWdg;
-
+    bool pause ;
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);
