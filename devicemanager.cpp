@@ -48,14 +48,14 @@ void DeviceManager::stop()
     }
 }
 
-bool DeviceManager::SendAllWave()
+bool DeviceManager::SendAllWave(bool start)
 {
     bool ok = false;
     QMapIterator<quint32,Device*> i(dev_map);
     while (i.hasNext()) {
         i.next();
 
-        if(i.value()->SendStartWave(m_session_id++) == 0)
+        if(i.value()->SendStartWave(m_session_id++,start) == 0)
         {
             ok = false;
         }
@@ -63,6 +63,11 @@ bool DeviceManager::SendAllWave()
     }
 
     return ok;
+}
+
+bool DeviceManager::SendWave(quint8 dev_id,bool start)
+{
+    return dev_map[dev_id]->SendStartWave(m_session_id++,start)!=0;
 }
 
 bool DeviceManager::StartAll(bool start)

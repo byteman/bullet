@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     icon_file.addFile(":image/channel.png");
 
     ui->btnStop->setEnabled(false);
-    setupRealtimeDataDemo(ui->plot);
+
     checkAll(true);
     ui->rball->setChecked(true);
     //srv->setParent(this);
@@ -95,6 +95,10 @@ MainWindow::MainWindow(QWidget *parent) :
     menu->addAction(action);
 
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_list_files_menu_click(bool)));
+    action = new QAction("同步设备文件",this);
+    menu->addAction(action);
+
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_download_wave(bool)));
 
 
     dvm.start();
@@ -115,19 +119,6 @@ MainWindow::~MainWindow()
     srv->stop();
     delete ui;
 }
-
-
-
-void MainWindow::setupRealtimeDataDemo(QCustomPlot* plot)
-{
-
-
-    demoName = "测力波形";
-
-
-
-}
-
 
 QString MainWindow::FormatHex(QByteArray& data)
 {
@@ -216,7 +207,7 @@ void MainWindow::on_btnStop_clicked()
 //发送读取波形命令
 void MainWindow::on_btnReadWave_clicked()
 {
-    dvm.SendAllWave();
+    dvm.SendAllWave(true);
 }
 QTreeWidgetItem* MainWindow::findItemById(quint32 id)
 {
@@ -262,7 +253,11 @@ void MainWindow::on_list_files_menu_click(bool)
     if(m_cur_dev_id!=0)
         dvm.ListFiles(m_cur_dev_id);
 }
-
+void MainWindow::on_download_wave(bool)
+{
+    if(m_cur_dev_id!=0)
+        dvm.SendWave(m_cur_dev_id,true);
+}
 void MainWindow::DevOffline(Device *dev)
 {
     QTreeWidgetItem* item = findItemById(dev->id());
@@ -596,4 +591,14 @@ void MainWindow::on_pushButton_2_clicked()
         pause = true;
     }
 
+}
+
+void MainWindow::on_btnStartSend_clicked()
+{
+    dvm.SendAllWave(true);
+}
+
+void MainWindow::on_btnStopRead_clicked()
+{
+    dvm.SendAllWave(false);
 }

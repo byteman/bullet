@@ -130,6 +130,10 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_btnStartSend_clicked();
+
+    void on_btnStopRead_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;
@@ -142,6 +146,7 @@ protected slots:
     void on_reset_menu_click(bool);
     void on_write_menu_click(bool);
     void on_list_files_menu_click(bool);
+    void on_download_wave(bool);
 };
 
 #endif // MAINWINDOW_H

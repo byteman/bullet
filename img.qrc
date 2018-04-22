@@ -4,5 +4,6 @@
         <file>image/dir.png</file>
         <file>image/offline.png</file>
         <file>image/online.png</file>
+        <file>csv.txt</file>
     </qresource>
 </RCC>

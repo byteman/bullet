@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     utils.cpp \
     gpserver.cpp \
     gpsession.cpp \
-    mysocket.cpp
+    mysocket.cpp \
+    csvfile.cpp
 
 HEADERS  += mainwindow.h \
     tcpserver.h \
@@ -67,7 +68,8 @@ HEADERS  += mainwindow.h \
     utils.h \
     gpserver.h \
     gpsession.h \
-    mysocket.h
+    mysocket.h \
+    csvfile.h
 
 FORMS    += mainwindow.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012

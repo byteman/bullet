@@ -17,7 +17,8 @@ public:
     void stop();
     void load(int index, int channel);
     //发送全部设备最近的波形文件
-    bool SendAllWave();
+    bool SendAllWave(bool start);
+    bool SendWave(quint8 dev_id,bool start);
     bool StartAll(bool start);
 
     bool ResetAllDevice(quint8 delay_s);

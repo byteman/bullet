@@ -71,7 +71,7 @@ void Device::WriteParam(MsgDevicePara &para)
    WriteCmd(MSG_WRITE_PARAM,data);
 }
 
-qint64 Device::SendStartWave(quint16 sess_id)
+qint64 Device::SendStartWave(quint16 sess_id,bool start)
 {
     ProtoMessage msg;
     msg.head.cmd_id = MSG_START_WAVE;
@@ -81,6 +81,10 @@ qint64 Device::SendStartWave(quint16 sess_id)
     msg.is_ack = false;
     QByteArray data;
     msg.toByteArray(data);
+    if(start)
+        OpenFile();
+    else
+        CloseFile();
     return SendData(data);
 
 }
@@ -109,6 +113,23 @@ void Device::timeout()
 
     }
 }
+void Device::OpenFile()
+{
+    if(m_file==NULL){
+        QString fname = GetFileName();
+        qDebug() << "create file " << fname;
+        m_file = new CSVFile(fname);
+    }
+}
+void Device::CloseFile()
+{
+    if(m_file!=NULL)
+    {
+        m_file->close();
+        delete m_file;
+        m_file = NULL;
+    }
+}
 qint64 Device::StartRecWave(quint16 sess_id,bool start)
 {
     ProtoMessage msg;
@@ -116,23 +137,14 @@ qint64 Device::StartRecWave(quint16 sess_id,bool start)
     {
         msg.head.cmd_id = MSG_START_REC_WAVE;
 
-        if(m_file==NULL){
-            QString fname = GetFileName();
-            qDebug() << "create file " << fname;
-            m_file = new WaveFile(fname);
-        }
+
         m_packet_count = 3;
         timer.start(1000);
     }
     else
     {
         msg.head.cmd_id = MSG_STOP_REC_WAVE;
-        if(m_file!=NULL)
-        {
-            m_file->close();
-            delete m_file;
-            m_file = NULL;
-        }
+        CloseFile();
         timer.stop();
 
     }
@@ -276,7 +288,7 @@ QString Device::GetFileName()
 {
     QString dt  = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
     QString dir = CreateDir();
-    QString file = QString("%1/%2.wave").arg(dir).arg(dt);
+    QString file = QString("%1/%2.csv").arg(dir).arg(dt);
     return file;
 }
 void Device::sendProgress(int sample_start, int sample_total)
@@ -337,8 +349,12 @@ void Device::SaveWave(ProtoMessage &msg)
     if(m_file!=NULL)
     {
         m_file->write(wvData);
+        if( (sample_start + sample_num) == sample_total)
+        {
+            emit Progress(this,"同步完成");
+            CloseFile();
+        }
     }
-
 
     sendProgress(sample_start, sample_total);
 
@@ -358,6 +374,11 @@ void Device::setStation(const QString &station)
 bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
 {
     QString filename = CreateDir() + "/" + file;
+
+    CSVFile csv;
+    return csv.LoadWaveFile(filename,wvd);
+
+#if 0
     QFile filein(filename);
     if(!filein.exists()) return false;
     filein.open(QIODevice::ReadOnly);
@@ -384,7 +405,7 @@ bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
         }
     }
     return true;
-
+#endif
 }
 void Device::listWaveFiles(QStringList &files)
 {
