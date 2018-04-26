@@ -128,7 +128,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -711,90 +711,6 @@ border-bottom:2px;</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5">
-       <attribute name="title">
-        <string>标定</string>
-       </attribute>
-       <widget class="QGroupBox" name="groupBox_9">
-        <property name="geometry">
-         <rect>
-          <x>120</x>
-          <y>120</y>
-          <width>541</width>
-          <height>341</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>GroupBox</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>通道号</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1" colspan="2">
-          <widget class="QComboBox" name="comboBox"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>通道AD</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="QLineEdit" name="lineEdit"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>通道重量</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1" colspan="2">
-          <widget class="QLineEdit" name="lineEdit_2"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1" colspan="2">
-          <widget class="QLineEdit" name="lineEdit_3"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0" colspan="2">
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>PushButton</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QPushButton" name="pushButton_4">
-           <property name="text">
-            <string>PushButton</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1" colspan="2">
-          <widget class="QLineEdit" name="lineEdit_4"/>
-         </item>
-        </layout>
-       </widget>
-      </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
         <string>设备文件列表</string>
@@ -824,7 +740,7 @@ border-bottom:2px;</string>
           <property name="title">
            <string/>
           </property>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="btnClear">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -843,7 +759,7 @@ border-bottom:2px;</string>
             <string>清空</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="btnPause">
            <property name="geometry">
             <rect>
              <x>150</x>
@@ -866,6 +782,83 @@ border-bottom:2px;</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="">
+       <attribute name="title">
+        <string>标定</string>
+       </attribute>
+       <widget class="QComboBox" name="cbxChan">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>70</y>
+          <width>201</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>80</y>
+          <width>54</width>
+          <height>12</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>通道</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btnCalibZero">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>150</y>
+          <width>81</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>标定零点</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btnCalibWet">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>150</y>
+          <width>71</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>标定重量</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>120</y>
+          <width>54</width>
+          <height>12</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>标定重量</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>120</y>
+          <width>201</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -876,7 +869,7 @@ border-bottom:2px;</string>
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>30</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

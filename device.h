@@ -38,6 +38,7 @@ public:
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
     bool ListFiles();
     bool Reset(quint8 delay_s);
+    bool calib(quint8 chan,  int point,int weigh);
 private:
     quint32 m_dev_id;
     quint16 m_serial_id;

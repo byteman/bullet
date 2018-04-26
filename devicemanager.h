@@ -24,6 +24,8 @@ public:
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
     bool ListFiles(quint32 dev_id);
+    void calib(quint32 dev_id,quint8 chan,quint8 index,int weight);
+
     void ReadParam(quint32 dev_id);
     void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);

@@ -118,6 +118,13 @@ bool DeviceManager::ListFiles(quint32 dev_id)
     return dev_map[dev_id]->ListFiles();
 }
 
+void DeviceManager::calib(quint32 dev_id,quint8 chan,quint8 index, int weight)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    dev_map[dev_id]->calib(chan,index,weight);
+}
+
 void DeviceManager::ReadParam(quint32 dev_id)
 {
     if(!dev_map.contains(dev_id))

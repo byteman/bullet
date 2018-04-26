@@ -44,7 +44,17 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
     return SendData(data);
 
 }
-
+bool Device::calib(quint8 chan, int point,int weight)
+{
+    QByteArray data;
+    PARA_SENSOR_CAL cal;
+    cal.mCalPoint =point;
+    cal.mCalWet = weight;
+    cal.mSensorCh = chan;
+    data.append((const char*)&cal,sizeof(PARA_SENSOR_CAL));
+    WriteCmd(MSG_CALIB,data);
+    return true;
+}
 bool Device::ListFiles()
 {
     QByteArray data;

@@ -577,19 +577,19 @@ void MainWindow::on_btnStop_2_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    ui->txtLog->clear();
+
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
 
-    if(pause){
-        ui->pushButton_2->setText("暂停");
-        pause = false;
-    }else{
-        ui->pushButton_2->setText("继续");
-        pause = true;
-    }
+//    if(pause){
+//        ui->pushButton_2->setText("暂停");
+//        pause = false;
+//    }else{
+//        ui->pushButton_2->setText("继续");
+//        pause = true;
+//    }
 
 }
 
@@ -601,4 +601,30 @@ void MainWindow::on_btnStartSend_clicked()
 void MainWindow::on_btnStopRead_clicked()
 {
     dvm.SendAllWave(false);
+}
+
+void MainWindow::on_btnClear_clicked()
+{
+    ui->txtLog->clear();
+}
+
+void MainWindow::on_btnPause_clicked()
+{
+    if(pause){
+        ui->btnPause->setText("暂停");
+        pause = false;
+    }else{
+        ui->btnPause->setText("继续");
+        pause = true;
+    }
+}
+
+void MainWindow::on_btnCalibZero_clicked()
+{
+    dvm.calib(m_cur_dev_id, ui->cbxChan->currentIndex(),0,0);
+}
+
+void MainWindow::on_btnCalibWet_clicked()
+{
+
 }
