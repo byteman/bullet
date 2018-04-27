@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->btnStop->setEnabled(false);
 
+
     checkAll(true);
     ui->rball->setChecked(true);
     //srv->setParent(this);
@@ -75,6 +76,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&dvm,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
     connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
+    connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
+    connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+
+    connect(&m_timer,SIGNAL(timeout()),this,SLOT(on_mytime_out()));
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
     menu=new QMenu(this);
@@ -472,6 +477,12 @@ void MainWindow::closeEvent(QCloseEvent *)
     m_waveWdg->CloseAll();
 }
 
+void MainWindow::on_mytime_out()
+{
+    qDebug() << "mytimeout";
+    dvm.ReadRt(m_cur_dev_id);
+}
+
 void MainWindow::on_actionReset_triggered()
 {
 
@@ -555,6 +566,19 @@ void MainWindow::isAllCheck()
     ui->rball->setChecked(isAll);
 }
 
+void MainWindow::onCalibResult(Device *dev, int chan, int index, int result)
+{
+    QMessageBox::information(this,"信息","标定完成");
+}
+
+void MainWindow::onRealTimeResult(Device *dev, RT_AD_RESULT result)
+{
+    int index = ui->cbxChan->currentIndex();
+    if(index == -1) return;
+    ui->edtRtAd->setText(QString("%1").arg(result.chan[index].ad));
+    ui->edtrtWgt->setText(QString("%1").arg(result.chan[index].weight));
+}
+
 void MainWindow::on_btnStart_clicked()
 {
     qDebug() << "on_btnStart_clicked";
@@ -626,5 +650,19 @@ void MainWindow::on_btnCalibZero_clicked()
 
 void MainWindow::on_btnCalibWet_clicked()
 {
+    bool ok = false;
+    int weight  = ui->edtCalibWet->text().toInt(&ok);
+    if(ok){
+        dvm.calib(m_cur_dev_id,ui->cbxChan->currentIndex(),1,weight);
+    }
 
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    if(index == 4){
+        m_timer.start(500);
+    }else{
+        m_timer.stop();
+    }
 }

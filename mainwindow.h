@@ -68,6 +68,8 @@ private:
     void checkAll(bool checked);
     void isAllCheck();
 private slots:
+    void onCalibResult(Device* dev, int chan, int index, int result);
+    void onRealTimeResult(Device* dev,RT_AD_RESULT result);
     void onWaveMsg(Device*dev, MsgWaveData data);
     void onNotify(QString msg);
     void on_menu_click(bool);
@@ -140,15 +142,21 @@ private slots:
 
     void on_btnCalibZero_clicked();
 
+    void on_btnCalibWet_clicked();
+
+    void on_tabWidget_currentChanged(int index);
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_dev_id;
     WaveWidget *m_waveWdg;
     bool pause ;
+    QTimer m_timer;
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);
 protected slots:
+    void on_mytime_out();
     void on_reset_menu_click(bool);
     void on_write_menu_click(bool);
     void on_list_files_menu_click(bool);

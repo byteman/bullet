@@ -55,6 +55,26 @@ bool Device::calib(quint8 chan, int point,int weight)
     WriteCmd(MSG_CALIB,data);
     return true;
 }
+qint32 Device::ad() const
+{
+    return m_ad;
+}
+
+void Device::setAd(const qint32 &ad)
+{
+    m_ad = ad;
+}
+qint32 Device::weight() const
+{
+    return m_weight;
+}
+
+void Device::setWeight(const qint32 &weight)
+{
+    m_weight = weight;
+}
+
+
 bool Device::ListFiles()
 {
     QByteArray data;
@@ -79,6 +99,13 @@ void Device::WriteParam(MsgDevicePara &para)
    QByteArray data;
    para.toByteArray(data);
    WriteCmd(MSG_WRITE_PARAM,data);
+}
+
+void Device::ReadRt()
+{
+    QByteArray data;
+    WriteCmd(MSG_RT_AD,data);
+    return;
 }
 
 qint64 Device::SendStartWave(quint16 sess_id,bool start)
@@ -147,7 +174,7 @@ qint64 Device::StartRecWave(quint16 sess_id,bool start)
     {
         msg.head.cmd_id = MSG_START_REC_WAVE;
 
-
+        OpenFile();
         m_packet_count = 3;
         timer.start(1000);
     }
@@ -240,6 +267,23 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     {
         emit WriteParam(this,true);
         //写入参数结果的回应包.
+    }
+    else if(req.head.cmd_id == MSG_CALIB)
+    {
+        SENSOR_CAL_RESULT rst;
+        if(req.getData(&rst,sizeof(SENSOR_CAL_RESULT)))
+        {
+            emit CalibResult(this,rst.chan,rst.index,rst.result);
+        }
+
+    }
+    else if(req.head.cmd_id == MSG_RT_AD)
+    {
+        RT_AD_RESULT rst;
+        if(req.getData(&rst,sizeof(RT_AD_RESULT)))
+        {
+            emit RealTimeResult(this,rst);
+        }
     }
     else if(req.head.cmd_id == MSG_ENUM_FILES)
     {
@@ -359,11 +403,11 @@ void Device::SaveWave(ProtoMessage &msg)
     if(m_file!=NULL)
     {
         m_file->write(wvData);
-        if( (sample_start + sample_num) == sample_total)
-        {
-            emit Progress(this,"同步完成");
-            CloseFile();
-        }
+//        if( (sample_start + sample_num) == sample_total)
+//        {
+//            emit Progress(this,"同步完成");
+//            CloseFile();
+//        }
     }
 
     sendProgress(sample_start, sample_total);

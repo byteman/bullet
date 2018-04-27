@@ -35,11 +35,20 @@ public:
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     void ReadParam();
     void WriteParam(MsgDevicePara &para);
+    void ReadRt();
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
     bool ListFiles();
     bool Reset(quint8 delay_s);
     bool calib(quint8 chan,  int point,int weigh);
+    qint32 ad() const;
+    void setAd(const qint32 &ad);
+    qint64 SendData(QByteArray &data);
+    qint32 weight() const;
+    void setWeight(const qint32 &weight);
+
 private:
+    qint32 m_ad;
+    qint32 m_weight;
     quint32 m_dev_id;
     quint16 m_serial_id;
     QString m_name;
@@ -60,7 +69,7 @@ private:
     void DevNotify(QString msg);
     void sendProgress(int sample_start, int sample_total);
     void ProcessWave(int index, QByteArray &data);
-    qint64 SendData(QByteArray &data);
+
     QTimer timer;
     void OpenFile();
     void CloseFile();
@@ -71,6 +80,8 @@ signals:
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);
     void EnumFiles(Device* dev,MsgFileList files);
+    void CalibResult(Device* dev, int chan, int index, int result);
+    void RealTimeResult(Device* dev,RT_AD_RESULT result);
 private slots:
     void timeout();
 };
