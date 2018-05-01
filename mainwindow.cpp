@@ -602,3 +602,15 @@ void MainWindow::on_btnStopRead_clicked()
 {
     dvm.SendAllWave(false);
 }
+
+void MainWindow::on_btnNext_clicked()
+{
+//下一页
+
+}
+
+void MainWindow::on_btnPrev_clicked()
+{
+//上一页
+
+}

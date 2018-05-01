@@ -23,13 +23,14 @@ public:
 
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
-    bool ListFiles(quint32 dev_id);
+    bool ListFiles(quint32 dev_id,int page, int size);
     void ReadParam(quint32 dev_id);
     void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);
     void ListDevice(QList<Device*> &devices);
     Device* GetDevice(quint32 dev_id);
     void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
+
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
 
 public slots:

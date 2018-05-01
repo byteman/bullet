@@ -45,7 +45,7 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 
 }
 
-bool Device::ListFiles()
+bool Device::ListFiles(int page, int size)
 {
     QByteArray data;
     WriteCmd(MSG_ENUM_FILES,data);
@@ -413,6 +413,7 @@ void Device::listWaveFiles(QStringList &files)
     QDir wvDir(dir);
     files = wvDir.entryList(QDir::Files);
 }
+
 ISession *Device::sess() const
 {
     return m_sess;

@@ -111,11 +111,11 @@ bool DeviceManager::ResetDevice(quint32 dev_id,quint8 delay_s)
     return dev_map[dev_id]->Reset(delay_s);
 }
 
-bool DeviceManager::ListFiles(quint32 dev_id)
+bool DeviceManager::ListFiles(quint32 dev_id,int page, int size)
 {
     if(!dev_map.contains(dev_id))
         return false;
-    return dev_map[dev_id]->ListFiles();
+    return dev_map[dev_id]->ListFiles(page,size);
 }
 
 void DeviceManager::ReadParam(quint32 dev_id)
@@ -166,6 +166,8 @@ void DeviceManager::GetDeviceWaveFiles(quint32 dev_id, QStringList &files)
         return;
     return dev_map[dev_id]->listWaveFiles(files);
 }
+
+
 
 bool DeviceManager::LoadWaveFile(quint32 dev_id, QString file, MsgWaveData &wvd)
 {

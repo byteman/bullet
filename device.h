@@ -36,8 +36,10 @@ public:
     void ReadParam();
     void WriteParam(MsgDevicePara &para);
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
-    bool ListFiles();
+    bool ListFiles(int page, int size);
     bool Reset(quint8 delay_s);
+    void listWaveFiles(int page, int size, QStringList &files);
+
 private:
     quint32 m_dev_id;
     quint16 m_serial_id;
