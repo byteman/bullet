@@ -14,13 +14,37 @@ enum MessageID{
    MSG_ENUM_FILES, //枚举设备sd卡内的波形文件.
    MSG_START_REC_WAVE=8,
    MSG_STOP_REC_WAVE,
+   MSG_CALIB, //0xa
+   MSG_RT_AD, //实时AD和重量.
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;
+typedef qint16 INT16;
+typedef qint8  INT8;
 
 #pragma pack(push)
 #pragma pack(1)
 
+typedef struct{
+    INT8U chan;
+    INT8U index;
+    INT8U result;
+}SENSOR_CAL_RESULT;
+typedef struct
+{
+    INT16U	mSensorCh;	//传感器通道号
+    INT16U	mCalPoint;	//标定点
+    INT16U  mCalWet;	//标定重量
+    //INT8U 	checksum;
+}PARA_SENSOR_CAL;
+
+typedef struct{
+    INT16 ad;
+    INT16 weight;
+}RT_AD_CHAN;
+typedef struct{
+    RT_AD_CHAN chan[8];
+}RT_AD_RESULT;
 /*IP地址*/
 struct sIP_ADDR{
     sIP_ADDR()

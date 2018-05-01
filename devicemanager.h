@@ -23,14 +23,16 @@ public:
 
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
-    bool ListFiles(quint32 dev_id,int page, int size);
+    bool ListFiles(quint32 dev_id);
+    void calib(quint32 dev_id,quint8 chan,quint8 index,int weight);
+
     void ReadParam(quint32 dev_id);
+    void ReadRt(quint32 dev_id);
     void WriteParam(quint32 dev_id , MsgDevicePara &para);
     void SetStation(QString station);
     void ListDevice(QList<Device*> &devices);
     Device* GetDevice(quint32 dev_id);
     void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
-
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
 
 public slots:
@@ -41,7 +43,8 @@ public slots:
     void onNotify(QString msg);
     void onEnumFiles(Device* dev,MsgFileList files);
     void onProgress(Device* dev,QString progress);
-
+    void onCalibResult(Device* dev, int chan, int index, int result);
+    void onRealTimeResult(Device* dev,RT_AD_RESULT result);
 private:
     int m_dev_num;
 
@@ -62,6 +65,8 @@ signals:
     void Progress(Device* dev,QString progress);
     void EnumFiles(Device* dev,MsgFileList files);
     void WaveMsg(Device* dev, MsgWaveData data);
+    void CalibResult(Device* dev, int chan, int index, int result);
+    void RealTimeResult(Device* dev,RT_AD_RESULT result);
     // QObject interface
 protected:
     void timerEvent(QTimerEvent *);

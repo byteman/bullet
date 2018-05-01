@@ -32,6 +32,10 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
         connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
         connect(dev,SIGNAL(showWave(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
+
+        connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
+        connect(dev,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
         dev_map[ids[i].toInt()] = dev;
@@ -118,11 +122,25 @@ bool DeviceManager::ListFiles(quint32 dev_id,int page, int size)
     return dev_map[dev_id]->ListFiles(page,size);
 }
 
+void DeviceManager::calib(quint32 dev_id,quint8 chan,quint8 index, int weight)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    dev_map[dev_id]->calib(chan,index,weight);
+}
+
 void DeviceManager::ReadParam(quint32 dev_id)
 {
     if(!dev_map.contains(dev_id))
         return ;
     return dev_map[dev_id]->ReadParam();
+}
+
+void DeviceManager::ReadRt(quint32 dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->ReadRt();
 }
 
 void DeviceManager::WriteParam(quint32 dev_id, MsgDevicePara &para)
@@ -234,7 +252,7 @@ void DeviceManager::Message(SessMessage msg)
                 output_msg.head.cmd_id|=0x80;
 
                 output_msg.toByteArray(arr);
-                msg.getSession()->send(arr);
+                dev_map[dev_id]->SendData(arr);
             }
         }
         input_msg.clear();
@@ -256,6 +274,16 @@ void DeviceManager::onEnumFiles(Device *dev, MsgFileList files)
 void DeviceManager::onProgress(Device *dev, QString progress)
 {
     emit Progress(dev,progress);
+}
+
+void DeviceManager::onCalibResult(Device *dev, int chan, int index, int result)
+{
+    emit CalibResult(dev,chan,index,result);
+}
+
+void DeviceManager::onRealTimeResult(Device *dev, RT_AD_RESULT result)
+{
+    emit RealTimeResult(dev,result);
 }
 
 

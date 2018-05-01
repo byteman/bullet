@@ -24,8 +24,8 @@ void GpsSession::setHostPort(QHostAddress addr, quint16 port)
 qint64 GpsSession::send(QByteArray &data)
 {
     //qDebug() << "host " << m_host << " port" << m_port;
-    //return m_socket->sendBytes(data.data(),data.size(),)
-    return 0;
+    return m_socket->sendTo(data.data(),data.size(),m_host);
+
 }
 
 qint64 GpsSession::send(QHostAddress host, quint16 port, QByteArray &data)

@@ -70,7 +70,10 @@ bool ProtoParser::parseData(ProtoMessage &prot_msg)
 //        return false;
 //    }
 
-    while(m_data.size() > sizeof(ProtoHeader)+1){
+//    qDebug() << "size1" << m_data.size();
+//    qDebug() << "size2" << sizeof(ProtoHeader)+1;
+
+    while(m_data.size() >= sizeof(ProtoHeader)+1){
         quint8 x1=0xFE;
         quint8 x2 = 0x7F;
         quint8 v1 = m_data[0];
