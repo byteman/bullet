@@ -7,6 +7,8 @@
 #include "csvfile.h"
 #include "session.h"
 #include <QTimer>
+#include <QJsonDocument>
+#include "syncfile.h"
 class Device:public QObject
 {
     Q_OBJECT
@@ -26,7 +28,7 @@ public:
     QString station() const;
     void setStation(const QString &station);
     void listWaveFiles(QStringList &files);
-
+    void RemoveFile(QString file);
     ISession *sess() const;
     void setSess(ISession *sess);
     void setHostPort(QHostAddress host,quint16 port);
@@ -37,7 +39,7 @@ public:
     void WriteParam(MsgDevicePara &para);
     void ReadRt();
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
-    bool ListFiles();
+    bool ListFiles(int page,int size);
     bool Reset(quint8 delay_s);
     bool calib(quint8 chan,  int point,int weigh);
     qint32 ad() const;
@@ -45,8 +47,10 @@ public:
     qint64 SendData(QByteArray &data);
     qint32 weight() const;
     void setWeight(const qint32 &weight);
-
+    void sendProgress(int sample_start, int sample_total);
+    void SendSyncFile(QString file);
 private:
+    SyncFile m_sync;
     qint32 m_ad;
     qint32 m_weight;
     quint32 m_dev_id;
@@ -67,19 +71,21 @@ private:
     QString CreateDir();
     QString GetFileName();
     void DevNotify(QString msg);
-    void sendProgress(int sample_start, int sample_total);
+
     void ProcessWave(int index, QByteArray &data);
 
     QTimer timer;
     void OpenFile();
     void CloseFile();
+    QString BuildFileName(QString name);
 signals:
+    void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);
     void Progress(Device* dev,QString progress);
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);
-    void EnumFiles(Device* dev,MsgFileList files);
+    void EnumFiles(Device* dev,ENUM_FILE_RESP resp);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);
 private slots:

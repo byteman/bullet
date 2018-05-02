@@ -6,7 +6,7 @@
 #include "ui_mainwindow.h"
 #include <QThread>
 
-
+#define PAGE_SIZE 40
 void MainWindow::loadDeviceUI()
 {
 
@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     m_cur_dev_id = 0;
+    m_cur_page = 0;
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
 
@@ -73,11 +74,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
     connect(&dvm,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
     connect(&dvm,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
-    connect(&dvm,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
+    connect(&dvm,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
     connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
     connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
     connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+
+    connect(&dvm,SIGNAL(CommResult(Device*,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
     connect(&m_timer,SIGNAL(timeout()),this,SLOT(on_mytime_out()));
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
@@ -94,16 +97,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     action = new QAction("复位设备",this);
     menu->addAction(action);
-
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
+
+
     action = new QAction("枚举设备文件",this);
     menu->addAction(action);
-
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_list_files_menu_click(bool)));
-    action = new QAction("同步设备文件",this);
-    menu->addAction(action);
 
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_download_wave(bool)));
+
+    action = new QAction("删除设备文件",this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_remove_menu_click(bool)));
+
+
+//    action = new QAction("同步设备文件",this);
+//    menu->addAction(action);
+
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_download_wave(bool)));
 
 
     dvm.start();
@@ -136,16 +146,23 @@ void MainWindow::Message(SessMessage s)
         ui->txtLog->append(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
 }
 
-void MainWindow::onEnumFiles(Device *dev, MsgFileList files)
+void MainWindow::onEnumFiles(Device *dev, ENUM_FILE_RESP resp)
 {
     ui->listFile->clear();
-    for(int i =0; i < files.size();i++)
+    ui->cbxCurPage->clear();
+    for(int j = 0; j < resp.total_page;j++)
+    {
+        ui->cbxCurPage->addItem(QString("%1").arg(j+1));
+    }
+    ui->cbxCurPage->setCurrentIndex(resp.cur_page);
+    m_cur_page = resp.cur_page;
+    for(int i =0; i < resp.files.size();i++)
     {
         QListWidgetItem* item = NULL;
-        if(files[i].attr == 1)
-            item = new QListWidgetItem(icon_file,files[i].name);
+        if(resp.files[i].attr == 1)
+            item = new QListWidgetItem(icon_file,resp.files[i].name);
         else
-            item = new QListWidgetItem(icon_dir,files[i].name);
+            item = new QListWidgetItem(icon_dir,resp.files[i].name);
         ui->listFile->addItem(item);
     }
 }
@@ -185,22 +202,12 @@ void MainWindow::onWaveProgress(Device *dev, QString progress)
     QTreeWidgetItem* item = findItemById(dev->id());
     if(item!=NULL)
     {
+        if(progress=="100%"){
+            listFiles(dev->id());
+        }
         item->setText(1,progress);
     }
 }
-
-//void MainWindow::on_btnStart_clicked()
-//{
-//    //if(srv.start(8888))
-//    qDebug() << "start";
-//    if(1)
-//    {
-//        ui->btnStart->setEnabled(false);
-//        ui->btnStop->setEnabled(true);
-//        QString str = QString("listen%1").arg(8888);
-//        ui->statusBar->showMessage(str);
-//    }
-//}
 
 void MainWindow::on_btnStop_clicked()
 {
@@ -235,6 +242,7 @@ QTreeWidgetItem* MainWindow::findItemById(quint32 id)
 
 void MainWindow::onNotify(QString msg)
 {
+    if(pause)return;
     ui->txtLog->append("send--> "+ msg);
 }
 
@@ -253,10 +261,17 @@ void MainWindow::on_reset_menu_click(bool)
     if(m_cur_dev_id!=0)
         dvm.ResetDevice(m_cur_dev_id,1);
 }
-void MainWindow::on_list_files_menu_click(bool)
+void MainWindow::MyListFiles(int id,int page)
 {
     if(m_cur_dev_id!=0)
-        dvm.ListFiles(m_cur_dev_id);
+    {
+        dvm.ListFiles(id,page,PAGE_SIZE);
+        ui->listFile->clear();
+    }
+}
+void MainWindow::on_list_files_menu_click(bool)
+{
+   MyListFiles(m_cur_dev_id,m_cur_page);
 }
 void MainWindow::on_download_wave(bool)
 {
@@ -357,7 +372,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     quint32 dev_id = item->data(0,Qt::UserRole).toInt();
     listFiles(dev_id);
     readParam(dev_id);
-    dvm.ListFiles(dev_id);
+    MyListFiles(dev_id,m_cur_page);
+
     m_waveWdg->Clear();
 }
 
@@ -477,9 +493,17 @@ void MainWindow::closeEvent(QCloseEvent *)
     m_waveWdg->CloseAll();
 }
 
+void MainWindow::onCommResult(Device *dev, int cmd, int result)
+{
+    if(cmd == MSG_REMOVE_FILE)
+    {
+        dvm.ListFiles(m_cur_dev_id,0,PAGE_SIZE);
+    }
+}
+
 void MainWindow::on_mytime_out()
 {
-    qDebug() << "mytimeout";
+    //qDebug() << "mytimeout";
     dvm.ReadRt(m_cur_dev_id);
 }
 
@@ -670,11 +694,62 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::on_btnNext_clicked()
 {
 //下一页
+    MyListFiles(m_cur_dev_id,m_cur_page+1);
 
 }
 
 void MainWindow::on_btnPrev_clicked()
 {
+    if(m_cur_page>0)
+    {
+        MyListFiles(m_cur_dev_id,m_cur_page-1);
+    }
 //上一页
+    //dvm.ListFiles()
+}
+
+void MainWindow::on_cbxCurPage_currentIndexChanged(int index)
+{
+
+   //dvm.ListFiles(m_cur_dev_id,index,PAGE_SIZE);
+}
+
+void MainWindow::on_btnGo_clicked()
+{
+    int idx = ui->cbxCurPage->currentIndex();
+    if(idx >= 0){
+        dvm.ListFiles(m_cur_dev_id,idx,PAGE_SIZE);
+    }
+}
+
+void MainWindow::removeFiles()
+{
+    if(QMessageBox::Yes==QMessageBox::question(this,"提示","确定删除文件"))
+    {
+        dvm.RemoveFile(m_cur_dev_id,"");
+        MyListFiles(m_cur_dev_id,m_cur_page);
+    }
+
+}
+void MainWindow::on_btnDelAll_clicked()
+{
+    removeFiles();
+}
+void MainWindow::on_remove_menu_click(bool)
+{
+    removeFiles();
+}
+
+void MainWindow::on_listFile_itemDoubleClicked(QListWidgetItem *item)
+{
+    if(QMessageBox::Yes==QMessageBox::question(this,"提示","下载设备文件"))
+    {
+        dvm.SyncFile(m_cur_dev_id, item->text());
+    }
+
+}
+
+void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
+{
 
 }

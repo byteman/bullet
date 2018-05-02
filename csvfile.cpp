@@ -25,7 +25,8 @@ CSVFile::CSVFile(QString file):
     m_index(0)
 {
     m_file = new QFile(file);
-    m_file->open(QIODevice::ReadWrite|QIODevice::Append);
+    //m_file->open(QIODevice::ReadWrite|QIODevice::Append);
+    m_file->open(QIODevice::ReadWrite|QIODevice::Truncate);
     for(int i=0; i < 8; i++)
     {
         m_values.push_back("");

@@ -6,6 +6,7 @@
 #include "protomessage.h"
 #include "protoparser.h"
 #include "device.h"
+#include "syncfile.h"
 #include <QMap>
 #include <QList>
 class DeviceManager:public QObject
@@ -21,9 +22,10 @@ public:
     bool SendWave(quint8 dev_id,bool start);
     bool StartAll(bool start);
 
+    bool SyncFile(quint8 dev_id,QString file);
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(quint32 dev_id,quint8 delay_s);
-    bool ListFiles(quint32 dev_id);
+    bool ListFiles(quint32 dev_id,int page, int size);
     void calib(quint32 dev_id,quint8 chan,quint8 index,int weight);
 
     void ReadParam(quint32 dev_id);
@@ -35,13 +37,15 @@ public:
     void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
     bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
 
+    bool RemoveFile(quint8 dev_id, QString file);
 public slots:
+    void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
     void onReadParam(Device* dev,MsgDevicePara para);
     void onWriteParam(Device* dev, bool result);
     void Message(SessMessage msg);
     void onNotify(QString msg);
-    void onEnumFiles(Device* dev,MsgFileList files);
+    void onEnumFiles(Device* dev,ENUM_FILE_RESP resp);
     void onProgress(Device* dev,QString progress);
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);
@@ -56,6 +60,7 @@ private:
     quint16 m_serial_id;
     quint16 m_session_id;
 signals:
+    void CommResult(Device* dev,int cmd, int result);
     void ReadParam(Device* dev,MsgDevicePara para);
     void WriteParam(Device* dev, bool result);
     void SendData(SessMessage msg);
@@ -63,7 +68,7 @@ signals:
     void DevOffline(Device* dev);
     void Notify(QString msg);
     void Progress(Device* dev,QString progress);
-    void EnumFiles(Device* dev,MsgFileList files);
+    void EnumFiles(Device* dev,ENUM_FILE_RESP resp);
     void WaveMsg(Device* dev, MsgWaveData data);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);

@@ -29,12 +29,14 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
         connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
         connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
-        connect(dev,SIGNAL(EnumFiles(Device*,MsgFileList)),this,SLOT(onEnumFiles(Device*,MsgFileList)));
+        connect(dev,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
         connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
         connect(dev,SIGNAL(showWave(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
 
         connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
         connect(dev,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+
+        connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
         dev->setId(ids[i].toInt());
         dev->setName(names[i]);
@@ -89,6 +91,22 @@ bool DeviceManager::StartAll(bool start)
     }
 
     return ok;
+}
+
+bool DeviceManager::SyncFile(quint8 dev_id, QString file)
+{
+    if(!dev_map.contains(dev_id))
+        return false;
+    dev_map[dev_id]->SendSyncFile(file);
+    return true;
+}
+
+bool DeviceManager::RemoveFile(quint8 dev_id,QString file)
+{
+    if(!dev_map.contains(dev_id))
+        return false;
+    dev_map[dev_id]->RemoveFile(file);
+    return true;
 }
 
 bool DeviceManager::ResetAllDevice(quint8 delay_s)
@@ -194,6 +212,11 @@ bool DeviceManager::LoadWaveFile(quint32 dev_id, QString file, MsgWaveData &wvd)
     return dev_map[dev_id]->LoadWaveFile(file,wvd);
 }
 
+void DeviceManager::onCommResult(Device *dev, int cmd, int result)
+{
+    emit CommResult(dev,cmd,result);
+}
+
 //这里获取到的通道数据必然保护通道所属的设备ID，从而能够区分设备.
 void DeviceManager::onWaveMsg(Device* dev,MsgWaveData wvData)
 {
@@ -244,7 +267,7 @@ void DeviceManager::Message(SessMessage msg)
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
             dev_map[dev_id]->onMessage(input_msg,output_msg);
 
-            if(!input_msg.is_ack)
+            if(!input_msg.is_ack )
             {
                 QByteArray arr;
                 output_msg.head = input_msg.head;
@@ -266,9 +289,9 @@ void DeviceManager::onNotify(QString msg)
     emit Notify(msg);
 }
 
-void DeviceManager::onEnumFiles(Device *dev, MsgFileList files)
+void DeviceManager::onEnumFiles(Device *dev, ENUM_FILE_RESP resp)
 {
-    emit EnumFiles(dev,files);
+    emit EnumFiles(dev,resp);
 }
 
 void DeviceManager::onProgress(Device *dev, QString progress)

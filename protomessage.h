@@ -5,17 +5,18 @@
 #include <QVector>
 #include <QDateTime>
 enum MessageID{
-   MSG_START_WAVE=0x1, //启动发送波形
-   MSG_WAVE_DATA, //设备上报的波形文件
+   MSG_START_WAVE=0x1, //启动发送历史波形文件。
+   MSG_WAVE_DATA, //上位机程序主动读取波形文件
    MSG_HEART, //设备上报心跳
    MSG_READ_PARAM, //读取设备参数
    MSG_WRITE_PARAM, //修改设备厂商
    MSG_RESET, //复位设备
    MSG_ENUM_FILES, //枚举设备sd卡内的波形文件.
-   MSG_START_REC_WAVE=8,
-   MSG_STOP_REC_WAVE,
+   MSG_START_REC_WAVE=8,//启动实时发送波形. 0x88表示设备实时波形。
+   MSG_STOP_REC_WAVE, //停止实时发送波形.
    MSG_CALIB, //0xa
    MSG_RT_AD, //实时AD和重量.
+   MSG_REMOVE_FILE,
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;
@@ -24,6 +25,29 @@ typedef qint8  INT8;
 
 #pragma pack(push)
 #pragma pack(1)
+
+typedef struct{
+    INT16U index; //当前包序号
+    INT16U count; //包个数
+    QByteArray toBuffer()
+    {
+        QByteArray tmp;
+        tmp.append((const char*)&index,2);
+        tmp.append((const char*)&count,2);
+        return tmp;
+    }
+}MsgReadFile;
+typedef struct{
+    INT16U page; //页码号
+    INT16U size; //每页大小
+    QByteArray toBuffer()
+    {
+        QByteArray tmp;
+        tmp.append((const char*)&page,2);
+        tmp.append((const char*)&size,2);
+        return tmp;
+    }
+}ENUM_FILES_REQ;
 
 typedef struct{
     INT8U chan;
@@ -206,6 +230,18 @@ public:
     {
         data.clear();
     }
+    bool getBuffer(void* dest, int size)
+    {
+        int sz = data.size();
+        if(sz < size)
+        {
+            return false;
+        }
+        memcpy(dest, data.data(),size);
+
+        return true;
+    }
+
     bool getData(void* dest, int size)
     {
         int sz = data.size();
@@ -276,6 +312,12 @@ struct MsgFileInfo{
     char    attr; //1 file 2 dir
 };
 typedef QList<MsgFileInfo> MsgFileList;
+typedef struct{
+    INT16U total_page; //总页数
+    INT16U cur_page; //当前页
+
+    MsgFileList files; //每页的文件信息.
+}ENUM_FILE_RESP;
 //一个通道的数据总和.
 typedef QVector<double> ChannelData;
 

@@ -77,8 +77,10 @@ void Device::setWeight(const qint32 &weight)
 
 bool Device::ListFiles(int page, int size)
 {
-    QByteArray data;
-    WriteCmd(MSG_ENUM_FILES,data);
+    ENUM_FILES_REQ data;
+    data.page = page;
+    data.size = size;
+    WriteCmd(MSG_ENUM_FILES,data.toBuffer());
     return true;
 }
 void Device::ReadParam()
@@ -229,12 +231,31 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     //启动波形回应.
     if(req.head.cmd_id == MSG_START_WAVE)
     {
+        quint16 total = 0;
+        req.getBuffer(&total,2);
+        QString name = req.data.mid(2);
         //ack
         DevNotify("start wave");
+        if(total == 0){
+            DevNotify("packet==0");
+            return;
+        }
+        m_sync.StartSync(this,BuildFileName(name),total);
 
     }
-    //波形数据文件.
+    //设备回应删除成功
+    else if(req.head.cmd_id == MSG_REMOVE_FILE)
+    {
+        emit CommResult(this,req.head.cmd_id,0);
+    }
+    //读取某个波形文件的历史数据.
     else if(req.head.cmd_id == MSG_WAVE_DATA)
+    {
+        //
+        m_sync.onMessage(req,resp);
+    }
+    //实时波形数据文件.
+    else if(req.head.cmd_id == MSG_START_REC_WAVE)
     {
         //req
         if(!m_start_send)
@@ -244,7 +265,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         m_packet_count++;
         SaveWave(req);
     }
-    //注册和心跳包
+    //注册和心跳包的回应
     else if(req.head.cmd_id == MSG_HEART)
     {
         //req
@@ -253,6 +274,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         //qDebug() << "heart beart";
 
     }
+    //读取参数的回应
     else if(req.head.cmd_id == MSG_READ_PARAM)
     {
         //读取的参数的回应包.
@@ -263,11 +285,13 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         }
 
     }
+    //写入参数成功的回应
     else if(req.head.cmd_id == MSG_WRITE_PARAM)
     {
         emit WriteParam(this,true);
         //写入参数结果的回应包.
     }
+    //标定结果的回应
     else if(req.head.cmd_id == MSG_CALIB)
     {
         SENSOR_CAL_RESULT rst;
@@ -277,6 +301,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         }
 
     }
+    //读取实时ad值的回应
     else if(req.head.cmd_id == MSG_RT_AD)
     {
         RT_AD_RESULT rst;
@@ -285,31 +310,41 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             emit RealTimeResult(this,rst);
         }
     }
+    //枚举文件的回应
     else if(req.head.cmd_id == MSG_ENUM_FILES)
     {
         QByteArray &data = req.data;
-        int num = (data[1]<<8) + data[0];
-        QByteArray attr = data.mid(2,num);
-        int length = data.size() - 2 - num;
+
+        ENUM_FILE_RESP resp;
+        resp.total_page  = (data[1]<<8) + data[0];
+        resp.cur_page = (data[3]<<8) + data[2];
+        int num = (data[5]<<8) + data[4];
+        int off = 6;
+        QByteArray attr = data.mid(off,num);
+        int length = data.size() - off - num;
         if(length > 0)
         {
             QString files = data.right(length);
+            qDebug() << "files=" << files;
             QStringList filelist = files.split(",");
             if( filelist.size()!=num)
             {
                 emit Notify("file num error");
                 return;
             }
-            MsgFileList flist;
+
             for(int i = 0; i < num; i++)
             {
                 MsgFileInfo finfo;
 
+                if(filelist[i].contains("xls")){
+                    continue;
+                }
                 finfo.attr = attr[i];
                 finfo.name = filelist[i];
-                flist.push_back(finfo);
+                resp.files.push_back(finfo);
             }
-            emit EnumFiles(this,flist);
+            emit EnumFiles(this,resp);
 
         }
 
@@ -337,6 +372,13 @@ QString Device::CreateDir()
         dir.mkpath(target_dir);
     }
     return target_dir;
+}
+QString Device::BuildFileName(QString name)
+{
+    QString dt  = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
+    QString dir = CreateDir();
+    QString file = QString("%1/%2").arg(dir).arg(name);
+    return file;
 }
 QString Device::GetFileName()
 {
@@ -403,14 +445,9 @@ void Device::SaveWave(ProtoMessage &msg)
     if(m_file!=NULL)
     {
         m_file->write(wvData);
-//        if( (sample_start + sample_num) == sample_total)
-//        {
-//            emit Progress(this,"同步完成");
-//            CloseFile();
-//        }
     }
 
-    sendProgress(sample_start, sample_total);
+    //sendProgress(sample_start, sample_total);
 
     ProcessWave(sample_start, wvData);
 
@@ -468,6 +505,25 @@ void Device::listWaveFiles(QStringList &files)
     files = wvDir.entryList(QDir::Files);
 }
 
+void Device::RemoveFile(QString file)
+{
+    QByteArray data;
+    WriteCmd(MSG_REMOVE_FILE,data);
+}
+void Device::SendSyncFile(QString file)
+{
+    ProtoMessage msg;
+    msg.head.cmd_id = MSG_START_WAVE;
+    msg.head.device_id = m_dev_id;
+    msg.head.serial_id = m_serial_id++;
+    msg.head.sesson_id = m_sess_id++;
+    msg.is_ack = false;
+    msg.data.append(file);
+    QByteArray data;
+    msg.toByteArray(data);
+
+    SendData(data);
+}
 ISession *Device::sess() const
 {
     return m_sess;

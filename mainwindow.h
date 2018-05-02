@@ -32,6 +32,8 @@ public:
 
 
     void ShowDeviceChannel(quint32 dev_id, QString file, int chan);
+    void removeFiles();
+    void MyListFiles(int id, int page);
 private:
     Ui::MainWindow *ui;
     QVector<double> xdata;
@@ -74,7 +76,7 @@ private slots:
     void onNotify(QString msg);
     void on_menu_click(bool);
     void Message(SessMessage msg);
-    void onEnumFiles(Device* dev,MsgFileList files);
+    void onEnumFiles(Device* dev,ENUM_FILE_RESP files);
     void onReadPara(Device* dev, MsgDevicePara para);
     void onWritePara(Device* dev, bool result);
     void onWaveProgress(Device* dev, QString progress);
@@ -146,8 +148,19 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_cbxCurPage_currentIndexChanged(int index);
+
+    void on_btnGo_clicked();
+
+    void on_btnDelAll_clicked();
+
+    void on_listFile_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_treeWidget_itemActivated(QTreeWidgetItem *item, int column);
+
 protected:
     void timerEvent(QTimerEvent *);
+    quint32 m_cur_page;
     quint32 m_cur_dev_id;
     WaveWidget *m_waveWdg;
     bool pause ;
@@ -156,11 +169,15 @@ protected:
 protected:
     void closeEvent(QCloseEvent *);
 protected slots:
+    void onCommResult(Device* dev,int cmd, int result);
     void on_mytime_out();
     void on_reset_menu_click(bool);
     void on_write_menu_click(bool);
     void on_list_files_menu_click(bool);
     void on_download_wave(bool);
+    void on_btnNext_clicked();
+    void on_btnPrev_clicked();
+    void on_remove_menu_click(bool);
 };
 
 #endif // MAINWINDOW_H
