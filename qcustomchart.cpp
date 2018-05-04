@@ -8,6 +8,13 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
    m_plot->yAxis->scaleRange(0,2000);
+   m_plot->xAxis->setLabel("时间");
+   //m_plot->yAxis->setLabel("牛顿");
+
+   QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+   timeTicker->setTimeFormat("%h:%m:%s");
+   m_plot->xAxis->setTicker(timeTicker);
+   m_plot->axisRect()->setupFullAxesBox();
    m_plot->setOpenGl(true);
    SetChannel(num);
 }

@@ -753,3 +753,8 @@ void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
 {
 
 }
+
+void MainWindow::on_btnResetZero_clicked()
+{
+    dvm.calib(m_cur_dev_id, 0,100,0);
+}

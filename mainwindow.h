@@ -158,6 +158,8 @@ private slots:
 
     void on_treeWidget_itemActivated(QTreeWidgetItem *item, int column);
 
+    void on_btnResetZero_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_page;
