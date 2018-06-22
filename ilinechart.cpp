@@ -104,11 +104,14 @@ void ILineChart::Clear()
     }
 }
 
-void ILineChart::GetValueRange(double &min, double &max)
+void ILineChart::GetValueRange(int chan, double &min, double &max)
 {
-    min = m_min;
-    max = m_max;
+    int index = (chan >= channels.size())?0:chan;
+
+    channels[index]->GetValueRange(min,max);
 }
+
+
 
 void ILineChart::SetFilter(IValueFilter *filter)
 {

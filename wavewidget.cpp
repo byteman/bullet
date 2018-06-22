@@ -26,6 +26,7 @@ void WaveWidget::SetData(MsgWaveData &wvd)
 
 }
 
+
 void WaveWidget::AppendData(MsgWaveData &wvd)
 {
     m_chart->AppendDataArray(wvd.channels);
@@ -33,8 +34,15 @@ void WaveWidget::AppendData(MsgWaveData &wvd)
 void WaveWidget::DisplayAllChannel(bool show)
 {
     m_chart->DisplayAllChannel(show);
-}
 
+
+}
+void WaveWidget::GetValueRange(int chan, double &min, double &max)
+{
+
+    m_chart->GetValueRange(chan,min,max);
+    //channels[index]->GetValueRange(min,max);
+}
 void WaveWidget::Display()
 {
     m_chart->Display();

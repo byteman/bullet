@@ -24,6 +24,8 @@ public:
 
     void SetData(MsgWaveData &wvd);
     void AppendData(MsgWaveData &wvd);
+
+    void GetValueRange(int chan, double &min, double &max);
 private:
 
     int m_num;

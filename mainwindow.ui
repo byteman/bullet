@@ -148,6 +148,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_26">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="rb1">
              <property name="styleSheet">
               <string notr="true">border-color: rgb(0, 170, 255);
@@ -159,9 +166,23 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="rb2">
              <property name="text">
               <string>通道2</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -173,9 +194,23 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_25">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="rb4">
              <property name="text">
               <string>通道4</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -187,9 +222,23 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="rb6">
              <property name="text">
               <string>通道6</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -201,9 +250,23 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="rb8">
              <property name="text">
               <string>通道8</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -1038,6 +1101,9 @@ border-bottom:2px;</string>
      </property>
      <addaction name="actionStation1"/>
      <addaction name="actionStation2"/>
+     <addaction name="action3"/>
+     <addaction name="action4"/>
+     <addaction name="action5"/>
     </widget>
     <addaction name="menu"/>
     <addaction name="actionReset"/>
@@ -1054,11 +1120,17 @@ border-bottom:2px;</string>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionStation1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>工位1</string>
    </property>
   </action>
   <action name="actionStation2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>工位2</string>
    </property>
@@ -1066,6 +1138,30 @@ border-bottom:2px;</string>
   <action name="actionReset">
    <property name="text">
     <string>复位设备</string>
+   </property>
+  </action>
+  <action name="action3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位3</string>
+   </property>
+  </action>
+  <action name="action4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位4</string>
+   </property>
+  </action>
+  <action name="action5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位5</string>
    </property>
   </action>
  </widget>

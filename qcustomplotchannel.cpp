@@ -46,17 +46,25 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
 
     QVector<double> keys;
     QVector<double> values;
+    m_max = -100000;
     int index = m_graph->dataCount();
     for(int i = 0; i < 1; i++)
     {
         keys.push_back(index++);
+        double v = 0;
         if(m_filter!=NULL)
         {
-            values.push_back(m_filter->filter(samples[i]));
+            v = m_filter->filter(samples[i]);
         }else{
-            values.push_back(samples[i]);
+            v = samples[i];
+
         }
+        if(v > m_max ){
+            m_max = v;
+        }
+        values.push_back(v);
     }
+
     m_graph->addData(keys,values);
 
 }
@@ -77,7 +85,8 @@ void QCustomPlotChannel::SetPen(QPen &pen)
 
 void QCustomPlotChannel::GetValueRange(double &min, double &max)
 {
-
+    max = m_max;
+    min = m_min;
 }
 
 void QCustomPlotChannel::GetKeyRange(double &min, double &max)

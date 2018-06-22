@@ -31,6 +31,14 @@ void MainWindow::loadDeviceUI()
             m_cur_dev_id = devices[i]->id();
         }
     }
+    chanels[0] = ui->label_12;
+    chanels[1] = ui->label_19;
+    chanels[2] = ui->label_25;
+    chanels[3] = ui->label_11;
+    chanels[4] = ui->label_24;
+    chanels[5] = ui->label_23;
+    chanels[6] = ui->label_22;
+    chanels[7] = ui->label_21;
 
 }
 MainWindow::MainWindow(QWidget *parent) :
@@ -47,7 +55,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_debug_bytes = config.value("/device/debug",20).toInt();
     m_refresh_count = config.value("/device/refresh",20).toInt();
+    m_cur_station = config.value("/device/station",1).toInt();
+    stationActions[1] = ui->actionStation1;
+    stationActions[2] = ui->actionStation2;
+    stationActions[3] = ui->action3;
+    stationActions[4] = ui->action4;
+    stationActions[5] = ui->action5;
 
+    setCurrentStation(m_cur_station);
     icon_device[0].addFile(":image/online.png");
     icon_device[1].addFile(":image/offline.png");
     icon_channel.addFile(":image/channel.png");
@@ -376,15 +391,28 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 
     m_waveWdg->Clear();
 }
-
+void MainWindow::setCurrentStation(int index)
+{
+    QSettings config("bullet.ini", QSettings::IniFormat);
+    config.setValue("/device/station",index);
+    dvm.SetStation(QString("工位%1").arg(index));
+    QMapIterator<int, QAction*> i(stationActions);
+    while (i.hasNext()) {
+        i.next();
+        i.value()->setChecked(false);
+    }
+    if(stationActions.contains(index)){
+        stationActions[index]->setChecked(true);
+    }
+}
 void MainWindow::on_actionStation1_triggered()
 {
-    dvm.SetStation("工位1");
+    setCurrentStation(1);
 }
 
 void MainWindow::on_actionStation2_triggered()
 {
-    dvm.SetStation("工位2");
+    setCurrentStation(2);
 }
 
 void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
@@ -393,6 +421,12 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
 
+    for(int i = 0; i < 8; i++){
+        double min,max;
+        m_waveWdg->GetValueRange(i,min,max);
+        chanels[i]->setText(QString("%1").arg(max));
+
+    }
     m_waveWdg->DisplayAllChannel(true);
 
 
@@ -757,4 +791,19 @@ void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
 void MainWindow::on_btnResetZero_clicked()
 {
     dvm.calib(m_cur_dev_id, 0,100,0);
+}
+
+void MainWindow::on_action3_triggered()
+{
+    setCurrentStation(3);
+}
+
+void MainWindow::on_action4_triggered()
+{
+    setCurrentStation(4);
+}
+
+void MainWindow::on_action5_triggered()
+{
+    setCurrentStation(5);
 }

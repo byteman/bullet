@@ -18,6 +18,7 @@ public:
     virtual void GetKeyRange(double& min,double &max);
 private:
     QCPGraph* m_graph;
+    double m_min,m_max;
 };
 
 #endif // QCUSTOMPLOTCHANNEL_H

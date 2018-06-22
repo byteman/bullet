@@ -13,7 +13,7 @@ struct ILineChart{
     virtual void AppendDataArray(QVector<QVector<double>> &samples);
     virtual void CloseAll();
     virtual void Clear();
-    virtual void GetValueRange(double &min, double &max);
+    virtual void GetValueRange(int chan,double &min, double &max);
     virtual void SetFilter(IValueFilter* filter);
 protected:
     QVector<IGraphicChannel*> channels;
