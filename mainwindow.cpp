@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stationActions[4] = ui->action4;
     stationActions[5] = ui->action5;
 
-    setCurrentStation(m_cur_station);
+
     icon_device[0].addFile(":image/online.png");
     icon_device[1].addFile(":image/offline.png");
     icon_channel.addFile(":image/channel.png");
@@ -132,7 +132,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     dvm.start();
-    dvm.SetStation("工位1");
+    setCurrentStation(m_cur_station);
+    //dvm.SetStation("工位1");
     loadDeviceUI();
 
     m_waveWdg = new WaveWidget(ui->plot,8);

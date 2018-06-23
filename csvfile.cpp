@@ -102,12 +102,13 @@ bool CSVFile::LoadWaveFile(QString file, MsgWaveData &wvd)
 {
 
     QFile filein(file);
+
     if(!filein.exists()) return false;
 
 
     if (!filein.open(QIODevice::ReadOnly)) return false;
 
-
+    qDebug() << "name =" << file << "file size=" << filein.size();
     QTextStream stream(&filein);
     stream.readLine();
     ChannelData cda;
