@@ -1088,7 +1088,7 @@ border-bottom:2px;</string>
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">
@@ -1104,6 +1104,11 @@ border-bottom:2px;</string>
      <addaction name="action3"/>
      <addaction name="action4"/>
      <addaction name="action5"/>
+     <addaction name="actionW"/>
+     <addaction name="actionW_2"/>
+     <addaction name="action2"/>
+     <addaction name="action3_2"/>
+     <addaction name="action3_3"/>
     </widget>
     <addaction name="menu"/>
     <addaction name="actionReset"/>
@@ -1162,6 +1167,43 @@ border-bottom:2px;</string>
    </property>
    <property name="text">
     <string>工位5</string>
+   </property>
+  </action>
+  <action name="actionW">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位6</string>
+   </property>
+  </action>
+  <action name="actionW_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位7</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="text">
+    <string>工位8</string>
+   </property>
+  </action>
+  <action name="action3_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位9</string>
+   </property>
+  </action>
+  <action name="action3_3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>工位10</string>
    </property>
   </action>
  </widget>

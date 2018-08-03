@@ -61,6 +61,11 @@ MainWindow::MainWindow(QWidget *parent) :
     stationActions[3] = ui->action3;
     stationActions[4] = ui->action4;
     stationActions[5] = ui->action5;
+    stationActions[6] = ui->actionW;
+    stationActions[7] = ui->actionW_2;
+    stationActions[8] = ui->action2;
+    stationActions[9] = ui->action3_2;
+    stationActions[10] = ui->action3_3;
 
 
     icon_device[0].addFile(":image/online.png");
@@ -807,4 +812,29 @@ void MainWindow::on_action4_triggered()
 void MainWindow::on_action5_triggered()
 {
     setCurrentStation(5);
+}
+
+void MainWindow::on_actionW_triggered()
+{
+    setCurrentStation(6);
+}
+
+void MainWindow::on_actionW_2_triggered()
+{
+    setCurrentStation(7);
+}
+
+void MainWindow::on_action2_triggered()
+{
+    setCurrentStation(8);
+}
+
+void MainWindow::on_action3_2_triggered()
+{
+    setCurrentStation(9);
+}
+
+void MainWindow::on_action3_3_triggered()
+{
+    setCurrentStation(10);
 }

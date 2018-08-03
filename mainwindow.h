@@ -167,6 +167,16 @@ private slots:
 
     void on_action5_triggered();
 
+    void on_actionW_triggered();
+
+    void on_actionW_2_triggered();
+
+    void on_action2_triggered();
+
+    void on_action3_2_triggered();
+
+    void on_action3_3_triggered();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_page;
