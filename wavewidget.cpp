@@ -62,5 +62,6 @@ void WaveWidget::CloseAll()
 void WaveWidget::Clear()
 {
     m_chart->Clear();
+
 }
 

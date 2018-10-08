@@ -49,8 +49,9 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
 
     QVector<double> keys;
     QVector<double> values;
-    m_max = 0;
+
     int index = m_graph->dataCount();
+
     for(int i = 0; i < 1; i++)
     {
         keys.push_back(index++);
@@ -62,7 +63,7 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
             v = samples[i];
 
         }
-        if(i == 0) m_max = v;
+        if(index == 0) m_max = v;
         if(v > m_max ){
             m_max = v;
         }
@@ -79,6 +80,7 @@ void QCustomPlotChannel::Clear()
     QVector<double> keys;
 
     m_graph->setData(keys,keys);
+    m_max = 0;
 }
 
 

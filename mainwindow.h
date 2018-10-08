@@ -177,6 +177,10 @@ private slots:
 
     void on_action3_3_triggered();
 
+    void on_treeWidget_clicked(const QModelIndex &index);
+
+    void on_treeWidget_itemChanged(QTreeWidgetItem *item, int column);
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_page;
@@ -184,6 +188,8 @@ protected:
     int m_cur_station;
     WaveWidget *m_waveWdg;
     bool pause ;
+    int m_dot;
+    int m_full;
     QTimer m_timer;
     QMap<int,QLabel*>  chanels;
     QMap<int,QAction*> stationActions;

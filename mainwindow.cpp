@@ -51,11 +51,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     QSettings config("bullet.ini", QSettings::IniFormat);
-
+    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
 
     m_debug_bytes = config.value("/device/debug",20).toInt();
     m_refresh_count = config.value("/device/refresh",20).toInt();
     m_cur_station = config.value("/device/station",1).toInt();
+    int dot= 3 - config.value("/device/dot",3).toInt();
+    if(dot < 0 || dot > 3) dot = 0;
+
+    m_full =  config.value("/device/full",10000).toInt();
+    ui->edtFull->setText(QString("%1").arg(m_full));
+    ui->cbxDot->setCurrentIndex(dot);
+     m_dot  =  ui->cbxDot->currentText().toInt();
     stationActions[1] = ui->actionStation1;
     stationActions[2] = ui->actionStation2;
     stationActions[3] = ui->action3;
@@ -503,6 +510,12 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
        m_waveWdg->Display();
 
    }
+   for(int i = 0; i < 8; i++){
+       double min,max;
+       m_waveWdg->GetValueRange(i,min,max);
+       chanels[i]->setText(QString("%1").arg(max));
+
+   }
 
 }
 
@@ -523,7 +536,13 @@ void MainWindow::on_btnSavePara_clicked()
     para.mWorkMode = ui->cbxMode->currentIndex();
 
     toInt32U(ui->edtServerPort->text(),para.Server_ip.port);
+    QSettings config("bullet.ini", QSettings::IniFormat);
+    config.setIniCodec("UTF-8");
 
+    int dot = ui->cbxDot->currentText().toInt();
+    config.setValue("/device/dot",dot);
+    config.setValue("/device/full",ui->edtFull->text());
+    m_dot = dot;
     dvm.WriteParam(m_cur_dev_id,para);
 }
 
@@ -634,13 +653,40 @@ void MainWindow::onCalibResult(Device *dev, int chan, int index, int result)
 {
     QMessageBox::information(this,"信息","标定完成");
 }
+static QString float2string(float wf, int dot)
+{
+    char buf[64] = {0,};
+    switch(dot)
+    {
+
+        case 1:
+            qsnprintf(buf,64,"%0.1f",wf/10);
+            break;
+        case 2:
+            qsnprintf(buf,64,"%0.2f",wf/100);
+            break;
+        case 3:
+            qsnprintf(buf,64,"%0.3f",wf/1000);
+            break;
+        case 4:
+            qsnprintf(buf,64,"%0.4f",wf/10000);
+            break;
+        default:
+            qsnprintf(buf,64,"%d",int(wf));
+            break;
+    }
+    return buf;
+}
+
 
 void MainWindow::onRealTimeResult(Device *dev, RT_AD_RESULT result)
 {
     int index = ui->cbxChan->currentIndex();
     if(index == -1) return;
     ui->edtRtAd->setText(QString("%1").arg(result.chan[index].ad));
-    ui->edtrtWgt->setText(QString("%1").arg(result.chan[index].weight));
+    ui->edtrtWgt->setText(QString("%1").arg(float2string(result.chan[index].weight,m_dot)));
+    //ui->edtCalibWet->setText(QString("%1").arg(result.chan[index].weight));
+
 }
 
 void MainWindow::on_btnStart_clicked()
@@ -837,4 +883,14 @@ void MainWindow::on_action3_2_triggered()
 void MainWindow::on_action3_3_triggered()
 {
     setCurrentStation(10);
+}
+
+void MainWindow::on_treeWidget_clicked(const QModelIndex &index)
+{
+
+}
+
+void MainWindow::on_treeWidget_itemChanged(QTreeWidgetItem *item, int column)
+{
+
 }
