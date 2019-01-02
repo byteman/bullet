@@ -1,5 +1,5 @@
 #include "qcustomplotchannel.h"
-static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+static QColor colors[12] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan,Qt::magenta,Qt::yellow,Qt::darkRed,Qt::darkGreen};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
     m_graph(graph)

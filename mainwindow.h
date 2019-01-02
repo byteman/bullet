@@ -70,6 +70,7 @@ private:
     void checkAll(bool checked);
     void isAllCheck();
     void setCurrentStation(int index);
+    void simData();
 private slots:
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);

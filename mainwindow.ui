@@ -61,12 +61,25 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_3">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="title">
           <string>波形列表</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QListWidget" name="listWidget"/>
+           <widget class="QListWidget" name="listWidget">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -148,13 +161,6 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_26">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="rb1">
              <property name="styleSheet">
               <string notr="true">border-color: rgb(0, 170, 255);
@@ -166,23 +172,9 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="rb2">
              <property name="text">
               <string>通道2</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_19">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
@@ -194,23 +186,9 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_25">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="rb4">
              <property name="text">
               <string>通道4</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
@@ -222,23 +200,9 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_24">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="rb6">
              <property name="text">
               <string>通道6</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_23">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
@@ -250,13 +214,6 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_22">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="rb8">
              <property name="text">
               <string>通道8</string>
@@ -264,9 +221,30 @@ border-bottom:2px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_21">
+            <widget class="QCheckBox" name="checkBox">
              <property name="text">
-              <string/>
+              <string>通道9</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_2">
+             <property name="text">
+              <string>通道10</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_4">
+             <property name="text">
+              <string>通道11</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_3">
+             <property name="text">
+              <string>通道12</string>
              </property>
             </widget>
            </item>

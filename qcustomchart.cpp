@@ -8,7 +8,7 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
 
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
-   m_plot->yAxis->scaleRange(0,2000);
+   m_plot->yAxis->scaleRange(0,200);
    m_plot->xAxis->setLabel("时间");
    //m_plot->yAxis->setLabel("牛顿");
 
@@ -46,7 +46,7 @@ void QCustomChart::DisplayAllChannel(bool show)
     ILineChart::DisplayAllChannel(show);
     //qDebug() << "display " << t.elapsed();
     //t = QTime::currentTime();
-    m_plot->rescaleAxes();
+    //m_plot->rescaleAxes();
     //qDebug() << "rescaleAxes " << t.elapsed();
     //t = QTime::currentTime();
     m_plot->replot();
@@ -56,7 +56,7 @@ void QCustomChart::DisplayAllChannel(bool show)
 
 void QCustomChart::Display()
 {
-    m_plot->rescaleAxes();
+    //m_plot->rescaleAxes();
     m_plot->replot();
 }
 

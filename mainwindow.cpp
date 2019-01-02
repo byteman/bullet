@@ -23,7 +23,7 @@ void MainWindow::loadDeviceUI()
         item->setText(1,"100%");
         ui->treeWidget->addTopLevelItem(item);
 
-        item->setIcon(0,icon_device[1]);
+        item->setIcon(0,icon_device[0]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
         if(i == 0){
@@ -31,6 +31,7 @@ void MainWindow::loadDeviceUI()
             m_cur_dev_id = devices[i]->id();
         }
     }
+    #if 0
     chanels[0] = ui->label_12;
     chanels[1] = ui->label_19;
     chanels[2] = ui->label_25;
@@ -39,8 +40,10 @@ void MainWindow::loadDeviceUI()
     chanels[5] = ui->label_23;
     chanels[6] = ui->label_22;
     chanels[7] = ui->label_21;
+#endif
 
 }
+bool stopTime = false;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -148,10 +151,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //dvm.SetStation("工位1");
     loadDeviceUI();
 
-    m_waveWdg = new WaveWidget(ui->plot,8);
+    m_waveWdg = new WaveWidget(ui->plot,12);
 
-    this->startTimer(1000);
-
+    this->startTimer(100);
+stopTime = false;
     qDebug() <<"MainWindow thread id=" << thread();
 }
 
@@ -323,8 +326,34 @@ void MainWindow::DevOnline(Device *dev)
         item->setIcon(0,icon_device[0]);
     }
 }
+int get_random_number()
+ {
+     qsrand(QTime(0,0,0).msecsTo(QTime::currentTime()));
+     int a = qrand()%2;   //随机生成0到9的随机数
+     return a;
+}
+void MainWindow::simData()
+{
+    MsgWaveData data;
+    if(stopTime)return;
+    static int cout= 10;
+    for(int i = 0; i < 12; i++)
+    {
+        ChannelData ch;
+        for(int j = 0; j < 100; j++){
+            ch.push_back(get_random_number());
+        }
+        data.channels.push_back(ch);
+    }
+    m_waveWdg->AppendData(data);
+    static int count = 0;
+    if( (count++ % m_refresh_count) == 0)
+    {
 
+        m_waveWdg->Display();
 
+    }
+}
 void MainWindow::timerEvent(QTimerEvent *)
 {
     QList<Device*> devices;
@@ -337,9 +366,11 @@ void MainWindow::timerEvent(QTimerEvent *)
             if(devices[i]->online())
                 item->setIcon(0,icon_device[0]);
             else
-                item->setIcon(0,icon_device[1]);
+                item->setIcon(0,icon_device[0]);
         }
     }
+    simData();
+
 }
 
 void MainWindow::on_treeWidget_customContextMenuRequested(const QPoint &pos)
@@ -407,6 +438,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 void MainWindow::setCurrentStation(int index)
 {
     QSettings config("bullet.ini", QSettings::IniFormat);
+    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
+
     config.setValue("/device/station",index);
     dvm.SetStation(QString("工位%1").arg(index));
     QMapIterator<int, QAction*> i(stationActions);
@@ -434,7 +467,7 @@ void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
 
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < 12; i++){
         double min,max;
         m_waveWdg->GetValueRange(i,min,max);
         chanels[i]->setText(QString("%1").arg(max));
@@ -510,7 +543,7 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
        m_waveWdg->Display();
 
    }
-   for(int i = 0; i < 8; i++){
+   for(int i = 0; i < 12; i++){
        double min,max;
        m_waveWdg->GetValueRange(i,min,max);
        chanels[i]->setText(QString("%1").arg(max));
@@ -706,6 +739,7 @@ void MainWindow::on_btnStop_2_clicked()
         quint32 dev_id = item->data(0,Qt::UserRole).toInt();
         listFiles(dev_id);
     }
+    stopTime = true;
 
 }
 
