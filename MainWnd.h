@@ -36,6 +36,7 @@ protected:
 private:
         Ui::MainWnd *ui;
      MyDevices* devices;
+     WaveWidget* wave;
      QString m_cur_dev_id;
      DeviceManager dvm;
      QIcon icon_device[2];
@@ -50,6 +51,7 @@ private:
      void Init();
      QTreeWidgetItem *findItemById(QString id);
      void AddLog(QString msg);
+     void simData();
 private slots:
     void initForm();
     void buttonClick();
@@ -70,6 +72,10 @@ private slots:
     void DevOffline(Device *dev);
     void DevOnline(Device *dev);
     void on_mytime_out();
+    void on_treeWidget_doubleClicked(const QModelIndex &index);
+
+    void on_btnShou_clicked();
+
 protected:
     virtual void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);

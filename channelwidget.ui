@@ -86,7 +86,7 @@ background-color: rgb(0, 85, 127);</string>
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="img.qrc">
           <normaloff>:/image/alarm.png</normaloff>:/image/alarm.png</iconset>
         </property>
         <property name="iconSize">
@@ -103,7 +103,7 @@ background-color: rgb(0, 85, 127);</string>
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="img.qrc">
           <normaloff>:/image/start.png</normaloff>:/image/start.png</iconset>
         </property>
         <property name="iconSize">
@@ -126,7 +126,7 @@ background-color: rgb(0, 85, 127);</string>
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="main.qrc">
           <normaloff>:/image/main_config.png</normaloff>:/image/main_config.png</iconset>
         </property>
         <property name="iconSize">
@@ -217,7 +217,7 @@ background-color: rgb(0, 85, 127);</string>
         </property>
         <property name="font">
          <font>
-          <family>Arial</family>
+          <family>微软雅黑</family>
           <pointsize>48</pointsize>
           <weight>50</weight>
           <italic>false</italic>
@@ -225,7 +225,7 @@ background-color: rgb(0, 85, 127);</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">font: 48pt &quot;Arial&quot;;</string>
+         <string notr="true">font: 48pt &quot;微软雅黑&quot;;</string>
         </property>
         <property name="text">
          <string>000</string>
@@ -258,6 +258,9 @@ background-color: rgb(0, 85, 127);</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="img.qrc"/>
+  <include location="main.qrc"/>
+ </resources>
  <connections/>
 </ui>

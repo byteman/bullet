@@ -16,7 +16,7 @@ debug{
 }
 INCLUDEPATH+=./ext/
 LIBS+=-L./ext/lib -lPocoNetd -lPocoFoundationd
-DEFINES += QCUSTOMPLOT_USE_OPENGL
+#DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
     tcpserver.cpp \
     device.cpp \
@@ -46,7 +46,9 @@ SOURCES += main.cpp\
     iconhelper.cpp \
     channelwidget.cpp \
     mydevices.cpp \
-    MainWnd.cpp
+    MainWnd.cpp \
+    dialogparams.cpp \
+    dialogcalib.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -79,10 +81,14 @@ HEADERS  += tcpserver.h \
     appinit.h \
     iconhelper.h \
     channelwidget.h \
-    mydevices.h
+    mydevices.h \
+    dialogparams.h \
+    dialogcalib.h
 
 FORMS    += MainWnd.ui \
-    channelwidget.ui
+    channelwidget.ui \
+    dialogparams.ui \
+    dialogcalib.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

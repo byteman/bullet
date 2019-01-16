@@ -1,4 +1,4 @@
-#ifndef MYDEVICES_H
+﻿#ifndef MYDEVICES_H
 #define MYDEVICES_H
 
 #include <QObject>
@@ -39,7 +39,8 @@ private:
     QGroupBox* m_container;
     QGridLayout* qlayout;
     QMap<int,QByteArray > m_values;
-
+    bool m_zoom;
+    int  m_addr;
     //CSVFile m_csv;
     int m_num;
     int m_start;

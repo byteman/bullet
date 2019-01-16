@@ -1,5 +1,43 @@
-#include "qcustomchart.h"
+﻿#include "qcustomchart.h"
 #include "qcustomplotchannel.h"
+void QCustomChart::Init()
+{
+   QColor TextColor(255,255,255);
+   int TextWidth = 2;
+
+
+   QLinearGradient plotGradient;
+   plotGradient.setStart(0, 0);
+   plotGradient.setFinalStop(0, 350);
+   plotGradient.setColorAt(0, QColor(80, 80, 80));
+   plotGradient.setColorAt(1, QColor(50, 50, 50));
+   m_plot->setBackground(plotGradient);
+
+   QLinearGradient axisRectGradient;
+   axisRectGradient.setStart(0, 0);
+   axisRectGradient.setFinalStop(0, 350);
+   axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+   axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+   m_plot->axisRect()->setBackground(axisRectGradient);
+
+
+   m_plot->yAxis->setLabelColor(TextColor);
+   m_plot->xAxis->setLabelColor(TextColor);
+   m_plot->xAxis->setLabelFont(QFont("微软雅黑",16,QFont::Bold));
+   m_plot->yAxis->setLabelFont(QFont("微软雅黑",16,QFont::Bold));
+   m_plot->xAxis->setTickLabelColor(TextColor);
+   m_plot->yAxis->setTickLabelColor(TextColor);
+
+   //m_plot->legend->setTextColor(TextColor);
+
+   m_plot->xAxis->setBasePen(QPen(TextColor, TextWidth));
+   m_plot->yAxis->setBasePen(QPen(TextColor, TextWidth));
+   m_plot->xAxis->setTickPen(QPen(TextColor, TextWidth));
+   m_plot->yAxis->setTickPen(QPen(TextColor, TextWidth));
+   m_plot->xAxis->setSubTickPen(QPen(TextColor, TextWidth));
+   m_plot->yAxis->setSubTickPen(QPen(TextColor, TextWidth));
+
+}
 QCustomChart::QCustomChart(QCustomPlot *parent, int num):
     m_plot(parent)
 {
@@ -9,19 +47,21 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
    m_plot->xAxis->scaleRange(0,200);
    m_plot->yAxis->scaleRange(0,2000);
 
-   m_plot->xAxis->setLabel("时间");
-   //m_plot->yAxis->setLabel("牛顿");
+
+   m_plot->xAxis->setLabel(QString::fromLocal8Bit("时间"));
+   m_plot->yAxis->setLabel(QString::fromLocal8Bit("牛"));
 
    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
    timeTicker->setTimeFormat("%h:%m:%s");
    m_plot->xAxis->setTicker(timeTicker);
-   m_plot->axisRect()->setupFullAxesBox();
-   //customPlot->yAxis->setRange(-1.2, 1.2);
+   //m_plot->axisRect()->setupFullAxesBox();
+   m_plot->yAxis->setRange(-100, 100);
 
    m_plot->yAxis->setScaleRatio(m_plot->yAxis,1.3);
-     //ui.ImgQCustomPlot->yAxis->setScaleRatio(ui.ImgQCustomPlot->xAxis, 1);
-   m_plot->setOpenGl(true);
-   //SetChannel(0,num);
+
+   Init();
+   //m_plot->setOpenGl(true);开这句要崩溃
+
 }
 
 void QCustomChart::SetChannel(int start,int num)
@@ -37,10 +77,6 @@ void QCustomChart::SetChannel(int start,int num)
     }
 
 }
-
-
-
-
 void QCustomChart::DisplayChannel(int chan,bool show)
 {
     ILineChart::DisplayChannel(chan,show);

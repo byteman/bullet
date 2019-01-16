@@ -82,7 +82,7 @@ void MainWnd::Init()
 
     //m_waveWdg = new WaveWidget(ui->plot,12);
 
-    this->startTimer(100);
+    //this->startTimer(100);
     on_btnMenu_Max_clicked();
     //stopTime = false;
     qDebug() <<"MainWindow thread id=" << thread();
@@ -239,6 +239,24 @@ void MainWnd::loadDeviceUI()
         }
     }
 }
+int get_random_number()
+ {
+     qsrand(QTime(0,0,0).msecsTo(QTime::currentTime()));
+     int a = qrand()%100;   //随机生成0到9的随机数
+     return a;
+}
+void MainWnd::simData()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        devices->DisplayWeight(i,get_random_number(),0,0);
+        //Sleep(i);
+
+    }
+    //wave->AppendData(0,get_random_number());
+    //wave->DisplayChannel(0,true);
+
+}
 bool MainWnd::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonDblClick) {
@@ -318,6 +336,8 @@ void MainWnd::initForm()
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
     ui->gbDevices->installEventFilter(this);
+    //wave = new WaveWidget(ui->plot3,1);
+    //wave->SetChannel(0,1);
     loadDeviceUI();
 }
 
@@ -391,4 +411,26 @@ void MainWnd::resizeEvent(QResizeEvent *e)
 void MainWnd::showEvent(QShowEvent *)
 {
 
+}
+
+void MainWnd::on_treeWidget_doubleClicked(const QModelIndex &index)
+{
+    qDebug() <<"click";
+}
+void MainWnd::on_btnShou_clicked()
+{
+    static bool hide = false;
+    if(!hide){
+        ui->treeWidget->hide();
+        ui->btnShou->setIcon(QIcon(":/image/fang.png"));
+        qDebug() << "hide";
+        //ui->widgetDocker->setStyleSheet("border:0px;");
+        //ui->widgetDocker->resize(ui->btnShou->width(),ui->widgetDocker->height());
+
+    }else{
+        ui->btnShou->setIcon(QIcon(":/image/shou.png"));
+
+        ui->treeWidget->show();
+    }
+      hide =!hide;
 }

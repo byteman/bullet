@@ -9,10 +9,11 @@ public:
     QCustomChart(QCustomPlot *parent, int num);
 private:
     QCustomPlot *m_plot;
-
+    QColor m_color;
     // ILineChart interface
     void SetChannel(int start,int num);
     void AddChannel(QString name);
+    void Init();
 public:
     virtual void DisplayChannel(int chan=0,bool bshow=true);
     virtual void DisplayAllChannel(bool show);

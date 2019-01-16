@@ -10,5 +10,9 @@
         <file>image/stop.png</file>
         <file>image/alarm.png</file>
         <file>image/device.png</file>
+        <file>image/close.png</file>
+        <file>image/open.png</file>
+        <file>image/fang.png</file>
+        <file>image/shou.png</file>
     </qresource>
 </RCC>

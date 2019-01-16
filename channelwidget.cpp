@@ -1,4 +1,4 @@
-#include "channelwidget.h"
+﻿#include "channelwidget.h"
 #include "ui_channelwidget.h"
 #include "utils.h"
 #include "command.h"
@@ -18,7 +18,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     ui->lbl_weight->setText("");
 
     m_waveWdg = new WaveWidget(ui->plot2,1);
-
+    m_waveWdg->SetChannel(addr,1);
     m_waveWdg->Hide();
 }
 
@@ -26,11 +26,11 @@ void ChannelWidget::Show()
 {
     if(m_zoom){
 
-       ui->lbl_weight->setStyleSheet("font-size : 128px");
+       //ui->lbl_weight->setStyleSheet("font-size : 128px");
        ui->lbl_weight->hide();
        m_waveWdg->Show();
     }else{
-       ui->lbl_weight->setStyleSheet("font-size : 16pt");
+       ui->lbl_weight->setStyleSheet("font-size : 48pt");
        ui->lbl_weight->show();
        m_waveWdg->Hide();
 
@@ -84,7 +84,11 @@ QString ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
     resetTimeout();
 
     ui->lbl_weight->setText(ws);
-    m_waveWdg->AppendData(0,utils::int2float(wf,dot));
+    if(m_zoom){
+        m_waveWdg->AppendData(0,utils::int2float(wf,dot));
+        m_waveWdg->DisplayAllChannel(true);
+    }
+
     return wt;
 
 }
@@ -102,7 +106,7 @@ void ChannelWidget::mouseDoubleClickEvent(QMouseEvent *)
     //qDebug() <<m_addr <<" double click";
     m_zoom=!m_zoom;
     if(m_zoom){
-
+        m_waveWdg->Clear();
        ui->lbl_weight->setStyleSheet("font-size : 128px");
     }else{
        ui->lbl_weight->setStyleSheet("font-size : 16pt");

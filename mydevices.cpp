@@ -1,4 +1,4 @@
-#include "mydevices.h"
+﻿#include "mydevices.h"
 #include <QGridLayout>
 #include "utils.h"
 #include <QDir>
@@ -8,7 +8,9 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
     m_container(parent),
     m_max(10),
     m_row(2),m_col(4),
-    m_num(0),m_max_sample(5000)
+    m_num(0),m_max_sample(5000),
+    m_addr(0),
+    m_zoom(false)
 {
     for(int i = 0; i < max; i++ )
     {
@@ -33,7 +35,8 @@ void MyDevices::zoomDevice(int addr)
 }
 void MyDevices::onDoubleClick(int addr,bool zoom)
 {
-
+    m_zoom = zoom;
+    m_addr = addr;
     if(zoom){
        zoomDevice(addr);
     }else{
@@ -60,6 +63,10 @@ void MyDevices::clearAll()
 
 void MyDevices::Resize()
 {
+    if(m_zoom){
+       zoomDevice(m_addr);
+       return;
+    }
     int width  = m_container->width()  - (m_col-1)*COL_S - (MAR_L+MAR_R);
     int height = m_container->height() - (m_row-1)*ROW_S - (MAR_T+MAR_B);
 
@@ -86,6 +93,7 @@ void MyDevices::SetDeviceNum(int start, int num)
     m_start = start;
     m_end = start+num ;
     m_values.clear();
+
 }
 
 void MyDevices::SetMaxSampleNum(int max)
@@ -113,14 +121,11 @@ void MyDevices::SetUnit(QString unit)
 
 void MyDevices::SetAlarmSetting(int addr,int alarmSetting, double value)
 {
-    //for(int i = 0; i < widgets.size();i++)
-    //{
+
     if(addr < widgets.size() && addr >= 0)
     {
         //widgets[addr]->SetAlarmSetting(alarmSetting,value);
     }
-
-    //}
 }
 
 void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
