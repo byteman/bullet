@@ -129,6 +129,7 @@ void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
     {
 
         QString str = widgets[addr]->DisplayWeight(weight,state,dot);
+
     }
 }
 void MyDevices::GetNum(int &start, int &num)

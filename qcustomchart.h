@@ -11,11 +11,11 @@ private:
     QCustomPlot *m_plot;
 
     // ILineChart interface
-    void SetChannel(int num);
+    void SetChannel(int start,int num);
+    void AddChannel(QString name);
 public:
     virtual void DisplayChannel(int chan=0,bool bshow=true);
     virtual void DisplayAllChannel(bool show);
-    virtual void Display();
     // ILineChart interface
 
 

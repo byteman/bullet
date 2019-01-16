@@ -1,52 +1,70 @@
 #include "wavewidget.h"
-//#include <QValueAxis>
-//#include "qchartlinechart.h"
 #include "qcustomchart.h"
-#include "shiftfilter.h"
-WaveWidget::WaveWidget(QWidget *parent, int num,int shift):
-    m_parent(parent)
+WaveWidget::WaveWidget(QWidget *parent, int num):
+    m_parent(parent),
+    m_start(0),
+    m_num(0)
 {
 
-    //m_chart = new QChartLineChart(parent,num);
-
     m_chart = new QCustomChart((QCustomPlot*)parent,num);
-    m_chart->SetFilter(new ShiftFilter(shift));
 
 }
-//WaveWidget::WaveWidget(QCustomPlot* parent,int num)
-//{
-//    m_chart = new QCustomChart(parent,num);
-//}
 WaveWidget::~WaveWidget()
 {
 
 }
-void WaveWidget::SetData(MsgWaveData &wvd)
-{
-    m_chart->SetDataArray(wvd.channels);
 
-}
-
-
-void WaveWidget::AppendData(MsgWaveData &wvd)
-{
-    m_chart->AppendDataArray(wvd.channels);
-}
 void WaveWidget::DisplayAllChannel(bool show)
 {
     m_chart->DisplayAllChannel(show);
-
-
 }
-void WaveWidget::GetValueRange(int chan, double &min, double &max)
+
+//void WaveWidget::SetData(ChannelsData &waves)
+//{
+//    QMapIterator<int, ChannelSample> i(waves);
+//    int start=33,num=0;
+
+//    while (i.hasNext()) {
+//        i.next();
+//        if(i.key() < start)
+//        {
+//            start = i.key();
+//        }
+//        num++;
+
+//       // m_chart->SetChanDataArray(chan,waves[i.key()]);
+//        //cout << i.key() << ": " << i.value() << endl;
+//    }
+//    if(num > 0)
+//    {
+//        m_chart->SetChannel(start,num);
+//        for(int i = 0; i < num; i++)
+//        {
+//            m_chart->SetChanDataArray(i,waves[start+i]);
+//        }
+//    }
+
+//}
+
+void WaveWidget::AppendData(int addr, float value)
+{
+    if(m_start == 0) return;
+    int chan = addr - m_start;
+    if(chan < 0){
+        return;
+    }
+    m_chart->AppendData(chan,value);
+}
+
+void WaveWidget::SetChannel(int start,int num)
 {
 
-    m_chart->GetValueRange(chan,min,max);
-    //channels[index]->GetValueRange(min,max);
-}
-void WaveWidget::Display()
-{
-    m_chart->Display();
+    if((num == m_num) && (start==m_start)) return;
+    m_start = start;
+    m_num   = num;
+    if(m_chart!=NULL){
+        m_chart->SetChannel(start,num);
+    }
 }
 
 void WaveWidget::DisplayChannel(int chan,bool bshow)
@@ -63,28 +81,22 @@ void WaveWidget::CloseAll()
 void WaveWidget::Clear()
 {
     m_chart->Clear();
-
 }
-
+//void WaveWidget::AppendDataArr(ChannelDataArray &wvd)
+//{
+//    //m_chart->AppendDataArray(wvd);
+//}
 void WaveWidget::Hide()
 {
     if(m_parent){
-        //m_parent->setGeometry(0,0,0,0);
-           m_parent->hide();
+         m_parent->hide();
     }
 
 }
 void WaveWidget::Show()
 {
     if(m_parent){
-        //m_parent->setGeometry(0,0,1000,1000);
-     m_parent->show();
+        m_parent->show();
     }
 
-}
-
-
-void WaveWidget::AppendData(int addr, float value)
-{
-    m_chart->AppendData(chan,value);
 }

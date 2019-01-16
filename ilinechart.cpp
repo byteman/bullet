@@ -11,11 +11,6 @@ void ILineChart::DisplayAllChannel(bool show)
 
 }
 
-void ILineChart::Display()
-{
-
-}
-
 
 void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
 {
@@ -24,6 +19,12 @@ void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
 
         channels[i]->AddDataArray(samples[i]);
     }
+}
+
+void ILineChart::AppendData(int chan,float value)
+{
+    if(chan >= channels.size()) return;
+    channels[chan]->AddData(0,value);
 }
 #if 0
 void ILineChart::SetDataArray(QVector<QVector<double>> &samples)
@@ -63,6 +64,12 @@ void ILineChart::SetDataArray(QVector<QVector<double>> &samples)
     }
 
 }
+
+void ILineChart::SetChanDataArray(int chan, QVector<double> &samples)
+{
+    if(chan >= channels.size()) return;
+    channels[chan]->SetDataArray(samples);
+}
 #endif
 void ILineChart::InitChannel(QWidget *parent, int num)
 {
@@ -78,6 +85,8 @@ void ILineChart::InitChannel(QWidget *parent, int num)
     //Qt::darkCyan	16	Dark cyan (#008080)
 
 }
+
+
 
 void ILineChart::DisplayChannel(int chan,bool bshow)
 {
@@ -104,14 +113,16 @@ void ILineChart::Clear()
     }
 }
 
-void ILineChart::GetValueRange(int chan, double &min, double &max)
+void ILineChart::SetChannel(int start, int num)
 {
-    int index = (chan >= channels.size())?0:chan;
 
-    channels[index]->GetValueRange(min,max);
 }
 
-
+void ILineChart::GetValueRange(double &min, double &max)
+{
+    min = m_min;
+    max = m_max;
+}
 
 void ILineChart::SetFilter(IValueFilter *filter)
 {
@@ -123,5 +134,5 @@ void ILineChart::SetFilter(IValueFilter *filter)
 
 double ILineChart::filter(double value)
 {
-    return 0;
+    return value;
 }

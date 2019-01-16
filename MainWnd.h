@@ -73,6 +73,10 @@ private slots:
 protected:
     virtual void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);
+
+    // QWidget interface
+protected:
+    virtual void showEvent(QShowEvent *);
 };
 
 #endif // UIDEMO01_H

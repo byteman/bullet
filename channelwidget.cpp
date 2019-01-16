@@ -84,6 +84,7 @@ QString ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
     resetTimeout();
 
     ui->lbl_weight->setText(ws);
+    m_waveWdg->AppendData(0,utils::int2float(wf,dot));
     return wt;
 
 }

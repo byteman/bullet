@@ -1,15 +1,21 @@
 #include "qcustomplotchannel.h"
-static QColor colors[12] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan,Qt::magenta,Qt::yellow,Qt::darkRed,Qt::darkGreen};
+static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
     m_graph(graph)
 {
 //    m_max = -10000;
 //    m_min = 10000;
-    m_graph->setName(QString("通道%1").arg(index+1));
-    QPen pen(colors[index]);
-    pen.setWidth(2);
-    graph->setPen(pen);
+    if(index < 8)
+    {
+        QPen pen(colors[index]);
+        pen.setWidth(2);
+        graph->setPen(pen);
+    }
+
+
+    Clear();
+
 }
 
 void QCustomPlotChannel::SetDataArray(QVector<double> &values)
@@ -23,7 +29,6 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
         keys.append(i);
 
     }
-    m_max = 0;
     for(int i = 0; i < values.size();i++)
     {
         double v = values[i];
@@ -31,8 +36,6 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
         {
             v = m_filter->filter(v);
         }
-        if(i == 0) m_max = v;
-        if(v > m_max ) m_max =v;
         values2.push_back(v);
     }
 
@@ -41,7 +44,12 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
 
 void QCustomPlotChannel::AddData(double key, double value)
 {
+    //int index = m_graph->dataCount();
+    //time = QTime::currentTime();
+    // calculate two new data points:
+    key = time.elapsed()/1000.0;
 
+    m_graph->addData(key,value);
 }
 
 void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
@@ -49,27 +57,17 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
 
     QVector<double> keys;
     QVector<double> values;
-
     int index = m_graph->dataCount();
-
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < samples.size(); i++)
     {
         keys.push_back(index++);
-        double v = 0;
         if(m_filter!=NULL)
         {
-            v = m_filter->filter(samples[i]);
+            values.push_back(m_filter->filter(samples[i]));
         }else{
-            v = samples[i];
-
+            values.push_back(samples[i]);
         }
-        if(index == 0) m_max = v;
-        if(v > m_max ){
-            m_max = v;
-        }
-        values.push_back(v);
     }
-
     m_graph->addData(keys,values);
 
 }
@@ -78,9 +76,8 @@ void QCustomPlotChannel::Clear()
 {
 
     QVector<double> keys;
-
+    time = QTime::currentTime();
     m_graph->setData(keys,keys);
-    m_max = 0;
 }
 
 
@@ -89,10 +86,14 @@ void QCustomPlotChannel::SetPen(QPen &pen)
 
 }
 
+void QCustomPlotChannel::SetName(QString &name)
+{
+    m_graph->setName(name);
+}
+
 void QCustomPlotChannel::GetValueRange(double &min, double &max)
 {
-    max = m_max;
-    min = m_min;
+
 }
 
 void QCustomPlotChannel::GetKeyRange(double &min, double &max)

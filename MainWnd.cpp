@@ -246,6 +246,10 @@ bool MainWnd::eventFilter(QObject *watched, QEvent *event)
             on_btnMenu_Max_clicked();
             return true;
         }
+    }else if (event->type() == QEvent::Resize) {
+        if(devices!=NULL)
+            devices->Resize();
+        return true;
     }
 
     return QWidget::eventFilter(watched, event);
@@ -313,6 +317,7 @@ void MainWnd::initForm()
     devices = new MyDevices(36,ui->gbDevices);
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
+    ui->gbDevices->installEventFilter(this);
     loadDeviceUI();
 }
 
@@ -379,5 +384,11 @@ void MainWnd::on_btnExit_clicked()
 void MainWnd::resizeEvent(QResizeEvent *e)
 {
 //    qDebug() << e->size();
-    devices->Resize();
+
+}
+
+
+void MainWnd::showEvent(QShowEvent *)
+{
+
 }

@@ -14,11 +14,12 @@ public:
     virtual void Clear();
     virtual int  Size();
     virtual void SetPen(QPen& pen);
+    virtual void SetName(QString &name);
     virtual void GetValueRange(double& min,double &max);
     virtual void GetKeyRange(double& min,double &max);
 private:
     QCPGraph* m_graph;
-    double m_min,m_max;
+    QTime time;
 };
 
 #endif // QCUSTOMPLOTCHANNEL_H
