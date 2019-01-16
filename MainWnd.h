@@ -83,6 +83,10 @@ protected:
     // QWidget interface
 protected:
     virtual void showEvent(QShowEvent *);
+
+    // QWidget interface
+protected:
+    virtual void closeEvent(QCloseEvent *);
 };
 
 #endif // UIDEMO01_H

@@ -364,7 +364,7 @@ void MainWnd::buttonClick()
     } else if (name == "btnHelp") {
         ui->stackedWidget->setCurrentIndex(3);
     } else if (name == "btnExit") {
-        exit(0);
+        this->close();
     }
 }
 
@@ -433,4 +433,17 @@ void MainWnd::on_btnShou_clicked()
         ui->treeWidget->show();
     }
       hide =!hide;
+}
+#include "myhelper.h"
+
+void MainWnd::closeEvent(QCloseEvent *event)
+{
+    int result = myHelper::ShowMessageBoxQuesion(QString::fromLocal8Bit("确定离开?"));
+       if (result == 1) {
+           event->accept();
+       } else {
+           event->ignore();
+       }
+
+
 }

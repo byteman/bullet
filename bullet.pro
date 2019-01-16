@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     mydevices.cpp \
     MainWnd.cpp \
     dialogparams.cpp \
-    dialogcalib.cpp
+    dialogcalib.cpp \
+    frmmessagebox.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -83,12 +84,14 @@ HEADERS  += tcpserver.h \
     channelwidget.h \
     mydevices.h \
     dialogparams.h \
-    dialogcalib.h
+    dialogcalib.h \
+    frmmessagebox.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
     dialogparams.ui \
-    dialogcalib.ui
+    dialogcalib.ui \
+    frmmessagebox.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

@@ -50,6 +50,8 @@ public:
                   const QString &normalTextColor = "#EEEEEE",
                   const QString &darkTextColor = "#FFFFFF");
 
+    void SetIcon(QLabel *lab, QChar c, int size);
+    void SetIcon(QPushButton *btn, QChar c, int size);
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 

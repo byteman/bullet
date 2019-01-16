@@ -17,10 +17,8 @@
    <string notr="true">background-color: rgb(163, 163, 163);
 font: 12pt &quot;微软雅黑&quot;;
 color: rgb(255, 255, 255);
-
-
-	border:1px solid #242424;
-	border-radius:5px;
+border:1px solid #246424;
+border-radius:3px;
 
 </string>
   </property>

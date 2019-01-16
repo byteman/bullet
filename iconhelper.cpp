@@ -26,6 +26,20 @@ IconHelper::IconHelper(QObject *) : QObject(qApp)
     }
 }
 
+void IconHelper::SetIcon(QLabel* lab, QChar c, int size)
+{
+    iconFont.setPointSize(size);
+    lab->setFont(iconFont);
+    lab->setText(c);
+}
+
+void IconHelper::SetIcon(QPushButton* btn, QChar c, int size)
+{
+    iconFont.setPointSize(size);
+    btn->setFont(iconFont);
+    btn->setText(c);
+}
+
 void IconHelper::setIcon(QLabel *lab, QChar c, quint32 size)
 {
     iconFont.setPointSize(size);
