@@ -19,25 +19,25 @@ public:
     void load(int index, int channel);
     //发送全部设备最近的波形文件
     bool SendAllWave(bool start);
-    bool SendWave(quint8 dev_id,bool start);
+    bool SendWave(QString dev_id,bool start);
     bool StartAll(bool start);
 
-    bool SyncFile(quint8 dev_id,QString file);
+    bool SyncFile(QString dev_id,QString file);
     bool ResetAllDevice(quint8 delay_s);
-    bool ResetDevice(quint32 dev_id,quint8 delay_s);
-    bool ListFiles(quint32 dev_id,int page, int size);
-    void calib(quint32 dev_id,quint8 chan,quint8 index,int weight);
+    bool ResetDevice(QString dev_id,quint8 delay_s);
+    bool ListFiles(QString dev_id,int page, int size);
+    void calib(QString dev_id,quint8 chan,quint8 index,int weight);
 
-    void ReadParam(quint32 dev_id);
-    void ReadRt(quint32 dev_id);
-    void WriteParam(quint32 dev_id , MsgDevicePara &para);
+    void ReadParam(QString dev_id);
+    void ReadRt(QString dev_id);
+    void WriteParam(QString dev_id , MsgDevicePara &para);
     void SetStation(QString station);
     void ListDevice(QList<Device*> &devices);
-    Device* GetDevice(quint32 dev_id);
-    void GetDeviceWaveFiles(quint32 dev_id,QStringList &files);
-    bool LoadWaveFile(quint32 dev_id, QString file, MsgWaveData& wvd);
+    Device* GetDevice(QString dev_id);
+    void GetDeviceWaveFiles(QString dev_id,QStringList &files);
+    bool LoadWaveFile(QString dev_id, QString file, MsgWaveData& wvd);
 
-    bool RemoveFile(quint8 dev_id, QString file);
+    bool RemoveFile(QString dev_id, QString file);
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
@@ -52,8 +52,8 @@ public slots:
 private:
     int m_dev_num;
 
-    QMap<quint32,QString> id_name_map;
-    QMap<quint32,Device*> dev_map;
+    QMap<QString,QString> id_name_map;
+    QMap<QString,Device*> dev_map;
     QStringList names;
     QStringList ids;
     ProtoParser parser;

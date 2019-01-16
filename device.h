@@ -22,8 +22,8 @@ public:
     QString name() const;
     void setName(const QString &name);
     void onMessage(ProtoMessage &reqest, ProtoMessage &response);
-    quint32 id() const;
-    void setId(const quint32 &id);
+    QString id() const;
+    void setId(const QString &id);
     void SaveWave(ProtoMessage &msg);
     QString station() const;
     void setStation(const QString &station);
@@ -42,7 +42,7 @@ public:
     bool ListFiles(int page,int size);
     bool Reset(quint8 delay_s);
     bool calib(quint8 chan,  int point,int weigh);
-    qint32 ad() const;
+    quint32 ad() const;
     void setAd(const qint32 &ad);
     qint64 SendData(QByteArray &data);
     qint32 weight() const;
@@ -53,7 +53,7 @@ private:
     SyncFile m_sync;
     qint32 m_ad;
     qint32 m_weight;
-    quint32 m_dev_id;
+    QString m_dev_id;
     quint16 m_serial_id;
     QString m_name;
     QString m_station;

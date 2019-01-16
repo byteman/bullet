@@ -21,14 +21,17 @@ public:
     void SetChannel(int num);
     void CloseAll();
     void Clear();
+    void Hide();
 
     void SetData(MsgWaveData &wvd);
     void AppendData(MsgWaveData &wvd);
 
     void GetValueRange(int chan, double &min, double &max);
+    void Show();
 private:
 
     int m_num;
+    QWidget* m_parent;
     ILineChart* m_chart;
 
 };

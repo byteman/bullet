@@ -5,6 +5,7 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
 {
    m_plot->axisRect()->setupFullAxesBox();
    m_plot->legend->setVisible(true);
+m_plot->setBackground(QBrush(QColor(66,66,66)));
 
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
@@ -14,9 +15,12 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
 
    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
    timeTicker->setTimeFormat("%h:%m:%s");
+
    m_plot->xAxis->setTicker(timeTicker);
+   m_plot->yAxis->setLabelColor(QColor(255,255,255));
+      m_plot->xAxis->setLabelColor(QColor(255,255,255));
    m_plot->axisRect()->setupFullAxesBox();
-   m_plot->setOpenGl(true);
+   //m_plot->setOpenGl(true);
    SetChannel(num);
 }
 

@@ -30,11 +30,15 @@ void Device::setOnline(bool online)
 {
     m_online = online;
 }
+#include <memory.h>
+#include <stdlib.h>
+#include <string.h>
 qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 {
     ProtoMessage msg;
     msg.head.cmd_id = cmd;
-    msg.head.device_id = m_dev_id;
+    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
+    //msg.head.device_id = m_dev_id;
     msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = m_sess_id++;
     msg.is_ack = false;
@@ -55,7 +59,7 @@ bool Device::calib(quint8 chan, int point,int weight)
     WriteCmd(MSG_CALIB,data);
     return true;
 }
-qint32 Device::ad() const
+quint32 Device::ad() const
 {
     return m_ad;
 }
@@ -114,7 +118,7 @@ qint64 Device::SendStartWave(quint16 sess_id,bool start)
 {
     ProtoMessage msg;
     msg.head.cmd_id = MSG_START_WAVE;
-    msg.head.device_id = m_dev_id;
+    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
     msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = sess_id;
     msg.is_ack = false;
@@ -188,7 +192,7 @@ qint64 Device::StartRecWave(quint16 sess_id,bool start)
 
     }
     m_start_send = start;
-    msg.head.device_id = m_dev_id;
+    //msg.head.device_id = m_dev_id;
     msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = sess_id;
     msg.is_ack = false;
@@ -242,11 +246,6 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         }
         m_sync.StartSync(this,BuildFileName(name),total);
 
-    }
-    //设备回应删除成功
-    else if(req.head.cmd_id == MSG_REMOVE_FILE)
-    {
-        emit CommResult(this,req.head.cmd_id,0);
     }
     //读取某个波形文件的历史数据.
     else if(req.head.cmd_id == MSG_WAVE_DATA)
@@ -310,54 +309,15 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             emit RealTimeResult(this,rst);
         }
     }
-    //枚举文件的回应
-    else if(req.head.cmd_id == MSG_ENUM_FILES)
-    {
-        QByteArray &data = req.data;
-
-        ENUM_FILE_RESP resp;
-        resp.total_page  = (data[1]<<8) + data[0];
-        resp.cur_page = (data[3]<<8) + data[2];
-        int num = (data[5]<<8) + data[4];
-        int off = 6;
-        QByteArray attr = data.mid(off,num);
-        int length = data.size() - off - num;
-        if(length > 0)
-        {
-            QString files = data.right(length);
-            qDebug() << "files=" << files;
-            QStringList filelist = files.split(",");
-            if( filelist.size()!=num)
-            {
-                emit Notify("file num error");
-                return;
-            }
-
-            for(int i = 0; i < num; i++)
-            {
-                MsgFileInfo finfo;
-
-                if(filelist[i].contains("xls")){
-                    continue;
-                }
-                finfo.attr = attr[i];
-                finfo.name = filelist[i];
-                resp.files.push_back(finfo);
-            }
-            emit EnumFiles(this,resp);
-
-        }
 
 
-
-    }
 }
-quint32 Device::id() const
+QString Device::id() const
 {
     return m_dev_id;
 }
 
-void Device::setId(const quint32 &id)
+void Device::setId(const QString &id)
 {
     m_dev_id = id;
 }
@@ -409,16 +369,9 @@ void Device::ProcessWave(int index,QByteArray &data)
     {
         for(int j = 0; j < 8; j++)
         {
-//           quint8 v1 = (data[i*8+j*2+1]<<8);
-//           quint8 v2 = data[i*8+j*2+0];
-//           qint16 value =  (v1<<8) + v2;
-
            quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
            memcpy(&value, data.data() + i*16 + j*2,2);
-
-
            wvd.channels[j].push_back( value );
-            //cda[j]
         }
     }
     emit showWave(this,wvd);
@@ -469,34 +422,6 @@ bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
     CSVFile csv;
     return csv.LoadWaveFile(filename,wvd);
 
-#if 0
-    QFile filein(filename);
-    if(!filein.exists()) return false;
-    filein.open(QIODevice::ReadOnly);
-    QByteArray data = filein.readAll();
-    //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
-    int sample_nr = data.size() / (8*2);
-
-    ChannelData cda;
-
-    wvd.channels.reserve(8);
-    wvd.channels.fill(cda,8);
-    for(int i = 0 ; i < sample_nr; i++)
-    {
-
-
-        for(int j = 0; j < 8; j++)
-        {
-
-           quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
-           memcpy(&value, data.data() + i*16 + j*2,2);
-
-           wvd.channels[j].push_back( value );
-            //cda[j]
-        }
-    }
-    return true;
-#endif
 }
 void Device::listWaveFiles(QStringList &files)
 {
@@ -514,7 +439,7 @@ void Device::SendSyncFile(QString file)
 {
     ProtoMessage msg;
     msg.head.cmd_id = MSG_START_WAVE;
-    msg.head.device_id = m_dev_id;
+    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
     msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = m_sess_id++;
     msg.is_ack = false;

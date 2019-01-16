@@ -18,7 +18,6 @@ INCLUDEPATH+=./ext/
 LIBS+=-L./ext/lib -lPocoNetd -lPocoFoundationd
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
-        mainwindow.cpp \
     tcpserver.cpp \
     device.cpp \
     devicemanager.cpp \
@@ -42,10 +41,14 @@ SOURCES += main.cpp\
     gpsession.cpp \
     mysocket.cpp \
     csvfile.cpp \
-    syncfile.cpp
+    syncfile.cpp \
+    appinit.cpp \
+    iconhelper.cpp \
+    channelwidget.cpp \
+    mydevices.cpp \
+    MainWnd.cpp
 
-HEADERS  += mainwindow.h \
-    tcpserver.h \
+HEADERS  += tcpserver.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
@@ -71,16 +74,25 @@ HEADERS  += mainwindow.h \
     gpsession.h \
     mysocket.h \
     csvfile.h \
-    syncfile.h
+    syncfile.h \
+    MainWnd.h \
+    appinit.h \
+    iconhelper.h \
+    channelwidget.h \
+    mydevices.h
 
-FORMS    += mainwindow.ui
+FORMS    += MainWnd.ui \
+    channelwidget.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd
 LIBS += -lOpengl32 \
                 -lglu32
 RESOURCES += \
-    img.qrc
+    img.qrc \
+    qss.qrc \
+    main.qrc
 RC_FILE=icon.rc
 DISTFILES +=
 
+#msvc:QMAKE_CXXFLAGS += -execution-charset:utf-8

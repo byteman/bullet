@@ -71,6 +71,7 @@ private:
     void isAllCheck();
     void setCurrentStation(int index);
     void simData();
+    void initForm();
 private slots:
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);
@@ -182,10 +183,12 @@ private slots:
 
     void on_treeWidget_itemChanged(QTreeWidgetItem *item, int column);
 
+    void on_rb1_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_page;
-    quint32 m_cur_dev_id;
+    QString m_cur_dev_id;
     int m_cur_station;
     WaveWidget *m_waveWdg;
     bool pause ;

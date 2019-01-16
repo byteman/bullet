@@ -206,7 +206,7 @@ struct WaveDataHead{
 struct ProtoHeader{
     quint16 magic; // 0xFE 0x7F
     quint16 length;// 整条数据包的总长度
-    quint32 device_id; //设备编号
+    qint8   device_id[12]; //设备编号 001122334455 mac地址是12字节
     quint16 serial_id; //序号
     quint16 sesson_id; //会话编号
     quint8  cmd_id; //命令编号

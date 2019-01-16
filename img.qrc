@@ -5,5 +5,10 @@
         <file>image/offline.png</file>
         <file>image/online.png</file>
         <file>csv.txt</file>
+        <file>image/setting.png</file>
+        <file>image/start.png</file>
+        <file>image/stop.png</file>
+        <file>image/alarm.png</file>
+        <file>image/device.png</file>
     </qresource>
 </RCC>

@@ -3,7 +3,8 @@
 //#include "qchartlinechart.h"
 #include "qcustomchart.h"
 #include "shiftfilter.h"
-WaveWidget::WaveWidget(QWidget *parent, int num,int shift)
+WaveWidget::WaveWidget(QWidget *parent, int num,int shift):
+    m_parent(parent)
 {
 
     //m_chart = new QChartLineChart(parent,num);
@@ -65,3 +66,25 @@ void WaveWidget::Clear()
 
 }
 
+void WaveWidget::Hide()
+{
+    if(m_parent){
+        //m_parent->setGeometry(0,0,0,0);
+           m_parent->hide();
+    }
+
+}
+void WaveWidget::Show()
+{
+    if(m_parent){
+        //m_parent->setGeometry(0,0,1000,1000);
+     m_parent->show();
+    }
+
+}
+
+
+void WaveWidget::AppendData(int addr, float value)
+{
+    m_chart->AppendData(chan,value);
+}
