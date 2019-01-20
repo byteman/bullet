@@ -63,6 +63,7 @@ private slots:
     void onNotify(QString msg);
     void on_btnMenu_Min_clicked();
     void onWaveMsg(Device*dev, MsgWaveData data);
+    void onSensorMsg(Device*dev, MsgSensorData data);
     void on_btnMenu_Max_clicked();
     void on_btnMenu_Close_clicked();
     void on_btnExit_clicked();

@@ -1,4 +1,4 @@
-#ifndef DEVICEMANAGER_H
+﻿#ifndef DEVICEMANAGER_H
 #define DEVICEMANAGER_H
 
 #include <QObject>
@@ -41,6 +41,7 @@ public:
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
+    void onSensorMsg(Device* dev,MsgSensorData msData);
     void onReadParam(Device* dev,MsgDevicePara para);
     void onWriteParam(Device* dev, bool result);
     void Message(SessMessage msg);
@@ -70,6 +71,7 @@ signals:
     void Progress(Device* dev,QString progress);
     void EnumFiles(Device* dev,ENUM_FILE_RESP resp);
     void WaveMsg(Device* dev, MsgWaveData data);
+    void SensorMsg(Device*,MsgSensorData);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);
     // QObject interface

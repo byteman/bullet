@@ -1,4 +1,4 @@
-#include "protoparser.h"
+﻿#include "protoparser.h"
 #include <QDebug>
 ProtoParser::ProtoParser()
 {
@@ -18,7 +18,7 @@ bool ProtoParser::parseData(QByteArray &data,ProtoMessage& prot_msg)
 
             prot_msg.is_ack = (prot_msg.head.cmd_id&0x80);
             prot_msg.head.cmd_id = (prot_msg.head.cmd_id&0x7F);
-
+qDebug() << "len=" << prot_msg.head.length << " size=" << data.size();
             if(prot_msg.head.length > data.size() ||
                prot_msg.head.length < 1     )
             {

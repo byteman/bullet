@@ -1,4 +1,4 @@
-#ifndef DEVICE_H
+﻿#ifndef DEVICE_H
 #define DEVICE_H
 
 #include <QObject>
@@ -81,6 +81,7 @@ private:
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);
+    void OnSensorData(Device* dev, MsgSensorData wave);
     void Progress(Device* dev,QString progress);
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);

@@ -1,4 +1,4 @@
-#include "devicemanager.h"
+﻿#include "devicemanager.h"
 #include <QSettings>
 DeviceManager::DeviceManager():
     m_serial_id(0),
@@ -33,6 +33,7 @@ bool DeviceManager::start()
         connect(dev,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
         connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
         connect(dev,SIGNAL(showWave(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
+        connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
 
         connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
         connect(dev,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
@@ -43,7 +44,7 @@ bool DeviceManager::start()
         dev->setName(names[i]);
         dev_map[ids[i]] = dev;
     }
-    //this->startTimer(1000);
+    this->startTimer(1000);
     return true;
 }
 
@@ -223,7 +224,10 @@ void DeviceManager::onWaveMsg(Device* dev,MsgWaveData wvData)
 {
      emit WaveMsg(dev,wvData);
 }
-
+void DeviceManager::onSensorMsg(Device* dev,MsgSensorData msData)
+{
+     emit SensorMsg(dev,msData);
+}
 void DeviceManager::onReadParam(Device *dev, MsgDevicePara para)
 {
     emit ReadParam(dev,para);

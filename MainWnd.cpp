@@ -3,6 +3,7 @@
 #include "MainWnd.h"
 #include "ui_MainWnd.h"
 #include "iconhelper.h"
+#include "myhelper.h"
 #include <QDebug>
 void MainWnd::AddLog(QString msg)
 {
@@ -33,7 +34,7 @@ void MainWnd::Init()
 
 
     srv = new GPServer();
-    if(!srv->start(8888)){
+    if(!srv->start(8881)){
         AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8888是否被占用!!"));
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
@@ -50,8 +51,10 @@ void MainWnd::Init()
     //connect(&dvm,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
     //connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
+    connect(&dvm,SIGNAL(SensorMsg(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
+
     //connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
-    //connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+    connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
 
     //connect(&dvm,SIGNAL(CommResult(Device*,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
@@ -80,19 +83,23 @@ void MainWnd::Init()
     //dvm.SetStation("工位1");
     loadDeviceUI();
 
-    //m_waveWdg = new WaveWidget(ui->plot,12);
+    //wave = new WaveWidget(ui->plot3,12);
 
-    //this->startTimer(100);
+    this->startTimer(100);
     on_btnMenu_Max_clicked();
     //stopTime = false;
     qDebug() <<"MainWindow thread id=" << thread();
 
 }
+QString FormatHex(QByteArray& data)
+{
+    return data.toHex();
+}
 void MainWnd::Message(SessMessage s)
 {
     //if(pause)return;
-    //if(s.getData().size() <   m_debug_bytes)
-   //     ui->txtLog->append(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
+   // if(s.getData().size() <   m_debug_bytes)
+    AddLog(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
 }
 void MainWnd::on_mytime_out()
 {
@@ -164,10 +171,10 @@ void MainWnd::timerEvent(QTimerEvent *)
             if(devices[i]->online())
                 item->setIcon(0,icon_device[0]);
             else
-                item->setIcon(0,icon_device[0]);
+                item->setIcon(0,icon_device[1]);
         }
     }
-    //simData();
+    simData();
 
 }
 void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
@@ -202,6 +209,18 @@ void MainWnd::onWaveMsg(Device *dev, MsgWaveData data)
 
 }
 
+void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
+{
+
+
+    for(int i = 0; i < data.channels.size(); i++)
+    {
+        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
+    }
+    //wave->AppendData(0,get_random_number());
+    //wave->DisplayChannel(0,true);
+}
+
 MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MainWnd)
@@ -230,7 +249,7 @@ void MainWnd::loadDeviceUI()
 
         ui->treeWidget->addTopLevelItem(item);
 
-        item->setIcon(0,icon_device[0]);
+        item->setIcon(0,icon_device[1]);
 
         item->setData(0,Qt::UserRole,devices[i]->id());
         if(i == 0){
@@ -247,14 +266,14 @@ int get_random_number()
 }
 void MainWnd::simData()
 {
-    for(int i = 0; i < 8; i++)
-    {
-        devices->DisplayWeight(i,get_random_number(),0,0);
-        //Sleep(i);
+//    for(int i = 0; i < 8; i++)
+//    {
+//        devices->DisplayWeight(i,get_random_number(),0,0);
+//        Sleep(i);
 
-    }
-    //wave->AppendData(0,get_random_number());
-    //wave->DisplayChannel(0,true);
+//    }
+    wave->AppendData(0,get_random_number());
+    wave->DisplayChannel(0,true);
 
 }
 bool MainWnd::eventFilter(QObject *watched, QEvent *event)
@@ -332,12 +351,14 @@ void MainWnd::initForm()
     }
 
     ui->btnMain->click();
-    devices = new MyDevices(36,ui->gbDevices);
+
+    ui->gbDevices->installEventFilter(this);
+    wave = new WaveWidget(ui->plot3,1);
+    wave->SetChannel(0,1);
+    devices = new MyDevices(9,ui->gbDevices);
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
-    ui->gbDevices->installEventFilter(this);
-    //wave = new WaveWidget(ui->plot3,1);
-    //wave->SetChannel(0,1);
+
     loadDeviceUI();
 }
 
@@ -434,7 +455,6 @@ void MainWnd::on_btnShou_clicked()
     }
       hide =!hide;
 }
-#include "myhelper.h"
 
 void MainWnd::closeEvent(QCloseEvent *event)
 {

@@ -38,11 +38,31 @@ void QCustomChart::Init()
    m_plot->yAxis->setSubTickPen(QPen(TextColor, TextWidth));
 
 }
+void QCustomChart::myInit()
+{
+    //customPlot->addGraph(); // blue line
+    //customPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
+    //customPlot->addGraph(); // red line
+    //customPlot->graph(1)->setPen(QPen(QColor(255, 110, 40)));
+
+    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+    timeTicker->setTimeFormat("%h:%m:%s");
+    m_plot->xAxis->setTicker(timeTicker);
+    m_plot->axisRect()->setupFullAxesBox();
+    m_plot->yAxis->setRange(-1000, 1000);
+    //customPlot->setOpenGl(true);
+    // make left and bottom axes transfer their ranges to right and top axes:
+    QObject::connect(m_plot->xAxis, SIGNAL(rangeChanged(QCPRange)), m_plot->xAxis2, SLOT(setRange(QCPRange)));
+    QObject::connect(m_plot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_plot->yAxis2, SLOT(setRange(QCPRange)));
+
+}
 QCustomChart::QCustomChart(QCustomPlot *parent, int num):
     m_plot(parent)
 {
+    myInit();
+    return;
    m_plot->axisRect()->setupFullAxesBox();
-   //m_plot->legend->setVisible(true);
+   m_plot->legend->setVisible(true);
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
    m_plot->yAxis->scaleRange(0,2000);
@@ -81,7 +101,7 @@ void QCustomChart::DisplayChannel(int chan,bool show)
 {
     ILineChart::DisplayChannel(chan,show);
     m_plot->rescaleAxes();
-    m_plot->replot();
+    m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void QCustomChart::DisplayAllChannel(bool show)

@@ -1,4 +1,4 @@
-#ifndef PROTOMESSAGE_H
+﻿#ifndef PROTOMESSAGE_H
 #define PROTOMESSAGE_H
 
 #include <QObject>
@@ -63,8 +63,9 @@ typedef struct
 }PARA_SENSOR_CAL;
 
 typedef struct{
-    INT16 ad;
-    INT16 weight;
+    quint32  addr;
+    quint32 time;
+    quint32 weight;
 }RT_AD_CHAN;
 typedef struct{
     RT_AD_CHAN chan[8];
@@ -211,6 +212,11 @@ struct ProtoHeader{
     quint16 sesson_id; //会话编号
     quint8  cmd_id; //命令编号
 };
+struct SensorData{
+    quint8 addr;
+    quint32 weight;
+    quint32 time;
+};
 #pragma pack(pop)
 
 struct ProtoMessage
@@ -321,6 +327,15 @@ typedef struct{
 //一个通道的数据总和.
 typedef QVector<double> ChannelData;
 
+struct MsgSensorData:public ProtoMessage{
+    QVector<SensorData> channels; //一个设备包含n个通道的数据.
+    QString m_dev_serial;//设备唯一序列号
+    bool m_first; //是否是某次采集数据的首包数据.
+    MsgSensorData()
+    {
+        m_first = false;
+    }
+};
 struct MsgWaveData:public ProtoMessage{
   QVector<ChannelData> channels; //一个设备包含n个通道的数据.
   QString m_dev_serial;//设备唯一序列号

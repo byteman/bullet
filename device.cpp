@@ -1,4 +1,4 @@
-#include "device.h"
+﻿#include "device.h"
 #include <QDir>
 #include <QDebug>
 #include <QDateTime>
@@ -351,6 +351,20 @@ void Device::sendProgress(int sample_start, int sample_total)
 {
     emit Progress(this,QString("%1").arg(sample_start*100/sample_total)+"%");
 }
+#if 1
+void Device::ProcessWave(int index,QByteArray &data)
+{
+    MsgSensorData msd;
+    //qDebug() <<" sensor" << sizeof(SensorData);
+    while(data.size() >= sizeof(SensorData)){
+        SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
+        data.remove(0,sizeof(SensorData));
+        msd.channels.push_back(value);
+    }
+    emit OnSensorData(this,msd);
+
+}
+#else
 void Device::ProcessWave(int index,QByteArray &data)
 {
 
@@ -377,6 +391,7 @@ void Device::ProcessWave(int index,QByteArray &data)
     emit showWave(this,wvd);
 
 }
+#endif
 void Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;

@@ -29,7 +29,6 @@ void MyDevices::zoomDevice(int addr)
 
     widgets[addr]->SetUnit(m_unit);
     widgets[addr]->setGeometry(0,0,w,h);
-    //qlayout->addWidget(widgets[i+start],row,col);
     widgets[addr]->Show();
 
 }
@@ -72,7 +71,7 @@ void MyDevices::Resize()
 
     int w  = width / m_col;
     int h  = height / m_row;
-    qDebug() << "w=" <<w <<"h=" <<h;
+
     for(int i = 0; i < m_num; i++ )
     {
         int row = i/m_col ; //4
@@ -80,7 +79,6 @@ void MyDevices::Resize()
         widgets[i+m_start]->Reset();
         widgets[i+m_start]->SetUnit(m_unit);
         widgets[i+m_start]->setGeometry(MAR_L+col*w+col*COL_S,MAR_T+row*h+row*ROW_S,w,h);
-        //qlayout->addWidget(widgets[i+start],row,col);
         widgets[i+m_start]->Show();
     }
 }
@@ -133,7 +131,7 @@ void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
     if(addr < widgets.size())
     {
 
-        QString str = widgets[addr]->DisplayWeight(weight,state,dot);
+        widgets[addr]->DisplayWeight(weight,state,dot);
 
     }
 }
