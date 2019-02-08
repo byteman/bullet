@@ -68,10 +68,9 @@ border-radius:3px;
       <item>
        <widget class="QLabel" name="lblChan">
         <property name="styleSheet">
-         <string notr="true">	border:0px solid #242424;
-	border-radius:1px;
-
-background-color: rgb(0, 85, 127);</string>
+         <string notr="true">border:0px solid #242424;
+border-radius:1px;
+background-color: rgb(255, 85, 127);</string>
         </property>
         <property name="text">
          <string>1</string>

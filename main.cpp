@@ -6,9 +6,13 @@
 #include <QFile>
 #include <Poco/Environment.h>
 #include <QDebug>
+#include "channelwidget.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+//    ChannelWidget w(1);
+//    w.show();
 
     //加载样式表
     QFile file(":/qss/psblack.css");
@@ -26,8 +30,6 @@ int main(int argc, char *argv[])
     MainWnd w;
     w.show();
 
-//    MainWindow w;
-//    w.show();
 
     return a.exec();
 }

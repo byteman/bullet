@@ -1,4 +1,4 @@
-#ifndef QCUSTOMPLOTCHANNEL_H
+﻿#ifndef QCUSTOMPLOTCHANNEL_H
 #define QCUSTOMPLOTCHANNEL_H
 
 #include "igraphicchannel.h"
@@ -17,9 +17,14 @@ public:
     virtual void SetName(QString &name);
     virtual void GetValueRange(double& min,double &max);
     virtual void GetKeyRange(double& min,double &max);
+
 private:
+    double lastPointKey;
     QCPGraph* m_graph;
     QTime time;
+
+    // IGraphicChannel interface
+
 };
 
 #endif // QCUSTOMPLOTCHANNEL_H

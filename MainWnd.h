@@ -44,6 +44,7 @@ private:
      QIcon icon_dir;
      QIcon icon_file;
      QMenu* menu;
+     QMenu* menu2;
      QString m_cur_station;
      QTimer m_timer;
      GPServer* srv;
@@ -61,6 +62,7 @@ private slots:
 private slots:
     void Message(SessMessage s);
     void onNotify(QString msg);
+    void onChannelClick(int addr);
     void on_btnMenu_Min_clicked();
     void onWaveMsg(Device*dev, MsgWaveData data);
     void onSensorMsg(Device*dev, MsgSensorData data);
@@ -77,6 +79,11 @@ private slots:
 
     void on_btnShou_clicked();
 
+    void on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+
+    void on_add_device_click(bool);
+    void on_modify_menu_click(bool);
+    void on_remove_device_click(bool);
 protected:
     virtual void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);
@@ -88,6 +95,8 @@ protected:
     // QWidget interface
 protected:
     virtual void closeEvent(QCloseEvent *);
+protected slots:
+    void onResetResult(Device *, bool);
 };
 
 #endif // UIDEMO01_H

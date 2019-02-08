@@ -4,6 +4,10 @@
 #include "ui_MainWnd.h"
 #include "iconhelper.h"
 #include "myhelper.h"
+#include "dao.h"
+#include "dialogparams.h"
+#include "dialogdevice.h"
+#include "dialogchanconfig.h"
 #include <QDebug>
 void MainWnd::AddLog(QString msg)
 {
@@ -14,17 +18,6 @@ void MainWnd::Init()
     m_cur_dev_id = "123";
 
     qRegisterMetaType<SessMessage>("SessMessage");
-
-
-    QSettings config("bullet.ini", QSettings::IniFormat);
-    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
-
-    //m_debug_bytes = config.value("/device/debug",20).toInt();
-    //m_refresh_count = config.value("/device/refresh",20).toInt();
-    m_cur_station = config.value("/device/station","123").toString();
-    int dot= 3 - config.value("/device/dot",3).toInt();
-    if(dot < 0 || dot > 3) dot = 0;
-
 
     icon_device[0].addFile(":image/device.png");
     icon_device[1].addFile(":image/offline.png");
@@ -46,13 +39,12 @@ void MainWnd::Init()
     connect(&dvm,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
     connect(&dvm,SIGNAL(DevOffline(Device*)),this,SLOT(DevOffline(Device*)));
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
-    //connect(&dvm,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadPara(Device*,MsgDevicePara)));
-    //connect(&dvm,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWritePara(Device*,bool)));
+
     //connect(&dvm,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
     //connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
     connect(&dvm,SIGNAL(SensorMsg(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
-
+    connect(&dvm,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
     //connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
     connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
 
@@ -62,6 +54,7 @@ void MainWnd::Init()
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
     menu=new QMenu(this);
+    menu2=new QMenu(this);
     QIcon setting= QIcon(":image/setting.png");
     QAction* action = new QAction(setting,QString::fromLocal8Bit(" 配置参数"),this);
     menu->addAction(action);
@@ -76,19 +69,29 @@ void MainWnd::Init()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
 
+    action = new QAction(QString::fromLocal8Bit("删除设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_remove_device_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("修改设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_modify_menu_click(bool)));
 
 
+    action = new QAction(QString::fromLocal8Bit("添加设备"),this);
+    menu2->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
+
+    QSqlError err =  DAO::instance().Init("measure.db");
+    if(err.isValid()){
+        myHelper::ShowMessageBoxError(err.text());
+    }
     dvm.start();
-    //setCurrentStation(m_cur_station);
-    //dvm.SetStation("工位1");
+
     loadDeviceUI();
-
-    //wave = new WaveWidget(ui->plot3,12);
-
     this->startTimer(100);
     on_btnMenu_Max_clicked();
-    //stopTime = false;
-    qDebug() <<"MainWindow thread id=" << thread();
+
 
 }
 QString FormatHex(QByteArray& data)
@@ -101,6 +104,13 @@ void MainWnd::Message(SessMessage s)
    // if(s.getData().size() <   m_debug_bytes)
     AddLog(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
 }
+
+void MainWnd::onResetResult(Device *, bool)
+{
+    myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("复位设备成功"));
+
+}
+
 void MainWnd::on_mytime_out()
 {
     //qDebug() << "mytimeout";
@@ -109,20 +119,93 @@ void MainWnd::on_mytime_out()
 void MainWnd::onNotify(QString msg)
 {
 
-    ui->txtLog->append("send--> "+ msg);
+    //ui->txtLog->append("send--> "+ msg);
 }
 
+void MainWnd::onChannelClick(int addr)
+{
+    qDebug() << m_cur_dev_id << " chan=" << addr;
+    DialogChanConfig dlg;
+    DeviceChnConfig cfg;
+    dvm.GetDeviceChan(m_cur_dev_id,addr,cfg);
+    dlg.SetChanConfig(m_cur_dev_id,addr,cfg);
+    int result = dlg.exec();
+    if(result == QDialog::Accepted){
+        dlg.GetChanConfig(cfg);
+        dvm.UpdateDeviceChan(m_cur_dev_id,addr,cfg);
+        //loadDeviceUI();
+    }
+}
+
+//参数配置界面
 void MainWnd::on_menu_click(bool)
 {
+    DialogParams dlg(&dvm,m_cur_dev_id);
+    int reason = dlg.exec();
+
+    qDebug() << reason;
 
 }
 void MainWnd::on_write_menu_click(bool)
 {
 
 }
+void MainWnd::on_add_device_click(bool)
+{
+    qDebug() << "add device";
+    DialogDevice dlg;
+    int result = dlg.exec();
+    if(result == QDialog::Accepted){
+        QString dev_id,dev_name;
+        dlg.GetDeviceInfo(dev_id,dev_name);
+        dvm.AddDevice(dev_id,dev_name);
+        loadDeviceUI();
+    }
+}
+void MainWnd::on_remove_device_click(bool)
+{
+    qDebug()<<m_cur_dev_id << " removed";
+    QTreeWidgetItem* item =  ui->treeWidget->currentItem();
+    if(item==NULL){
+         return ;
+    }
+     QString id = item->data(0,Qt::UserRole).toString();
+     if(dvm.RemoveDevice(id)){
+         myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备成功"));
+     }else{
+         myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备失败"));
+     }
+     loadDeviceUI();
+
+}
+void MainWnd::on_modify_menu_click(bool)
+{
+    qDebug()<<m_cur_dev_id << " modify";
+    DialogDevice dlg;
+   QTreeWidgetItem* item =  ui->treeWidget->currentItem();
+   if(item==NULL){
+        return ;
+   }
+    QString id = item->data(0,Qt::UserRole).toString();
+    Device* dev = dvm.GetDevice(id);
+    if(dev==NULL)
+    {
+        return;
+    }
+    dlg.UpdateDeviceInfo(dev->id(),dev->name());
+
+    int result = dlg.exec();
+    if(result == QDialog::Accepted){
+        QString dev_id,dev_name;
+        dlg.GetDeviceInfo(dev_id,dev_name);
+        dvm.UpdateDevice(dev_id,dev_name);
+        loadDeviceUI();
+    }
+}
+
 void MainWnd::on_reset_menu_click(bool)
 {
-
+    dvm.ResetDevice(m_cur_dev_id,1);
 }
 QTreeWidgetItem* MainWnd::findItemById(QString id)
 {
@@ -174,7 +257,7 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[1]);
         }
     }
-    simData();
+    //simData();
 
 }
 void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
@@ -183,16 +266,16 @@ void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
        QTreeWidgetItem* curItem=ui->treeWidget->itemAt(pos);  //获取当前被点击的节点
        if(curItem == NULL)
        {
-
+           menu2->popup(QCursor::pos());
            return;
        }
-
+       m_cur_dev_id = curItem->data(0,Qt::UserRole).toString();
        menu->popup(QCursor::pos());
 
 }
 void MainWnd::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
-
+    m_cur_dev_id = item->data(0,Qt::UserRole).toString();
 }
 
 void MainWnd::onWaveMsg(Device *dev, MsgWaveData data)
@@ -201,11 +284,6 @@ void MainWnd::onWaveMsg(Device *dev, MsgWaveData data)
    {
        //m_waveWdg->Clear();
    }
-//   if(dev->id() != m_cur_dev_id)
-//   {
-//       return;
-//   }
-
 
 }
 
@@ -220,14 +298,36 @@ void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
     //wave->AppendData(0,get_random_number());
     //wave->DisplayChannel(0,true);
 }
-
+void DAOTest()
+{
+    DAO::instance().DeviceAdd("123","hello");
+    DAO::instance().DeviceAdd("456","hello2");
+    DeviceInfoList list;
+    DAO::instance().DeviceList(list);
+    for(int i = 0; i < list.size(); i++)
+    {
+        qDebug() << "serialNo=" << list[i].serialNo << " name=" << list[i].name;
+    }
+    QSqlError err = DAO::instance().DeviceUpdate("123","jjjj");
+    if(err.isValid()){
+        qDebug()<<"update=" << err.text();
+    }
+    err = DAO::instance().DeviceRemove("123");
+    err = DAO::instance().DeviceRemove("456");
+    if(err.isValid()){
+        qDebug()<<"remove="<<err.text();
+    }
+}
 MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MainWnd)
 {
     ui->setupUi(this);
     this->initForm();
+
     Init();
+
+    //DAOTest();
 }
 
 MainWnd::~MainWnd()
@@ -266,14 +366,14 @@ int get_random_number()
 }
 void MainWnd::simData()
 {
-//    for(int i = 0; i < 8; i++)
-//    {
-//        devices->DisplayWeight(i,get_random_number(),0,0);
-//        Sleep(i);
+    for(int i = 0; i < 8; i++)
+    {
+        devices->DisplayWeight(i,get_random_number(),0,0);
+        Sleep(i);
 
-//    }
-    wave->AppendData(0,get_random_number());
-    wave->DisplayChannel(0,true);
+    }
+    //wave->AppendData(0,get_random_number());
+    //wave->DisplayChannel(0,true);
 
 }
 bool MainWnd::eventFilter(QObject *watched, QEvent *event)
@@ -358,6 +458,7 @@ void MainWnd::initForm()
     devices = new MyDevices(9,ui->gbDevices);
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
+    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
 
     loadDeviceUI();
 }
@@ -466,4 +567,10 @@ void MainWnd::closeEvent(QCloseEvent *event)
        }
 
 
+}
+
+void MainWnd::on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+{
+    m_cur_dev_id = current->data(0,Qt::UserRole).toString();
+    qDebug() << "item change to" << m_cur_dev_id;
 }

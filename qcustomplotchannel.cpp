@@ -2,14 +2,15 @@
 static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
-    m_graph(graph)
+    m_graph(graph),
+    lastPointKey(0)
 {
 //    m_max = -10000;
 //    m_min = 10000;
     if(index < 8)
     {
         QPen pen(colors[index]);
-        pen.setWidth(2);
+        pen.setWidth(1);
         graph->setPen(pen);
     }
 
@@ -44,23 +45,7 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
 
 void QCustomPlotChannel::AddData(double key2, double value)
 {
-    //int index = m_graph->dataCount();
-    //time = QTime::currentTime();
-    // calculate two new data points:
-    static QTime time(QTime::currentTime());
-    // calculate two new data points:
-    double key = time.elapsed()/1000.0; // time elapsed since start of demo, in seconds
-    static double lastPointKey = 0;
-    if (key-lastPointKey > 0.002) // at most add point every 2 ms
-    {
-      m_graph->addData(key,value);
-      lastPointKey = key;
-    }
-    //m_graph->xAxis->setRange(key, 8, Qt::AlignRight);
-    //m_graph->replot();
-    //key = time.elapsed()/1000.0;
-
-
+    m_graph->addData(key2,value);
 }
 
 void QCustomPlotChannel::AddDataArray(QVector<double> &samples)

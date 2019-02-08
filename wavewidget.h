@@ -1,4 +1,4 @@
-#ifndef WAVEWIDGET_H
+﻿#ifndef WAVEWIDGET_H
 #define WAVEWIDGET_H
 
 #include <QObject>
@@ -28,6 +28,8 @@ public:
     void SaveWave();
     void Hide();
     void Show();
+    void SetRange(int range);
+    void AppendTimeData(int addr, double value);
 private:
 
     int m_num;

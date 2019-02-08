@@ -59,8 +59,7 @@ void QCustomChart::myInit()
 QCustomChart::QCustomChart(QCustomPlot *parent, int num):
     m_plot(parent)
 {
-    myInit();
-    return;
+
    m_plot->axisRect()->setupFullAxesBox();
    m_plot->legend->setVisible(true);
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -75,7 +74,7 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
    timeTicker->setTimeFormat("%h:%m:%s");
    m_plot->xAxis->setTicker(timeTicker);
    //m_plot->axisRect()->setupFullAxesBox();
-   m_plot->yAxis->setRange(-100, 100);
+   m_plot->yAxis->setRange(-5, 5);
 
    m_plot->yAxis->setScaleRatio(m_plot->yAxis,1.3);
 
@@ -92,7 +91,7 @@ void QCustomChart::SetChannel(int start,int num)
     for(int i = 0; i < num; i++)
     {
         QCustomPlotChannel* chan = new QCustomPlotChannel(i,m_plot->addGraph());
-        chan->SetName(QString("addr:%1").arg(start+i));
+        chan->SetName(QString("addr:%1").arg(start+i+1));
         channels.push_back(chan);
     }
 
@@ -109,10 +108,19 @@ void QCustomChart::DisplayAllChannel(bool show)
 
     ILineChart::DisplayAllChannel(show);
 
-    m_plot->rescaleAxes();
     //如果数值一直不变，会导致Y轴持续变大.
+    //m_plot->xAxis->setRange()
     //m_plot->yAxis->setScaleRatio(m_plot->yAxis,1.3);
     m_plot->replot();
+}
+
+void QCustomChart::SetRange(double key, int range)
+{
+    //rescale一定要放到setRange的前面，否则setRange没有作用.
+    m_plot->rescaleAxes();
+    m_plot->yAxis->scaleRange(1.2);
+    m_plot->xAxis->setRange(key,range,Qt::AlignRight);
+
 }
 
 

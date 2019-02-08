@@ -1,5 +1,6 @@
 ﻿#include "devicemanager.h"
 #include <QSettings>
+#include "dao.h"
 DeviceManager::DeviceManager():
     m_serial_id(0),
     m_session_id(0)
@@ -10,39 +11,30 @@ DeviceManager::DeviceManager():
 bool DeviceManager::start()
 {
 
-    QSettings config("bullet.ini", QSettings::IniFormat);
-    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
 
 
-    m_dev_num = config.value("/device/num",1).toInt();
-    QString str_id= config.value("/device/serial","1").toString();
-    ids = str_id.split(",");
-    names = config.value("/device/name","1").toString().split(",");
-    if( ids.size() < 1 || ids.size() != names.size())
+    DeviceInfoList devList;
+    DAO::instance().DeviceList(devList);
+
+    for(int i = 0; i < devList.size();i++)
     {
-        return false;
-    }
-    id_name_map.clear();
-    for(int i = 0; i < ids.size();i++)
-    {
-        id_name_map[ids[i]] = names[i];
+
         Device* dev = new Device();
         connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
         connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
         connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
-        connect(dev,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
-        connect(dev,SIGNAL(Progress(Device*,QString)),this,SLOT(onProgress(Device*,QString)));
-        connect(dev,SIGNAL(showWave(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
-        connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
 
+        connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
+        connect(dev,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
         connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
-        connect(dev,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
 
         connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
-        dev->setId(ids[i]);
-        dev->setName(names[i]);
-        dev_map[ids[i]] = dev;
+        dev->setId(devList[i].serialNo);
+        dev->setName(devList[i].name);
+        dev_lock.lock();
+        dev_map[devList[i].serialNo] = dev;
+        dev_lock.unlock();
     }
     this->startTimer(1000);
     return true;
@@ -50,65 +42,17 @@ bool DeviceManager::start()
 
 void DeviceManager::stop()
 {
-    for(int i = 0; i < ids.size();i++)
-    {
-        disconnect(dev_map[ids[i]],SIGNAL(Notify(QString)),0,0);
-    }
-}
-
-bool DeviceManager::SendAllWave(bool start)
-{
-    bool ok = false;
-    QMapIterator<QString,Device*> i(dev_map);
-    while (i.hasNext()) {
-        i.next();
-
-        if(i.value()->SendStartWave(m_session_id++,start) == 0)
-        {
-            ok = false;
-        }
-
-    }
-
-    return ok;
-}
-
-bool DeviceManager::SendWave(QString dev_id,bool start)
-{
-    return dev_map[dev_id]->SendStartWave(m_session_id++,start)!=0;
-}
-
-bool DeviceManager::StartAll(bool start)
-{
-    bool ok = false;
-    QMapIterator<QString,Device*> i(dev_map);
-    while (i.hasNext()) {
-        i.next();
-
-        if(i.value()->StartRecWave(m_session_id++,start) == 0)
-        {
-            ok = false;
-        }
-
-    }
-
-    return ok;
-}
-
-bool DeviceManager::SyncFile(QString dev_id, QString file)
-{
-    if(!dev_map.contains(dev_id))
-        return false;
-    dev_map[dev_id]->SendSyncFile(file);
-    return true;
-}
-
-bool DeviceManager::RemoveFile(QString dev_id,QString file)
-{
-    if(!dev_map.contains(dev_id))
-        return false;
-    dev_map[dev_id]->RemoveFile(file);
-    return true;
+     dev_lock.lock();
+     QMap<QString,Device*>::const_iterator it;
+     while (it != dev_map.constEnd()) {
+           //it.value()
+           ++it;
+       }
+//    for(int i = 0; i < ids.size();i++)
+//    {
+//        disconnect(dev_map[ids[i]],SIGNAL(Notify(QString)),0,0);
+//    }
+     dev_lock.unlock();
 }
 
 bool DeviceManager::ResetAllDevice(quint8 delay_s)
@@ -135,12 +79,6 @@ bool DeviceManager::ResetDevice(QString dev_id,quint8 delay_s)
     return dev_map[dev_id]->Reset(delay_s);
 }
 
-bool DeviceManager::ListFiles(QString dev_id,int page, int size)
-{
-    if(!dev_map.contains(dev_id))
-        return false;
-    return dev_map[dev_id]->ListFiles(page,size);
-}
 
 void DeviceManager::calib(QString dev_id,quint8 chan,quint8 index, int weight)
 {
@@ -149,18 +87,55 @@ void DeviceManager::calib(QString dev_id,quint8 chan,quint8 index, int weight)
     dev_map[dev_id]->calib(chan,index,weight);
 }
 
+bool DeviceManager::RemoveDevice(QString dev_id)
+{
+    QSqlError err = DAO::instance().DeviceRemove(dev_id);
+    if(err.isValid()){
+        qDebug() << " RemoveDevice failed " << err.text();
+    }
+    return !err.isValid();
+}
+//添加设备
+//1.数据库中添加一个设备.
+bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
+{
+    QSqlError err = DAO::instance().DeviceAdd(dev_id,dev_name);
+    if(err.isValid()){
+        qDebug() << " AddDevice failed " << err.text();
+    }
+    return !err.isValid();
+}
+
+bool DeviceManager::UpdateDevice(QString dev_id, QString dev_name)
+{
+    QSqlError err = DAO::instance().DeviceUpdate(dev_id,dev_name);
+    if(err.isValid()){
+        qDebug() << " UpdateDevice failed " << err.text();
+    }
+    return !err.isValid();
+}
+bool DeviceManager::UpdateDeviceChan(QString dev_id, int chan,DeviceChnConfig& cfg)
+{
+    QSqlError err = DAO::instance().DeviceChannalUpdate(dev_id,chan,cfg);
+    if(err.isValid()){
+        qDebug() << " UpdateDeviceChan failed " << err.text();
+    }
+    return !err.isValid();
+}
+
+bool DeviceManager::GetDeviceChan(QString dev_id, int chan, DeviceChnConfig &cfg)
+{
+    QSqlError err = DAO::instance().DeviceChannalGet(dev_id,chan,cfg);
+    if(err.isValid()){
+        qDebug() << " GetDeviceChan failed " << err.text();
+    }
+    return !err.isValid();
+}
 void DeviceManager::ReadParam(QString dev_id)
 {
     if(!dev_map.contains(dev_id))
         return ;
     return dev_map[dev_id]->ReadParam();
-}
-
-void DeviceManager::ReadRt(QString dev_id)
-{
-    if(!dev_map.contains(dev_id))
-        return ;
-    return dev_map[dev_id]->ReadRt();
 }
 
 void DeviceManager::WriteParam(QString dev_id, MsgDevicePara &para)
@@ -277,8 +252,9 @@ void DeviceManager::Message(SessMessage msg)
         {
             dev_map[dev_id]->setSess(msg.getSession());
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
+            qDebug() << "get message cmd=" << input_msg.head.cmd_id;
             dev_map[dev_id]->onMessage(input_msg,output_msg);
-
+            //是否需要回应，自动回应.
             if(!input_msg.is_ack )
             {
                 QByteArray arr;
@@ -319,6 +295,12 @@ void DeviceManager::onCalibResult(Device *dev, int chan, int index, int result)
 void DeviceManager::onRealTimeResult(Device *dev, RT_AD_RESULT result)
 {
     emit RealTimeResult(dev,result);
+}
+
+void DeviceManager::onResetResult(Device *dev, bool result)
+{
+    qDebug() << "onResetResult";
+    emit ResetResult(dev,result);
 }
 
 

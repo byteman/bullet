@@ -1,0 +1,42 @@
+数据库功能要求:
+1.查询某个设备某个通道的某个时间段的历史数据数据
+2.能配置某个设备通道的报警值.
+
+
+
+设备表
+tbl_device
+
+序号	设备名称[唯一]	设备唯一编号[唯一]	
+操作：增删改查设备
+
+增加设备后，不自动创建设备数据表和通道配置表.等用户配置的时候，或者有设备数据到达的时候才创建相关的表.
+CREATE TABLE `tbl_device` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `serialNo` TEXT NOT NULL UNIQUE, `name` TEXT NOT NULL UNIQUE )
+
+通道配置表:预先创建.
+tbl_chan_config
+序号	设备唯一编号	通道号	通道名称 最大报警值		最小报警值
+操作：增删改查配置
+CREATE TABLE `tbl_device_chan_config` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `serialNo` TEXT NOT NULL UNIQUE, `chanAddr` INTEGER NOT NULL, `chanName` TEXT NOT NULL, `maxValue` INTEGER, `minValue` INTEGER )
+
+设备数据表 :存放唯一编号为xxx的设备的历史测力数据
+tbl_xxx_data
+
+序号 	时间戳[10位][索引]	通道号[int][索引]	力值[整数g][索引]		
+
+操作：增删查数据.
+
+
+通道报警表
+tbl_xxx_alarm
+
+
+管理功能:
+1.删除历史数据后，需要压缩数据库文件.
+CREATE TABLE `tbl_xx_data` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `chan` INTEGER NOT NULL, `value` INTEGER NOT NULL )
+CREATE INDEX `idx_time` ON `tbl_xx_data` ( `time` )
+CREATE INDEX `idx_time_chan` ON `tbl_xx_data` ( `time` ASC, `chan` ASC )
+CREATE INDEX `idx_time_chan_value` ON `tbl_xx_data` ( `time` ASC, `chan` ASC, `value` ASC )
+
+
+创建触发器：添加一个设备成功后，自动添加一个通道表和一个数据表.

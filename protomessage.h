@@ -17,6 +17,7 @@ enum MessageID{
    MSG_CALIB, //0xa
    MSG_RT_AD, //实时AD和重量.
    MSG_REMOVE_FILE,
+   MSG_WRITE_PARAM_RESP=0x85, //修改设备厂商
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;
@@ -165,30 +166,24 @@ struct sDateTime{
 
     }
 };
-#define MAX_WIFI_BUF 18
+#define MAX_VER_BUF 36
 struct MsgDevicePara
 {
-    INT16U	mWorkMode;	//采集方式
-    INT16U	mWetUp;		//	重量上限值
-    INT16U  mWetDown;		//重量下限值
 
-    Glocal_IP_ADDR Local_IP; //IP 地址
+    //INT8U SerialNo[12] ;
+    Glocal_IP_ADDR Local_IP; //设备IP 地址
     sServerADDR Server_ip;	//服务器IP
-    INT8U	mWifiSSID[MAX_WIFI_BUF];  //ssid 名字
-    INT8U	mWifiPass[MAX_WIFI_BUF];  //pass 密码
-    sDateTime mDateTime; //时间和日期.
 
-
+    INT8U	Version[MAX_VER_BUF];  //ssid 名字
+    //INT8U	mWifiPass[MAX_WIFI_BUF];  //pass 密码
+    sDateTime mDateTime; //设备的时间和日期.
+    INT16U   mTimeout;//读取超时间隔时间ms 0-65535ms
+    INT8U   mSensorNr; //传感器个数
+    INT16U   mReadInt; //读取间隔时间.
     INT8U 	checksum;
     MsgDevicePara()
     {
-        mWorkMode = 0;
-        mWetUp = 0;
-        mWetDown = 0;
-        memset(mWifiSSID,0,MAX_WIFI_BUF);
-        strcpy((char*)mWifiSSID,"ssid");
-        memset(mWifiPass,0,MAX_WIFI_BUF);
-        strcpy((char*)mWifiPass,"123456");
+        memset(Version,0,MAX_VER_BUF);
     }
     void toByteArray(QByteArray& data)
     {
@@ -276,7 +271,7 @@ public:
         output.append(0x7F);
         head.length = sizeof(ProtoHeader) + 1+ data.size();
         output.append((const char*)&head.length,sizeof(quint16));
-        output.append((const char*)&head.device_id,sizeof(quint32));
+        output.append((const char*)head.device_id,12);
         output.append((const char*)&head.serial_id,sizeof(quint16));
         output.append((const char*)&head.sesson_id,sizeof(quint16));
         output.append((const char*)&head.cmd_id,sizeof(quint8));

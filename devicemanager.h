@@ -7,12 +7,14 @@
 #include "protoparser.h"
 #include "device.h"
 #include "syncfile.h"
+#include "models.h"
 #include <QMap>
 #include <QList>
 class DeviceManager:public QObject
 {
 Q_OBJECT
 public:
+
     DeviceManager();
     bool start();
     void stop();
@@ -27,6 +29,9 @@ public:
     bool ResetDevice(QString dev_id,quint8 delay_s);
     bool ListFiles(QString dev_id,int page, int size);
     void calib(QString dev_id,quint8 chan,quint8 index,int weight);
+    bool RemoveDevice(QString dev_id);
+    bool AddDevice(QString dev_id,QString dev_name);
+    bool UpdateDevice(QString dev_id,QString dev_name);
 
     void ReadParam(QString dev_id);
     void ReadRt(QString dev_id);
@@ -38,6 +43,8 @@ public:
     bool LoadWaveFile(QString dev_id, QString file, MsgWaveData& wvd);
 
     bool RemoveFile(QString dev_id, QString file);
+    bool UpdateDeviceChan(QString dev_id, int chan, DeviceChnConfig &cfg);
+    bool GetDeviceChan(QString dev_id, int chan, DeviceChnConfig &cfg);
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
@@ -50,13 +57,13 @@ public slots:
     void onProgress(Device* dev,QString progress);
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);
+    void onResetResult(Device* dev, bool result);
 private:
     int m_dev_num;
 
-    QMap<QString,QString> id_name_map;
     QMap<QString,Device*> dev_map;
+    QMutex dev_lock;
     QStringList names;
-    QStringList ids;
     ProtoParser parser;
     quint16 m_serial_id;
     quint16 m_session_id;
@@ -74,6 +81,7 @@ signals:
     void SensorMsg(Device*,MsgSensorData);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);
+    void ResetResult(Device* dev, bool result);
     // QObject interface
 protected:
     void timerEvent(QTimerEvent *);

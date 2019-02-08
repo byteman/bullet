@@ -1,4 +1,4 @@
-#ifndef IGRAPHICCHANNEL_H
+﻿#ifndef IGRAPHICCHANNEL_H
 #define IGRAPHICCHANNEL_H
 #include <QPen>
 #include "ifilter.h"
@@ -18,6 +18,7 @@ public:
     virtual void SetName(QString &name) = 0;
     virtual void GetKeyRange(double& min,double &max)=0;
     virtual void GetValueRange(double& min,double &max)=0;
+
 protected:
     IValueFilter* m_filter;
 };

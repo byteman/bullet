@@ -6,7 +6,7 @@
 
 QT       += core  gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets sql printsupport
 
 TARGET = bullet
 TEMPLATE = app
@@ -49,7 +49,11 @@ SOURCES += main.cpp\
     MainWnd.cpp \
     dialogparams.cpp \
     dialogcalib.cpp \
-    frmmessagebox.cpp
+    frmmessagebox.cpp \
+    dao.cpp \
+    models.cpp \
+    dialogdevice.cpp \
+    dialogchanconfig.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -85,13 +89,19 @@ HEADERS  += tcpserver.h \
     mydevices.h \
     dialogparams.h \
     dialogcalib.h \
-    frmmessagebox.h
+    frmmessagebox.h \
+    dao.h \
+    models.h \
+    dialogdevice.h \
+    dialogchanconfig.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
     dialogparams.ui \
     dialogcalib.ui \
-    frmmessagebox.ui
+    frmmessagebox.ui \
+    dialogdevice.ui \
+    dialogchanconfig.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

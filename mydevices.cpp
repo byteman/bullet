@@ -16,6 +16,8 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
     {
         ChannelWidget* widget = new ChannelWidget(i,parent);
         connect(widget,SIGNAL(onDoubleClick(int,bool)),this,SLOT(onDoubleClick(int,bool)));
+        connect(widget,SIGNAL(onConfigClick(int)),this,SLOT(onChannelConfigEvent(int)));
+
         widgets.push_back(widget);
         widget->hide();
     }
@@ -44,6 +46,11 @@ void MyDevices::onDoubleClick(int addr,bool zoom)
     }
 
 
+}
+
+void MyDevices::onChannelConfigEvent(int addr)
+{
+    emit onChannelConfig(addr);
 }
 void MyDevices::clearAll()
 {

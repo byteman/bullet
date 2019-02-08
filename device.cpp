@@ -281,6 +281,8 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         if(req.getData(&para,sizeof(MsgDevicePara)))
         {
             emit ReadParam(this,para);
+        }else{
+            qDebug() << "getparam failed";
         }
 
     }
@@ -309,7 +311,11 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             emit RealTimeResult(this,rst);
         }
     }
-
+    else if(req.head.cmd_id == MSG_RESET)
+    {
+          qDebug() << "onResetResult----";
+        emit ResetResult(this,true);
+    }
 
 }
 QString Device::id() const

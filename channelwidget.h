@@ -1,4 +1,4 @@
-#ifndef CHANNEL_WIDGET_H
+﻿#ifndef CHANNEL_WIDGET_H
 #define CHANNEL_WIDGET_H
 
 #include <QWidget>
@@ -24,6 +24,7 @@ public:
     virtual void mouseDoubleClickEvent(QMouseEvent *);
 signals:
     void onDoubleClick(int addr,bool zoom);
+    void onConfigClick(int addr);
 private:
     void SetOnline(bool online);
     Ui::ChannelWidget *ui;
@@ -40,6 +41,13 @@ private:
     // QObject interface
     void clearState();
     void resetTimeout();
+
+    // QObject interface
+protected:
+    virtual void timerEvent(QTimerEvent *);
+private slots:
+    void on_tbtSet_triggered(QAction *arg1);
+    void on_tbtSet_clicked();
 };
 
 #endif // DEVWIDGET_H

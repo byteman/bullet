@@ -18,6 +18,7 @@ private:
 public:
     virtual void DisplayChannel(int chan=0,bool bshow=true);
     virtual void DisplayAllChannel(bool show);
+    virtual void SetRange(double key, int range);
     // ILineChart interface
 
 

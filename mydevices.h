@@ -27,8 +27,10 @@ public:
     void Resize();
 public slots:
     void onDoubleClick(int addr,bool zoom);
+    void onChannelConfigEvent(int addr);
 signals:
     void WaveFull();
+    void onChannelConfig(int addr);
 private:
     void AppendWave(int addr,float value);
     QVector<ChannelWidget*> widgets;

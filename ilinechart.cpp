@@ -1,4 +1,4 @@
-#include "ilinechart.h"
+﻿#include "ilinechart.h"
 
 void ILineChart::DisplayAllChannel(bool show)
 {
@@ -25,6 +25,13 @@ void ILineChart::AppendData(int chan,float value)
 {
     if(chan >= channels.size()) return;
     channels[chan]->AddData(0,value);
+}
+
+void ILineChart::AppendData2(int chan, double key,double value)
+{
+    if(chan >= channels.size()) return;
+    channels[chan]->AddData(key,value);
+
 }
 #if 0
 void ILineChart::SetDataArray(QVector<QVector<double>> &samples)
@@ -130,6 +137,11 @@ void ILineChart::SetFilter(IValueFilter *filter)
     {
         channels[i]->SetFilter(filter);
     }
+}
+
+void ILineChart::SetRange(double key, int range)
+{
+
 }
 
 double ILineChart::filter(double value)

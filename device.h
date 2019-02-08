@@ -89,6 +89,7 @@ signals:
     void EnumFiles(Device* dev,ENUM_FILE_RESP resp);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);
+    void ResetResult(Device* dev,bool result);
 private slots:
     void timeout();
 };
