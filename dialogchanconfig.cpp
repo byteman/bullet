@@ -8,7 +8,7 @@ DialogChanConfig::DialogChanConfig(QWidget *parent) :
     ui->setupUi(this);
     ui->edtMaxValue->setValidator(new QIntValidator(-100, 10000, this));
     ui->edtMinValue->setValidator(new QIntValidator(-100, 10000, this));
-
+    ui->edtChan->setEnabled(false);
 }
 
 DialogChanConfig::~DialogChanConfig()

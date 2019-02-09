@@ -1,57 +1,78 @@
 ﻿#include "devicemanager.h"
 #include <QSettings>
 #include "dao.h"
-DeviceManager::DeviceManager():
-    m_serial_id(0),
-    m_session_id(0)
+DeviceManager::DeviceManager()
 {
 
 }
 
-bool DeviceManager::start()
+
+QString DeviceManager::GetLastError()
 {
+    return m_last_err;
+}
+bool DeviceManager::addOneDevice(QString& serialNo, QString& name)
+{
+    Device* dev = new Device();
+    connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
+    connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
+    connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
 
+    connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
+    connect(dev,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
+    connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
+    connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
+    dev->setId(serialNo);
+    dev->setName(name);
+    dev_lock.lock();
+    dev_map[serialNo] = dev;
+    dev_lock.unlock();
+    return true;
+}
+//初始化设备管理器，重新加载设备.
+bool DeviceManager::Init()
+{
 
     DeviceInfoList devList;
     DAO::instance().DeviceList(devList);
 
     for(int i = 0; i < devList.size();i++)
     {
-
-        Device* dev = new Device();
-        connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
-        connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
-        connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
-
-        connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
-        connect(dev,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
-        connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
-
-        connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
-
-        dev->setId(devList[i].serialNo);
-        dev->setName(devList[i].name);
-        dev_lock.lock();
-        dev_map[devList[i].serialNo] = dev;
-        dev_lock.unlock();
+        addOneDevice(devList[i].serialNo,devList[i].name);
     }
     this->startTimer(1000);
     return true;
 }
+void DeviceManager::removeOneDevice(Device* dev)
+{
+    if(dev==NULL){
+        return;
+    }
+    connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
+    connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
+    connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
 
-void DeviceManager::stop()
+    connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
+    connect(dev,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
+    connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
+    connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
+    dev_map.remove(dev->id());
+    delete dev;
+}
+void DeviceManager::Uninit()
 {
      dev_lock.lock();
      QMap<QString,Device*>::const_iterator it;
      while (it != dev_map.constEnd()) {
-           //it.value()
-           ++it;
+         Device* dev = it.value();
+         if(dev==NULL){
+             continue;
+         }
+         removeOneDevice(dev);
+         ++it;
        }
-//    for(int i = 0; i < ids.size();i++)
-//    {
-//        disconnect(dev_map[ids[i]],SIGNAL(Notify(QString)),0,0);
-//    }
+     dev_map.clear();
      dev_lock.unlock();
 }
 
@@ -86,13 +107,57 @@ void DeviceManager::calib(QString dev_id,quint8 chan,quint8 index, int weight)
         return ;
     dev_map[dev_id]->calib(chan,index,weight);
 }
+//bool DeviceManager::UpdateRecState(QString &dev_id,int chan, bool pause)
+//{
+//    if(dev_map.contains(dev_id)){
+//       dev_map[dev_id]->UpdateState(chan,pause);
+//    }
+//    return true;
+//}
+//设置设备通道的参数.
+bool DeviceManager::SetChanConfig(QString &dev_id, int chan, DeviceChnConfig &cfg)
+{
+    if(dev_map.contains(dev_id)){
+       dev_map[dev_id]->UpdateChanConfig(chan,cfg);
+    }
+    return true;
+}
+//单独修改通道的状态.
+bool DeviceManager::ControlDeviceChan(QString dev_id, int chan, bool pause)
+{
+    QSqlError err =DAO::instance().DeviceChannalUpdateState(dev_id,chan,pause);
+    if(err.isValid()){
+        qDebug() << " ControlDeviceChan failed " << err.text();
+    }
+    DeviceChnConfig cfg;
+
+    GetDeviceChan(dev_id,chan,cfg);
+    cfg.paused = pause?1:0;
+    SetChanConfig(dev_id,chan,cfg);
+
+    //UpdateRecState(dev_id,chan,pause);
+    return !err.isValid();
+}
 
 bool DeviceManager::RemoveDevice(QString dev_id)
 {
+    //1.先删除设备表中的设备
     QSqlError err = DAO::instance().DeviceRemove(dev_id);
     if(err.isValid()){
         qDebug() << " RemoveDevice failed " << err.text();
     }
+    //2.在删除设备通道表中数据
+    err = DAO::instance().DeviceChannalRemove(dev_id);
+    if(err.isValid()){
+        qDebug() << " DeviceChannalRemove failed " << err.text();
+    }
+    //3.删除设备数据表中数据.
+    err = DAO::instance().DeviceDataRemove(dev_id);
+    if(err.isValid()){
+        qDebug() << " DeviceDataRemove failed " << err.text();
+    }
+    removeOneDevice(GetDevice(dev_id));
+
     return !err.isValid();
 }
 //添加设备
@@ -103,22 +168,33 @@ bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
     if(err.isValid()){
         qDebug() << " AddDevice failed " << err.text();
     }
+    addOneDevice(dev_id,dev_name);
+
     return !err.isValid();
 }
-
+//修改数据库，在更新内存对象.
 bool DeviceManager::UpdateDevice(QString dev_id, QString dev_name)
 {
     QSqlError err = DAO::instance().DeviceUpdate(dev_id,dev_name);
     if(err.isValid()){
         qDebug() << " UpdateDevice failed " << err.text();
     }
+    Device* dev= GetDevice(dev_id);
+    if(dev!=NULL){
+        dev->setName(dev_name);
+    }
     return !err.isValid();
 }
+//修改了通道的配置参数.同时修改数据库和内存参数.
 bool DeviceManager::UpdateDeviceChan(QString dev_id, int chan,DeviceChnConfig& cfg)
 {
     QSqlError err = DAO::instance().DeviceChannalUpdate(dev_id,chan,cfg);
     if(err.isValid()){
         qDebug() << " UpdateDeviceChan failed " << err.text();
+    }
+    Device* dev= GetDevice(dev_id);
+    if(dev!=NULL){
+        dev->UpdateChanConfig(chan,cfg);
     }
     return !err.isValid();
 }
@@ -145,16 +221,6 @@ void DeviceManager::WriteParam(QString dev_id, MsgDevicePara &para)
     return dev_map[dev_id]->WriteParam(para);
 }
 
-void DeviceManager::SetStation(QString station)
-{
-
-    QMapIterator<QString,Device*> i(dev_map);
-    while (i.hasNext()) {
-        i.next();
-            i.value()->setStation(station);
-    }
-}
-
 void DeviceManager::ListDevice(QList<Device *> &devices)
 {
     QMapIterator<QString,Device*> i(dev_map);
@@ -173,22 +239,6 @@ Device *DeviceManager::GetDevice(QString dev_id)
     return dev_map[dev_id];
 }
 
-void DeviceManager::GetDeviceWaveFiles(QString dev_id, QStringList &files)
-{
-    if(!dev_map.contains(dev_id))
-        return;
-    return dev_map[dev_id]->listWaveFiles(files);
-}
-
-
-
-bool DeviceManager::LoadWaveFile(QString dev_id, QString file, MsgWaveData &wvd)
-{
-    if(!dev_map.contains(dev_id))
-        return false;
-    return dev_map[dev_id]->LoadWaveFile(file,wvd);
-}
-
 void DeviceManager::onCommResult(Device *dev, int cmd, int result)
 {
     emit CommResult(dev,cmd,result);
@@ -199,6 +249,29 @@ void DeviceManager::onWaveMsg(Device* dev,MsgWaveData wvData)
 {
      emit WaveMsg(dev,wvData);
 }
+void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
+{
+    DeviceDataList ddl;
+
+    for(int i = 0; i <msg.channels.size();i++)
+    {
+        //如果这个设备的这个通道已经禁用了。
+         if(dev->IsPaused(msg.channels[i].addr)){
+             continue;
+         }
+         DeviceData dd;
+         dd.chan = msg.channels[i].addr;
+         dd.value = msg.channels[i].weight;
+         dd.timestamp = msg.channels[i].time;
+         ddl.push_back(dd);
+    }
+
+    QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
+    if(err.isValid()){
+        qDebug() << "DeviceDataAdd err=" << err.text();
+    }
+}
+//收到设备发过来的波形数据，存储.
 void DeviceManager::onSensorMsg(Device* dev,MsgSensorData msData)
 {
      emit SensorMsg(dev,msData);
@@ -275,16 +348,6 @@ void DeviceManager::Message(SessMessage msg)
 void DeviceManager::onNotify(QString msg)
 {
     emit Notify(msg);
-}
-
-void DeviceManager::onEnumFiles(Device *dev, ENUM_FILE_RESP resp)
-{
-    emit EnumFiles(dev,resp);
-}
-
-void DeviceManager::onProgress(Device *dev, QString progress)
-{
-    emit Progress(dev,progress);
 }
 
 void DeviceManager::onCalibResult(Device *dev, int chan, int index, int result)

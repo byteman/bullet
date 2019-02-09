@@ -101,13 +101,17 @@ background-color: rgb(255, 85, 127);</string>
         </property>
         <property name="icon">
          <iconset resource="img.qrc">
-          <normaloff>:/image/start.png</normaloff>:/image/start.png</iconset>
+          <normaloff>:/image/start.png</normaloff>
+          <normalon>:/image/stop.png</normalon>:/image/start.png</iconset>
         </property>
         <property name="iconSize">
          <size>
           <width>36</width>
           <height>36</height>
          </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonIconOnly</enum>
@@ -158,6 +162,9 @@ background-color: rgb(255, 85, 127);</string>
             <width>16777215</width>
             <height>36</height>
            </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>下限:0</string>
@@ -256,8 +263,8 @@ background-color: rgb(255, 85, 127);</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

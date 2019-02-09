@@ -1,4 +1,4 @@
-#ifndef UTILS_H
+﻿#ifndef UTILS_H
 #define UTILS_H
 
 #include <QTime>
@@ -28,5 +28,6 @@ public:
     static std::string gbk2utf8(const QString &inStr);
     static QString utf82gbk(const std::string &inStr);
 };
-
+QString FormatHex(QByteArray& data);
+int get_random_number();
 #endif // UTILS_H

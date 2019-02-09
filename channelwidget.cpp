@@ -2,19 +2,18 @@
 #include "ui_channelwidget.h"
 #include "utils.h"
 #include "command.h"
-
+#include "dao.h"
 #define MAX_TIMEOUT 3
 ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ChannelWidget),
     m_addr(addr),
     m_timeout(MAX_TIMEOUT),
-    m_last_still(false),
     m_zoom(false)
 {
     ui->setupUi(this);
     ui->lblChan->setText(tr("Address") + ":" + QString("%1").arg(addr));
-    clearState();
+
     SetOnline(true);
     ui->lbl_weight->setText("");
 
@@ -23,9 +22,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
 
     m_waveWdg->SetChannel(addr-1,1);
     m_waveWdg->Hide();
-    //ui->lbl_weight->hide();
-    //m_waveWdg->Show();
-    //this->startTimer(100);
+
 }
 
 void ChannelWidget::Show()
@@ -52,6 +49,23 @@ ChannelWidget::~ChannelWidget()
     delete ui;
 }
 
+void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
+{
+    m_min_value = cfg.minValue;
+    m_max_value = cfg.maxValue;
+    m_paused    = cfg.paused;
+    ui->lbl_w_max->setText(QString(QStringLiteral("上超限:%1")).arg(m_min_value));
+    ui->lbl_w_min->setText(QString(QStringLiteral("下超限:%1")).arg(m_max_value));
+    ui->tbtPlay->setChecked(m_paused);
+}
+
+
+void ChannelWidget::SetRecState(bool paused)
+{
+    m_paused = paused;
+    ui->tbtPlay->setChecked(paused);
+}
+
 void ChannelWidget::Timeout()
 {
     if(m_timeout > 0)
@@ -60,7 +74,6 @@ void ChannelWidget::Timeout()
         SetOnline(true);
     }
     if(m_timeout<=0){
-        clearState();
         ui->lbl_weight->setText("");
         SetOnline(false);
     }
@@ -72,16 +85,16 @@ void ChannelWidget::SetUnit(QString unit)
     //ui->lbl_unit->setText(unit);
 }
 
-void ChannelWidget::clearState()
-{
-
-}
 void ChannelWidget::resetTimeout()
 {
     m_timeout = MAX_TIMEOUT;
 }
-
-QString ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
+void ChannelWidget::AlarmCheck(int weight)
+{
+    MinAlarm(weight<m_min_value);
+    MaxAlarm(weight>m_max_value);
+}
+void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
 {
     double wf = (double)weight;
 
@@ -94,8 +107,8 @@ QString ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
         m_waveWdg->AppendTimeData(m_addr-1,utils::int2float(wf,dot));
         m_waveWdg->DisplayAllChannel(true);
     }
+    AlarmCheck(weight);
 
-    return wt;
 
 }
 
@@ -107,12 +120,27 @@ void ChannelWidget::SetOnline(bool online)
         ui->lblChan->setStyleSheet("background-color: red;");
     }
 }
+void ChannelWidget::MaxAlarm(bool alarm)
+{
+    if(alarm){
+        ui->lbl_w_max->setStyleSheet("background-color: rgb(255, 0, 0);");
+    }else{
+        ui->lbl_w_max->setStyleSheet("background-color: rgb(0, 170, 0);");
+    }
+}
+void ChannelWidget::MinAlarm(bool alarm)
+{
+    if(alarm){
+        ui->lbl_w_min->setStyleSheet("background-color: rgb(255, 0, 0);");
+    }else{
+        ui->lbl_w_min->setStyleSheet("background-color: rgb(0, 170, 0);");
+    }
+}
 void ChannelWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
     //qDebug() <<m_addr <<" double click";
     m_zoom=!m_zoom;
     if(m_zoom){
-       // m_waveWdg->Clear();
        ui->lbl_weight->setStyleSheet("font-size : 128px");
     }else{
        ui->lbl_weight->setStyleSheet("font-size : 16pt");
@@ -134,14 +162,14 @@ void ChannelWidget::timerEvent(QTimerEvent *)
     //DisplayWeight(i++,0,0);
 }
 
-void ChannelWidget::on_tbtSet_triggered(QAction *arg1)
+void ChannelWidget::on_tbtSet_clicked()
 {
-    qDebug() << "addr=" << m_addr;
+    qDebug() << "addr " << m_addr << " config clicked";
     emit onConfigClick(this->m_addr);
 }
 
-void ChannelWidget::on_tbtSet_clicked()
+void ChannelWidget::on_tbtPlay_clicked(bool checked)
 {
-    qDebug() << "addr=" << m_addr;
-    emit onConfigClick(this->m_addr);
+    qDebug() << "play=" << checked;
+    emit onPlayClick(m_addr,checked);
 }

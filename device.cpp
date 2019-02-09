@@ -2,6 +2,9 @@
 #include <QDir>
 #include <QDebug>
 #include <QDateTime>
+#include <memory.h>
+#include <stdlib.h>
+#include <string.h>
 #define MAX_TIMEOUT 10
 
 /*
@@ -16,7 +19,6 @@ Device::Device():
     m_timeout(MAX_TIMEOUT),
     m_serial_id(0),
     m_sess(NULL),
-    m_file(NULL),
     m_start_send(true)
 {
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
@@ -30,9 +32,7 @@ void Device::setOnline(bool online)
 {
     m_online = online;
 }
-#include <memory.h>
-#include <stdlib.h>
-#include <string.h>
+
 qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 {
     ProtoMessage msg;
@@ -73,20 +73,11 @@ qint32 Device::weight() const
     return m_weight;
 }
 
-void Device::setWeight(const qint32 &weight)
+bool Device::IsPaused(int chan)
 {
-    m_weight = weight;
+    return m_channels[chan].paused;
 }
 
-
-bool Device::ListFiles(int page, int size)
-{
-    ENUM_FILES_REQ data;
-    data.page = page;
-    data.size = size;
-    WriteCmd(MSG_ENUM_FILES,data.toBuffer());
-    return true;
-}
 void Device::ReadParam()
 {
     QByteArray data;
@@ -114,23 +105,6 @@ void Device::ReadRt()
     return;
 }
 
-qint64 Device::SendStartWave(quint16 sess_id,bool start)
-{
-    ProtoMessage msg;
-    msg.head.cmd_id = MSG_START_WAVE;
-    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = sess_id;
-    msg.is_ack = false;
-    QByteArray data;
-    msg.toByteArray(data);
-    if(start)
-        OpenFile();
-    else
-        CloseFile();
-    return SendData(data);
-
-}
 qint64 Device::SendData(QByteArray& data)
 {
     if(m_sess)
@@ -150,56 +124,11 @@ void Device::timeout()
         {
             m_packet_count--;
             if(m_packet_count<= 0){
-                StartRecWave(m_serial_id++,true);
+                //StartRecWave(m_serial_id++,true);
             }
         }
 
     }
-}
-void Device::OpenFile()
-{
-    if(m_file==NULL){
-        QString fname = GetFileName();
-        qDebug() << "create file " << fname;
-        m_file = new CSVFile(fname);
-    }
-}
-void Device::CloseFile()
-{
-    if(m_file!=NULL)
-    {
-        m_file->close();
-        delete m_file;
-        m_file = NULL;
-    }
-}
-qint64 Device::StartRecWave(quint16 sess_id,bool start)
-{
-    ProtoMessage msg;
-    if(start)
-    {
-        msg.head.cmd_id = MSG_START_REC_WAVE;
-
-        OpenFile();
-        m_packet_count = 3;
-        timer.start(1000);
-    }
-    else
-    {
-        msg.head.cmd_id = MSG_STOP_REC_WAVE;
-        CloseFile();
-        timer.stop();
-
-    }
-    m_start_send = start;
-    //msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = sess_id;
-    msg.is_ack = false;
-    QByteArray data;
-    msg.toByteArray(data);
-    return SendData(data);
-
 }
 
 void Device::checkOnline()
@@ -233,33 +162,15 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     m_timeout = MAX_TIMEOUT;
     m_online = true;
     //启动波形回应.
-    if(req.head.cmd_id == MSG_START_WAVE)
-    {
-        quint16 total = 0;
-        req.getBuffer(&total,2);
-        QString name = req.data.mid(2);
-        //ack
-        DevNotify("start wave");
-        if(total == 0){
-            DevNotify("packet==0");
-            return;
-        }
-        m_sync.StartSync(this,BuildFileName(name),total);
 
-    }
-    //读取某个波形文件的历史数据.
-    else if(req.head.cmd_id == MSG_WAVE_DATA)
-    {
-        //
-        m_sync.onMessage(req,resp);
-    }
+
     //实时波形数据文件.
-    else if(req.head.cmd_id == MSG_START_REC_WAVE)
+    if(req.head.cmd_id == MSG_START_REC_WAVE)
     {
         //req
         if(!m_start_send)
         {
-            StartRecWave(req.head.sesson_id,m_start_send);
+            //StartRecWave(req.head.sesson_id,m_start_send);
         }
         m_packet_count++;
         SaveWave(req);
@@ -314,7 +225,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     else if(req.head.cmd_id == MSG_RESET)
     {
           qDebug() << "onResetResult----";
-        emit ResetResult(this,true);
+            emit ResetResult(this,true);
     }
 
 }
@@ -328,39 +239,14 @@ void Device::setId(const QString &id)
     m_dev_id = id;
 }
 
-QString Device::CreateDir()
+void Device::WriteValues(MsgSensorData& msg)
 {
 
-    QString target_dir=QString("%1/wave/%2/%3").arg(QDir::currentPath()).arg(m_station).arg(m_dev_id);
-    QDir dir(target_dir);
-    if(!dir.exists())
-    {
-        dir.mkpath(target_dir);
-    }
-    return target_dir;
 }
-QString Device::BuildFileName(QString name)
-{
-    QString dt  = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
-    QString dir = CreateDir();
-    QString file = QString("%1/%2").arg(dir).arg(name);
-    return file;
-}
-QString Device::GetFileName()
-{
-    QString dt  = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
-    QString dir = CreateDir();
-    QString file = QString("%1/%2.csv").arg(dir).arg(dt);
-    return file;
-}
-void Device::sendProgress(int sample_start, int sample_total)
-{
-    emit Progress(this,QString("%1").arg(sample_start*100/sample_total)+"%");
-}
-#if 1
 void Device::ProcessWave(int index,QByteArray &data)
 {
     MsgSensorData msd;
+    msd.m_dev_serial = this->id();
     //qDebug() <<" sensor" << sizeof(SensorData);
     while(data.size() >= sizeof(SensorData)){
         SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
@@ -370,34 +256,7 @@ void Device::ProcessWave(int index,QByteArray &data)
     emit OnSensorData(this,msd);
 
 }
-#else
-void Device::ProcessWave(int index,QByteArray &data)
-{
 
-    //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
-    int sample_nr = data.size() / (8*2);
-
-    ChannelData cda;
-    MsgWaveData wvd;
-    wvd.channels.reserve(8);
-    wvd.channels.fill(cda,8);
-    if(index == 0)
-    {
-        wvd.m_first = true;
-    }
-    for(int i = 0 ; i < sample_nr; i++)
-    {
-        for(int j = 0; j < 8; j++)
-        {
-           quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
-           memcpy(&value, data.data() + i*16 + j*2,2);
-           wvd.channels[j].push_back( value );
-        }
-    }
-    emit showWave(this,wvd);
-
-}
-#endif
 void Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
@@ -416,59 +275,23 @@ void Device::SaveWave(ProtoMessage &msg)
     //qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
     QByteArray wvData = msg.data.mid(12, nsize);
 
-    if(m_file!=NULL)
-    {
-        m_file->write(wvData);
-    }
-
-    //sendProgress(sample_start, sample_total);
-
     ProcessWave(sample_start, wvData);
 
 
 }
-QString Device::station() const
+//修改某个设备某个通道的状态.
+void Device::UpdateState(int chan,bool pause)
 {
-    return m_station;
+    if(m_channels.contains(chan)){
+        m_channels[chan].paused = pause;
+    }
 }
 
-void Device::setStation(const QString &station)
+void Device::UpdateChanConfig(int chan, DeviceChnConfig &cfg)
 {
-    m_station = station;
-}
-bool Device::LoadWaveFile(QString file, MsgWaveData &wvd)
-{
-    QString filename = CreateDir() + "/" + file;
-
-    CSVFile csv;
-    return csv.LoadWaveFile(filename,wvd);
-
-}
-void Device::listWaveFiles(QStringList &files)
-{
-    QString dir = CreateDir();
-    QDir wvDir(dir);
-    files = wvDir.entryList(QDir::Files);
-}
-
-void Device::RemoveFile(QString file)
-{
-    QByteArray data;
-    WriteCmd(MSG_REMOVE_FILE,data);
-}
-void Device::SendSyncFile(QString file)
-{
-    ProtoMessage msg;
-    msg.head.cmd_id = MSG_START_WAVE;
-    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = m_sess_id++;
-    msg.is_ack = false;
-    msg.data.append(file);
-    QByteArray data;
-    msg.toByteArray(data);
-
-    SendData(data);
+    if(m_channels.contains(chan)){
+        m_channels[chan] = cfg;
+    }
 }
 ISession *Device::sess() const
 {

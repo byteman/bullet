@@ -7,6 +7,7 @@
 #include <QGridLayout>
 #include <QMap>
 #include "channelwidget.h"
+#include "models.h"
 class MyDevices:public QObject
 {
     Q_OBJECT
@@ -17,7 +18,8 @@ public:
     void SetCenterAddr(int addr);
     void Timeout(int addr);
     void SetUnit(QString unit);
-    void SetAlarmSetting(int addr,int alarmSetting, double value);
+    void SetChanSetting(int addr,DeviceChnConfig& cfg);
+    void SetRecState(int addr, bool paused);
     void DisplayWeight(int addr,int weight, quint16 state,quint16 dot);
     void SaveWave();
     //void LoadWave(QString file,ChannelsData& datas);
@@ -28,9 +30,11 @@ public:
 public slots:
     void onDoubleClick(int addr,bool zoom);
     void onChannelConfigEvent(int addr);
+    void onPlayClickEvent(int addr, bool played);
 signals:
     void WaveFull();
     void onChannelConfig(int addr);
+    void onPlayClick(int addr, bool played);
 private:
     void AppendWave(int addr,float value);
     QVector<ChannelWidget*> widgets;

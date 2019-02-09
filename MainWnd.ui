@@ -636,8 +636,8 @@ QToolButton#btnShou:hover{
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

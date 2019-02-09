@@ -1,4 +1,4 @@
-#include "utils.h"
+﻿#include "utils.h"
 #include <QDebug>
 Utils::Utils()
 {
@@ -128,4 +128,14 @@ QString utils::float2string(float wf, int dot)
             break;
     }
     return buf;
+}
+QString FormatHex(QByteArray& data)
+{
+    return data.toHex();
+}
+int get_random_number()
+ {
+     qsrand(QTime(0,0,0).msecsTo(QTime::currentTime()));
+     int a = qrand()%100;   //随机生成0到9的随机数
+     return a;
 }

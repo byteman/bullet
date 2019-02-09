@@ -1,4 +1,4 @@
-#include "syncfile.h"
+﻿#include "syncfile.h"
 #include "device.h"
 SyncFile::SyncFile():
     m_cur(0),
@@ -72,7 +72,7 @@ void SyncFile::SaveWave(ProtoMessage &msg)
     qDebug() << "cur= " << sample_start <<" total=" << sample_total;
     if(sample_start+sample_num >= sample_total)
     {
-        m_device->sendProgress(sample_total, sample_total);
+        //m_device->sendProgress(sample_total, sample_total);
         StopSync();
     }
     else
@@ -81,7 +81,7 @@ void SyncFile::SaveWave(ProtoMessage &msg)
 
         readPacket(m_cur + m_want, m_want);
         m_cur += m_want;
-        m_device->sendProgress(sample_start, sample_total);
+       // m_device->sendProgress(sample_start, sample_total);
     }
 
 
@@ -122,7 +122,7 @@ void SyncFile::readPacket(int index,int count)
     msg.index = index;
     m_timeout = 0;
     qDebug() << "read " << index << " count=" << count;
-    m_device->WriteCmd(MSG_WAVE_DATA, msg.toBuffer());
+    //m_device->WriteCmd(MSG_WAVE_DATA, msg.toBuffer());
 }
 //1秒超时，重发当前波形.
 void SyncFile::timeout()

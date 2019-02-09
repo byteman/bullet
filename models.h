@@ -13,12 +13,14 @@ struct DeviceChnConfig{
     int chanNr;
     int maxValue;
     int minValue;
+    int paused; //是否暂停. 1 暂停 0 继续.
     DeviceChnConfig()
     {
         maxValue = 0;
         minValue = 0;
         chanNr = 0;
         chanName="0";
+        paused = 0;
     }
 };
 

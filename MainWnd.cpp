@@ -8,27 +8,19 @@
 #include "dialogparams.h"
 #include "dialogdevice.h"
 #include "dialogchanconfig.h"
+#include "utils.h"
 #include <QDebug>
+#define MAX_CHAN_NR 8
+#define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
 {
     ui->txtLog->append(msg);
 }
-void MainWnd::Init()
+void MainWnd::StartReceiver()
 {
-    m_cur_dev_id = "123";
-
-    qRegisterMetaType<SessMessage>("SessMessage");
-
-    icon_device[0].addFile(":image/device.png");
-    icon_device[1].addFile(":image/offline.png");
-    icon_channel.addFile(":image/channel.png");
-    icon_dir.addFile(":image/dir.png");
-    icon_file.addFile(":image/channel.png");
-
-
     srv = new GPServer();
-    if(!srv->start(8881)){
-        AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8888是否被占用!!"));
+    if(!srv->start(LISTEN_PORT)){
+        AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
     }
@@ -36,68 +28,45 @@ void MainWnd::Init()
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
 
+}
+bool MainWnd::InitDvm()
+{
     connect(&dvm,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
     connect(&dvm,SIGNAL(DevOffline(Device*)),this,SLOT(DevOffline(Device*)));
     connect(&dvm,SIGNAL(DevOnline(Device*)),this,SLOT(DevOnline(Device*)));
-
-    //connect(&dvm,SIGNAL(EnumFiles(Device*,ENUM_FILE_RESP)),this,SLOT(onEnumFiles(Device*,ENUM_FILE_RESP)));
-    //connect(&dvm,SIGNAL(Progress(Device*,QString)),this,SLOT(onWaveProgress(Device*,QString)));
     connect(&dvm,SIGNAL(WaveMsg(Device*,MsgWaveData)),this,SLOT(onWaveMsg(Device*,MsgWaveData)));
     connect(&dvm,SIGNAL(SensorMsg(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
     connect(&dvm,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
     //connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
     connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
 
-    //connect(&dvm,SIGNAL(CommResult(Device*,int,int)),this,SLOT(onCommResult(Device*,int,int)));
-
-    connect(&m_timer,SIGNAL(timeout()),this,SLOT(on_mytime_out()));
-    ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-
-    menu=new QMenu(this);
-    menu2=new QMenu(this);
-    QIcon setting= QIcon(":image/setting.png");
-    QAction* action = new QAction(setting,QString::fromLocal8Bit(" 配置参数"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
-
-    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
-    menu->addAction(action);
-
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
-
-    action = new QAction(QString::fromLocal8Bit("复位设备"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
-
-    action = new QAction(QString::fromLocal8Bit("删除设备"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_remove_device_click(bool)));
-
-    action = new QAction(QString::fromLocal8Bit("修改设备"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_modify_menu_click(bool)));
-
-
-    action = new QAction(QString::fromLocal8Bit("添加设备"),this);
-    menu2->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
-
+    return dvm.Init();
+}
+//初始化
+//1.参数的加载
+//2.界面的初始化
+//3.系统的启动.
+bool MainWnd::Init()
+{
+    //首先初始化数据管理模块.
     QSqlError err =  DAO::instance().Init("measure.db");
     if(err.isValid()){
+        //初始化失败
+        AddLog(err.text());
         myHelper::ShowMessageBoxError(err.text());
+        return false;
     }
-    dvm.start();
-
-    loadDeviceUI();
-    this->startTimer(100);
-    on_btnMenu_Max_clicked();
-
-
+    //首先初始化设备管理器.
+    if(!InitDvm()){
+        AddLog(err.text());
+        myHelper::ShowMessageBoxError(err.text());
+        return false;
+    }
+    //初始化UI相关.
+    this->initUI();
+    return true;
 }
-QString FormatHex(QByteArray& data)
-{
-    return data.toHex();
-}
+
 void MainWnd::Message(SessMessage s)
 {
     //if(pause)return;
@@ -110,18 +79,30 @@ void MainWnd::onResetResult(Device *, bool)
     myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("复位设备成功"));
 
 }
-
-void MainWnd::on_mytime_out()
-{
-    //qDebug() << "mytimeout";
-    //dvm.ReadRt(m_cur_dev_id);
-}
 void MainWnd::onNotify(QString msg)
 {
 
     //ui->txtLog->append("send--> "+ msg);
 }
-
+/**
+ * 点击了某个设备通道的播放或者暂停.
+ * 1.修改界面的状态
+ * 2.写数据库修改通道状态
+ * 3.修改设备对象中通道的状态.
+*/
+void MainWnd::onPlayClick(int addr, bool played)
+{
+    qDebug() <<"addr="<<addr<< " onPlayClick played=" << played;
+    dvm.ControlDeviceChan(m_cur_dev_id,addr,played);
+}
+/**
+ * @brief 点击了通道配置按钮
+ * @param addr
+ * 1.直接读数据库中通道的参数
+ * 2.显示出来供用户修改
+ * 3.将修改后的参数写入到数据库
+ * 4.更新设备对象中通道的相关参数.
+ */
 void MainWnd::onChannelClick(int addr)
 {
     qDebug() << m_cur_dev_id << " chan=" << addr;
@@ -133,7 +114,8 @@ void MainWnd::onChannelClick(int addr)
     if(result == QDialog::Accepted){
         dlg.GetChanConfig(cfg);
         dvm.UpdateDeviceChan(m_cur_dev_id,addr,cfg);
-        //loadDeviceUI();
+        devices->SetChanSetting(addr,cfg);
+
     }
 }
 
@@ -150,6 +132,7 @@ void MainWnd::on_write_menu_click(bool)
 {
 
 }
+//添加一个设备.
 void MainWnd::on_add_device_click(bool)
 {
     qDebug() << "add device";
@@ -159,39 +142,53 @@ void MainWnd::on_add_device_click(bool)
         QString dev_id,dev_name;
         dlg.GetDeviceInfo(dev_id,dev_name);
         dvm.AddDevice(dev_id,dev_name);
-        loadDeviceUI();
+        reloadDeviceList();
     }
 }
-void MainWnd::on_remove_device_click(bool)
+bool MainWnd::GetCurrentDeviceId(QString& id)
 {
-    qDebug()<<m_cur_dev_id << " removed";
     QTreeWidgetItem* item =  ui->treeWidget->currentItem();
     if(item==NULL){
-         return ;
+         return false;
     }
-     QString id = item->data(0,Qt::UserRole).toString();
+    id = item->data(0,Qt::UserRole).toString();
+    return true;
+}
+//删除一个设备.
+void MainWnd::on_remove_device_click(bool)
+{
+
+     QString id;
+     if(!GetCurrentDeviceId(id))
+     {
+         return;
+     }
      if(dvm.RemoveDevice(id)){
          myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备成功"));
      }else{
          myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备失败"));
      }
-     loadDeviceUI();
+     reloadDeviceList();
 
 }
+//修改设备名称.
 void MainWnd::on_modify_menu_click(bool)
 {
     qDebug()<<m_cur_dev_id << " modify";
-    DialogDevice dlg;
-   QTreeWidgetItem* item =  ui->treeWidget->currentItem();
-   if(item==NULL){
-        return ;
-   }
-    QString id = item->data(0,Qt::UserRole).toString();
+
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
     Device* dev = dvm.GetDevice(id);
     if(dev==NULL)
     {
+        qDebug()<<"Can not GetDevice " << id;
         return;
     }
+    DialogDevice dlg;
     dlg.UpdateDeviceInfo(dev->id(),dev->name());
 
     int result = dlg.exec();
@@ -199,10 +196,10 @@ void MainWnd::on_modify_menu_click(bool)
         QString dev_id,dev_name;
         dlg.GetDeviceInfo(dev_id,dev_name);
         dvm.UpdateDevice(dev_id,dev_name);
-        loadDeviceUI();
+        reloadDeviceList();
     }
 }
-
+//复位设备.
 void MainWnd::on_reset_menu_click(bool)
 {
     dvm.ResetDevice(m_cur_dev_id,1);
@@ -242,6 +239,7 @@ void MainWnd::DevOnline(Device *dev)
         item->setIcon(0,icon_device[0]);
     }
 }
+//1s 定时监测设备是否在线.
 void MainWnd::timerEvent(QTimerEvent *)
 {
     QList<Device*> devices;
@@ -260,6 +258,7 @@ void MainWnd::timerEvent(QTimerEvent *)
     //simData();
 
 }
+//树形设备列表右键菜单.
 void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
 {
 
@@ -273,24 +272,32 @@ void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
        menu->popup(QCursor::pos());
 
 }
-void MainWnd::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+//点击了树形设备列表
+//切换设备.
+//切换切换后设备的当前的通道配置
+//读取通道的录制状态.更新状态
+void MainWnd::changeDevice(QString dev_id)
 {
-    m_cur_dev_id = item->data(0,Qt::UserRole).toString();
+    if(devices==NULL){
+        return;
+    }
+    for(int i = 1; i <= MAX_CHAN_NR; i++)
+    {
+        DeviceChnConfig cfg;
+        //从数据库中获取参数的状态.
+        //修改显示的配置
+        if(dvm.GetDeviceChan(dev_id,i,cfg)){
+            devices->SetChanSetting(i,cfg);
+        }
+        //修改设备对象的配置.
+        dvm.SetChanConfig(dev_id,i,cfg);
+    }
+
 }
 
-void MainWnd::onWaveMsg(Device *dev, MsgWaveData data)
-{
-   if(data.m_first)
-   {
-       //m_waveWdg->Clear();
-   }
-
-}
 
 void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
 {
-
-
     for(int i = 0; i < data.channels.size(); i++)
     {
         devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
@@ -318,26 +325,36 @@ void DAOTest()
         qDebug()<<"remove="<<err.text();
     }
 }
+void MainWnd::Start()
+{
+    StartReceiver();
+    //系统定时器.用来监测设备是否在线掉线
+    this->startTimer(1000);
+}
 MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::MainWnd)
+    ui(new Ui::MainWnd),
+    m_cur_dev_id("")
 {
+    qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
-    this->initForm();
 
-    Init();
+    if(this->Init())
+    {
+        this->Start();
+    }
 
-    //DAOTest();
+
+
 }
 
 MainWnd::~MainWnd()
 {
     delete ui;
 }
-void MainWnd::loadDeviceUI()
+//加载左侧设备列表.
+void MainWnd::reloadDeviceList()
 {
-
-    //pause = false;
     QList<Device*> devices;
     ui->treeWidget->clear();
     ui->treeWidget->setIconSize(QSize(48,48));
@@ -358,12 +375,19 @@ void MainWnd::loadDeviceUI()
         }
     }
 }
-int get_random_number()
- {
-     qsrand(QTime(0,0,0).msecsTo(QTime::currentTime()));
-     int a = qrand()%100;   //随机生成0到9的随机数
-     return a;
+//设备相关的UI初始化.
+void MainWnd::loadDeviceUI()
+{
+    //设备状态.icon加载
+    icon_device[0].addFile(":image/device.png");
+    icon_device[1].addFile(":image/offline.png");
+    icon_channel.addFile(":image/channel.png");
+    icon_dir.addFile(":image/dir.png");
+    icon_file.addFile(":image/channel.png");
+    reloadDeviceList();
+
 }
+
 void MainWnd::simData()
 {
     for(int i = 0; i < 8; i++)
@@ -372,9 +396,6 @@ void MainWnd::simData()
         Sleep(i);
 
     }
-    //wave->AppendData(0,get_random_number());
-    //wave->DisplayChannel(0,true);
-
 }
 bool MainWnd::eventFilter(QObject *watched, QEvent *event)
 {
@@ -391,8 +412,18 @@ bool MainWnd::eventFilter(QObject *watched, QEvent *event)
 
     return QWidget::eventFilter(watched, event);
 }
+void MainWnd::initDeviceChannels()
+{
+    wave = new WaveWidget(ui->plot3,1);
+    wave->SetChannel(0,1);
+    devices = new MyDevices(9,ui->gbDevices);
+    devices->SetMaxSampleNum(50);
+    devices->SetDeviceNum(1,8);
+    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
+    connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
 
-void MainWnd::initForm()
+}
+void MainWnd::initUI()
 {
     this->setProperty("form", true);
     this->setProperty("canMove", true);
@@ -410,8 +441,6 @@ void MainWnd::initForm()
     //ui->labTitle->setText(tr("WeiZhi Tech"));
     ui->labTitle->setFont(QFont("Microsoft Yahei", 16));
     this->setWindowTitle(ui->labTitle->text());
-
-    //ui->stackedWidget->setStyleSheet("QLabel{font:60pt;}");
 
     //单独设置指示器大小
     int addWidth = 20;
@@ -450,17 +479,46 @@ void MainWnd::initForm()
         connect(btn, SIGNAL(clicked()), this, SLOT(buttonClick()));
     }
 
-    ui->btnMain->click();
+
 
     ui->gbDevices->installEventFilter(this);
-    wave = new WaveWidget(ui->plot3,1);
-    wave->SetChannel(0,1);
-    devices = new MyDevices(9,ui->gbDevices);
-    devices->SetMaxSampleNum(50);
-    devices->SetDeviceNum(1,8);
-    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
 
+//上下文菜单初始化
+    ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+    menu=new QMenu(this);
+    menu2=new QMenu(this);
+    QIcon setting= QIcon(":image/setting.png");
+    QAction* action = new QAction(setting,QString::fromLocal8Bit(" 配置参数"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
+    menu->addAction(action);
+
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("复位设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("删除设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_remove_device_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("修改设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_modify_menu_click(bool)));
+
+
+    action = new QAction(QString::fromLocal8Bit("添加设备"),this);
+    menu2->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
+    ui->btnMain->click();
+    on_btnMenu_Max_clicked();
+ //加载设备状态.
     loadDeviceUI();
+    initDeviceChannels();
 }
 
 void MainWnd::buttonClick()
@@ -522,39 +580,18 @@ void MainWnd::on_btnExit_clicked()
 
 }
 
-
-void MainWnd::resizeEvent(QResizeEvent *e)
-{
-//    qDebug() << e->size();
-
-}
-
-
-void MainWnd::showEvent(QShowEvent *)
-{
-
-}
-
-void MainWnd::on_treeWidget_doubleClicked(const QModelIndex &index)
-{
-    qDebug() <<"click";
-}
 void MainWnd::on_btnShou_clicked()
 {
     static bool hide = false;
     if(!hide){
         ui->treeWidget->hide();
         ui->btnShou->setIcon(QIcon(":/image/fang.png"));
-        qDebug() << "hide";
-        //ui->widgetDocker->setStyleSheet("border:0px;");
-        //ui->widgetDocker->resize(ui->btnShou->width(),ui->widgetDocker->height());
-
     }else{
         ui->btnShou->setIcon(QIcon(":/image/shou.png"));
 
         ui->treeWidget->show();
     }
-      hide =!hide;
+    hide =!hide;
 }
 
 void MainWnd::closeEvent(QCloseEvent *event)
@@ -568,9 +605,20 @@ void MainWnd::closeEvent(QCloseEvent *event)
 
 
 }
-
+//切换后触发.
 void MainWnd::on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
+    if(current==NULL){
+        return;
+    }
     m_cur_dev_id = current->data(0,Qt::UserRole).toString();
+
     qDebug() << "item change to" << m_cur_dev_id;
+}
+
+void MainWnd::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+{
+     m_cur_dev_id = item->data(0,Qt::UserRole).toString();
+
+     changeDevice(m_cur_dev_id);
 }

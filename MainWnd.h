@@ -30,6 +30,7 @@ public:
     explicit MainWnd(QWidget *parent = 0);
     ~MainWnd();
 
+    bool GetCurrentDeviceId(QString &id);
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -49,12 +50,20 @@ private:
      QTimer m_timer;
      GPServer* srv;
      void loadDeviceUI();
-     void Init();
+     bool Init();
      QTreeWidgetItem *findItemById(QString id);
      void AddLog(QString msg);
      void simData();
+     void changeDevice(QString dev_id);
+     void StartReceiver();
+     bool InitDvm();
+     void initDeviceChannels();
+     void initUI();
+     void Start();
+     void reloadDeviceList();
+     void refreshDeviceList();
 private slots:
-    void initForm();
+
     void buttonClick();
     void on_menu_click(bool);
     void on_write_menu_click(bool);
@@ -64,18 +73,16 @@ private slots:
     void onNotify(QString msg);
     void onChannelClick(int addr);
     void on_btnMenu_Min_clicked();
-    void onWaveMsg(Device*dev, MsgWaveData data);
     void onSensorMsg(Device*dev, MsgSensorData data);
     void on_btnMenu_Max_clicked();
     void on_btnMenu_Close_clicked();
     void on_btnExit_clicked();
     void on_treeWidget_customContextMenuRequested(const QPoint &pos);
-    void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
     // QWidget interface
     void DevOffline(Device *dev);
     void DevOnline(Device *dev);
-    void on_mytime_out();
-    void on_treeWidget_doubleClicked(const QModelIndex &index);
+
 
     void on_btnShou_clicked();
 
@@ -84,13 +91,14 @@ private slots:
     void on_add_device_click(bool);
     void on_modify_menu_click(bool);
     void on_remove_device_click(bool);
+    void onPlayClick(int addr, bool played);
+    void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
 protected:
-    virtual void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);
 
     // QWidget interface
 protected:
-    virtual void showEvent(QShowEvent *);
 
     // QWidget interface
 protected:

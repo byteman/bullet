@@ -27,6 +27,7 @@ public:
     QSqlError DeviceChannalUpdate(QString serialNo,int chan, DeviceChnConfig &cfg);
     //获取某个设备某个通道的配置数据
     QSqlError DeviceChannalGet(QString serialNo,int chan, DeviceChnConfig &cfg);
+    QSqlError DeviceChannalUpdateState(QString serialNo,int chan, bool paused );
 
      //设备数据管理,一个设备一个表.
     //添加一条测力数据.
@@ -38,6 +39,12 @@ public:
 
     //查询某个设备的某个通道某个时间段的历史数据.
     QSqlError DeviceDataQuery(QString serialNo,int chan, qint64 from, qint64 to, DeviceDataList& dataList);
+
+    //参数管理模块
+    QSqlError WriteIntParam(QString key, int value);
+    QSqlError WriteStringParam(QString key, QString value);
+    int ReadIntParam(QString key, int value,int defValue);
+    QString ReadStringParam(QString key, QString value,QString defValue);
 
 private:
     QSqlError CreateDataTable(QString serialNo);

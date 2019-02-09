@@ -17,6 +17,7 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
         ChannelWidget* widget = new ChannelWidget(i,parent);
         connect(widget,SIGNAL(onDoubleClick(int,bool)),this,SLOT(onDoubleClick(int,bool)));
         connect(widget,SIGNAL(onConfigClick(int)),this,SLOT(onChannelConfigEvent(int)));
+        connect(widget,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClickEvent(int,bool)));
 
         widgets.push_back(widget);
         widget->hide();
@@ -51,6 +52,11 @@ void MyDevices::onDoubleClick(int addr,bool zoom)
 void MyDevices::onChannelConfigEvent(int addr)
 {
     emit onChannelConfig(addr);
+}
+
+void MyDevices::onPlayClickEvent(int addr, bool played)
+{
+    emit onPlayClick( addr,  played);
 }
 void MyDevices::clearAll()
 {
@@ -124,14 +130,23 @@ void MyDevices::SetUnit(QString unit)
     }
 }
 
-void MyDevices::SetAlarmSetting(int addr,int alarmSetting, double value)
+void MyDevices::SetChanSetting(int addr, DeviceChnConfig &cfg)
 {
-
     if(addr < widgets.size() && addr >= 0)
     {
-        //widgets[addr]->SetAlarmSetting(alarmSetting,value);
+
+        widgets[addr]->SetChanSetting(cfg);
     }
 }
+
+void MyDevices::SetRecState(int addr, bool paused)
+{
+    if(addr < widgets.size() && addr >= 0)
+    {
+        widgets[addr]->SetRecState(paused);
+    }
+}
+
 
 void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
 {
