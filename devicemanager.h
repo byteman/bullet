@@ -60,6 +60,7 @@ private:
     QMap<QString,Device*> dev_map;
     QMutex dev_lock;
     ProtoParser parser;
+    bool m_use_sys_time;
 
 
     bool addOneDevice(QString &serialNo, QString &name);

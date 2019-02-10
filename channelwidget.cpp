@@ -9,7 +9,8 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     ui(new Ui::ChannelWidget),
     m_addr(addr),
     m_timeout(MAX_TIMEOUT),
-    m_zoom(false)
+    m_zoom(false),
+    m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
     ui->lblChan->setText(tr("Address") + ":" + QString("%1").arg(addr));
@@ -44,6 +45,45 @@ void ChannelWidget::Reset()
 {
     m_zoom = false;
 }
+
+bool ChannelWidget::IsZoom()
+{
+    return m_zoom;
+}
+
+void ChannelWidget::ClearDisplay()
+{
+    ui->lbl_weight->setText("");
+    m_waveWdg->Clear();
+    MinAlarm(false);
+    MaxAlarm(false);
+}
+
+int ChannelWidget::Addr()
+{
+    return m_addr;
+}
+
+QQueue<SensorData> &ChannelWidget::GetHistoryData()
+{
+    return m_histData;
+}
+//重新加载一组波形数据.
+void ChannelWidget::DisplayDataQueue(QQueue<SensorData> &dataQueue)
+{
+    m_waveWdg->Clear();
+    double t = 0;
+    for(int i = 0; i < dataQueue.size(); i++)
+    {
+        if(i == 0){
+            t = dataQueue[i].time;
+        }
+        double df = double(dataQueue[i].time - t)/1000.0f;
+
+        m_waveWdg->AppendTimeData(m_addr,df, dataQueue[i].weight);
+    }
+
+}
 ChannelWidget::~ChannelWidget()
 {
     delete ui;
@@ -54,8 +94,8 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
     m_min_value = cfg.minValue;
     m_max_value = cfg.maxValue;
     m_paused    = cfg.paused;
-    ui->lbl_w_max->setText(QString(QStringLiteral("上超限:%1")).arg(m_min_value));
-    ui->lbl_w_min->setText(QString(QStringLiteral("下超限:%1")).arg(m_max_value));
+    ui->lbl_w_max->setText(QString(QStringLiteral("上超限:%1")).arg(m_max_value));
+    ui->lbl_w_min->setText(QString(QStringLiteral("下超限:%1")).arg(m_min_value));
     ui->tbtPlay->setChecked(m_paused);
 }
 
@@ -64,6 +104,11 @@ void ChannelWidget::SetRecState(bool paused)
 {
     m_paused = paused;
     ui->tbtPlay->setChecked(paused);
+}
+
+void ChannelWidget::SetTimeRange(int rangeS)
+{
+    m_waveWdg->SetRange(rangeS);
 }
 
 void ChannelWidget::Timeout()
@@ -94,8 +139,32 @@ void ChannelWidget::AlarmCheck(int weight)
     MinAlarm(weight<m_min_value);
     MaxAlarm(weight>m_max_value);
 }
+void ChannelWidget::WriteValues(int &value)
+{
+    SensorData data;
+    data.time = QDateTime::currentMSecsSinceEpoch() / 1000;
+    data.weight = value;
+    data.addr = this->m_addr;
+    qint32 span = m_rt_wave_s;
+
+    m_histData.push_back(data);
+    do{
+        SensorData& first = m_histData.front();
+        //如果超过20分钟*60秒，也抛弃.最多一秒一条数据.
+        if( (data.time - first.time) < span && m_histData.size() < span){
+            //如果当前数据的时间没有大于第一个数据20min种，就说明数据还没有满,跳过,否则
+            break;
+        }
+        m_histData.pop_front();
+    }while(1);
+
+}
 void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
 {
+    if(m_paused)
+    {
+        return;
+    }
     double wf = (double)weight;
 
     QString ws = utils::float2string(wf, dot);

@@ -1,7 +1,9 @@
 ﻿#include "devicemanager.h"
 #include <QSettings>
 #include "dao.h"
-DeviceManager::DeviceManager()
+#include "config.h"
+DeviceManager::DeviceManager():
+    m_use_sys_time(true)
 {
 
 }
@@ -37,6 +39,7 @@ bool DeviceManager::Init()
     DeviceInfoList devList;
     DAO::instance().DeviceList(devList);
 
+    m_use_sys_time = DAO::instance().ReadIntParam("use_sys_time",true);
     for(int i = 0; i < devList.size();i++)
     {
         addOneDevice(devList[i].serialNo,devList[i].name);
@@ -164,9 +167,15 @@ bool DeviceManager::RemoveDevice(QString dev_id)
 //1.数据库中添加一个设备.
 bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
 {
+    //添加一个设备到设备表
     QSqlError err = DAO::instance().DeviceAdd(dev_id,dev_name);
     if(err.isValid()){
         qDebug() << " AddDevice failed " << err.text();
+    }
+    //在添加一个设备的数据表.
+    err = DAO::instance().CreateDataTable(dev_id);
+    if(err.isValid()){
+        qDebug() << " CreateDataTable" << dev_id << " failed= " << err.text();
     }
     addOneDevice(dev_id,dev_name);
 
@@ -252,7 +261,11 @@ void DeviceManager::onWaveMsg(Device* dev,MsgWaveData wvData)
 void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
 {
     DeviceDataList ddl;
+    qint32 time = 0;
 
+    if(Config::instance().m_use_sys_time){
+        time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
+    }
     for(int i = 0; i <msg.channels.size();i++)
     {
         //如果这个设备的这个通道已经禁用了。
@@ -263,6 +276,9 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
          dd.timestamp = msg.channels[i].time;
+         if(Config::instance().m_use_sys_time){
+             dd.timestamp = time;
+         }
          ddl.push_back(dd);
     }
 
@@ -275,6 +291,7 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
 void DeviceManager::onSensorMsg(Device* dev,MsgSensorData msData)
 {
      emit SensorMsg(dev,msData);
+     WriteValues(dev,msData);
 }
 void DeviceManager::onReadParam(Device *dev, MsgDevicePara para)
 {

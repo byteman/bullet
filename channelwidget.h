@@ -5,6 +5,8 @@
 #include <QTime>
 #include "wavewidget.h"
 #include "models.h"
+#include <QQueue>
+#include "protomessage.h"
 namespace Ui {
 class ChannelWidget;
 }
@@ -19,12 +21,17 @@ public:
     ~ChannelWidget();
     void SetChanSetting(DeviceChnConfig& cfg);
     void SetRecState(bool paused);
-
+    void SetTimeRange(int rangeS);
     void Timeout();
     void SetUnit(QString unit);
     void DisplayWeight(int weight, quint16 state, quint16 dot);
     void Show();
     void Reset();
+    bool IsZoom();
+    void ClearDisplay();
+    int  Addr();
+    QQueue<SensorData>& GetHistoryData();
+    void DisplayDataQueue(QQueue<SensorData> &dataQueue);
     virtual void mouseDoubleClickEvent(QMouseEvent *);
 signals:
     void onDoubleClick(int addr,bool zoom);
@@ -41,13 +48,16 @@ private:
     int m_addr; //设备的通道地址.
     int m_timeout;
     bool m_paused;
+    int m_rt_wave_s;
     int m_min_value,m_max_value; //最大最小报警值.
     QString m_unit; //显示的力单位
     bool m_zoom; //是否处于放大状态.
     WaveWidget* m_waveWdg; //波形控件.
+    QQueue<SensorData> m_histData;
 
     // QObject interface
 
+    void WriteValues(int &value);
 protected:
     virtual void timerEvent(QTimerEvent *);
 private slots:

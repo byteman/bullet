@@ -9,6 +9,7 @@
 #include "dialogdevice.h"
 #include "dialogchanconfig.h"
 #include "utils.h"
+#include "config.h"
 #include <QDebug>
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
@@ -19,7 +20,8 @@ void MainWnd::AddLog(QString msg)
 void MainWnd::StartReceiver()
 {
     srv = new GPServer();
-    if(!srv->start(LISTEN_PORT)){
+
+    if(!srv->start(Config::instance().m_local_port)){
         AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
@@ -56,6 +58,7 @@ bool MainWnd::Init()
         myHelper::ShowMessageBoxError(err.text());
         return false;
     }
+    Config::instance().Init();
     //首先初始化设备管理器.
     if(!InitDvm()){
         AddLog(err.text());
@@ -94,6 +97,7 @@ void MainWnd::onPlayClick(int addr, bool played)
 {
     qDebug() <<"addr="<<addr<< " onPlayClick played=" << played;
     dvm.ControlDeviceChan(m_cur_dev_id,addr,played);
+    devices->SetRecState(addr,played);
 }
 /**
  * @brief 点击了通道配置按钮
@@ -148,6 +152,15 @@ void MainWnd::on_add_device_click(bool)
 bool MainWnd::GetCurrentDeviceId(QString& id)
 {
     QTreeWidgetItem* item =  ui->treeWidget->currentItem();
+    if(item==NULL){
+         return false;
+    }
+    id = item->data(0,Qt::UserRole).toString();
+    return true;
+}
+bool MainWnd::GetCurrentDeviceId2(QString& id)
+{
+    QTreeWidgetItem* item =  ui->treeWidget2->currentItem();
     if(item==NULL){
          return false;
     }
@@ -292,12 +305,19 @@ void MainWnd::changeDevice(QString dev_id)
         //修改设备对象的配置.
         dvm.SetChanConfig(dev_id,i,cfg);
     }
-
+    devices->ClearDisplay();
+    int addr = devices->GetZoomWidget();
+    if(addr!=-1){
+        onWaveShow(addr,true);
+    }
 }
 
 
 void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
 {
+    if(dev->id() != m_cur_dev_id){
+        return;
+    }
     for(int i = 0; i < data.channels.size(); i++)
     {
         devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
@@ -352,6 +372,28 @@ MainWnd::~MainWnd()
 {
     delete ui;
 }
+void MainWnd::reloadDeviceList2()
+{
+    QList<Device*> devices;
+    ui->treeWidget2->clear();
+    ui->treeWidget2->setIconSize(QSize(48,48));
+    dvm.ListDevice(devices);
+    for(int i = 0; i < devices.size();i++)
+    {
+        QTreeWidgetItem* item = NULL;
+        item = new QTreeWidgetItem(QStringList(devices[i]->name()));
+
+        ui->treeWidget2->addTopLevelItem(item);
+
+        item->setIcon(0,icon_device[1]);
+
+        item->setData(0,Qt::UserRole,devices[i]->id());
+        if(i == 0){
+            ui->treeWidget2->setCurrentItem(item);
+            //m_cur_dev_id = devices[i]->id();
+        }
+    }
+}
 //加载左侧设备列表.
 void MainWnd::reloadDeviceList()
 {
@@ -375,6 +417,44 @@ void MainWnd::reloadDeviceList()
         }
     }
 }
+#include <QSignalMapper>
+int MainWnd::GetSelectChannel()
+{
+    for(int i = 0; i < rbChanList.size(); i++)
+    {
+        if(rbChanList[i]->isChecked()){
+            return i+1;
+        }
+    }
+    return 0;
+}
+void MainWnd::loadChannels()
+{
+    ui->rb1->setChecked(true);
+    rbChanList.push_back(ui->rb1);
+    rbChanList.push_back(ui->rb2);
+    rbChanList.push_back(ui->rb3);
+    rbChanList.push_back(ui->rb4);
+    rbChanList.push_back(ui->rb5);
+    rbChanList.push_back(ui->rb6);
+    rbChanList.push_back(ui->rb7);
+    rbChanList.push_back(ui->rb8);
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+    for(int i =0 ;i < rbChanList.size(); i++)
+    {
+        connect(rbChanList[i], SIGNAL(clicked()), signalMapper, SLOT(map()));
+        signalMapper->setMapping(rbChanList[i], i);
+
+    }
+    connect(signalMapper, SIGNAL(mapped(int)),
+                this, SLOT(chan_click(int)));
+
+}
+
+void MainWnd::chan_click(int chan)
+{
+    qDebug() << "chan " << chan << " clicked";
+}
 //设备相关的UI初始化.
 void MainWnd::loadDeviceUI()
 {
@@ -385,7 +465,7 @@ void MainWnd::loadDeviceUI()
     icon_dir.addFile(":image/dir.png");
     icon_file.addFile(":image/channel.png");
     reloadDeviceList();
-
+    reloadDeviceList2();
 }
 
 void MainWnd::simData()
@@ -412,15 +492,32 @@ bool MainWnd::eventFilter(QObject *watched, QEvent *event)
 
     return QWidget::eventFilter(watched, event);
 }
+void MainWnd::onWaveShow(int addr, bool zoom)
+{
+    //放大设备波形.
+    //1加载当前设备编号，当前波形历史数据,写入波形控件.
+    if(!zoom){
+        return;
+    }
+    QString id;
+    if(!GetCurrentDeviceId(id)){
+        return;
+    }
+    QQueue<SensorData>* data = dvm.GetDevice(id)->GetHistoryData(addr);
+    if(data==NULL)return;
+    devices->DisplayDataQueue(addr,*data);
+}
 void MainWnd::initDeviceChannels()
 {
     wave = new WaveWidget(ui->plot3,1);
     wave->SetChannel(0,1);
     devices = new MyDevices(9,ui->gbDevices);
+    devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
     connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
+    connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));
 
 }
 void MainWnd::initUI()
@@ -519,8 +616,16 @@ void MainWnd::initUI()
  //加载设备状态.
     loadDeviceUI();
     initDeviceChannels();
+    loadChannels();
+    loadSysConfig();
 }
+void MainWnd::loadSysConfig()
+{
+    ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
+    ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
+    ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
 
+}
 void MainWnd::buttonClick()
 {
     QToolButton *b = (QToolButton *)sender();
@@ -621,4 +726,65 @@ void MainWnd::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
      m_cur_dev_id = item->data(0,Qt::UserRole).toString();
 
      changeDevice(m_cur_dev_id);
+}
+
+void MainWnd::on_sbWaveMin_valueChanged(int arg1)
+{
+    Config::instance().SetRtWaveMin(arg1);
+    devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
+}
+
+void MainWnd::on_edtPort_textChanged(const QString &arg1)
+{
+    bool ok = false;
+    int port = arg1.toInt(&ok);
+    if(!ok){
+        return;
+    }
+    Config::instance().SetLocalPort(port);
+}
+
+void MainWnd::on_cbUseSysTime_stateChanged(int arg1)
+{
+    Config::instance().SetUseSysTime(arg1!=0);
+    qDebug() << arg1;
+}
+
+void MainWnd::on_btnQuery_clicked()
+{
+    QString id;
+    if(!GetCurrentDeviceId2(id)){
+        return;
+    }
+    int chan = GetSelectChannel();
+    if(chan == 0) return;
+    qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
+    qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
+    DeviceDataList ddl;
+    QSqlError err = DAO::instance().DeviceDataQuery(id,chan,from,to, ddl);
+    if(err.isValid()){
+        qDebug() << "err=" << err.text();
+        return;
+    }
+
+
+}
+
+void MainWnd::on_btnShou2_clicked()
+{
+    static bool hide = false;
+    if(!hide){
+        ui->treeWidget2->hide();
+        ui->btnShou2->setIcon(QIcon(":/image/fang.png"));
+    }else{
+        ui->btnShou2->setIcon(QIcon(":/image/shou.png"));
+
+        ui->treeWidget2->show();
+    }
+    hide =!hide;
+}
+
+void MainWnd::on_dteFrom_dateChanged(const QDate &date)
+{
+
 }

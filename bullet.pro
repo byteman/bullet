@@ -53,7 +53,8 @@ SOURCES += main.cpp\
     dao.cpp \
     models.cpp \
     dialogdevice.cpp \
-    dialogchanconfig.cpp
+    dialogchanconfig.cpp \
+    config.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -93,7 +94,8 @@ HEADERS  += tcpserver.h \
     dao.h \
     models.h \
     dialogdevice.h \
-    dialogchanconfig.h
+    dialogchanconfig.h \
+    config.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

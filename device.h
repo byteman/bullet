@@ -10,6 +10,12 @@
 #include <QJsonDocument>
 #include "syncfile.h"
 #include "models.h"
+#include <QQueue>
+struct DeviceChannel{
+    QQueue<SensorData> values;
+    DeviceChnConfig config;
+
+};
 class Device:public QObject
 {
     Q_OBJECT
@@ -45,8 +51,10 @@ public:
     bool IsPaused(int chan);
     void UpdateState(int chan,bool pause);
     void UpdateChanConfig(int chan, DeviceChnConfig& cfg);
+    QQueue<SensorData>* GetHistoryData(int chan);
+
 private:
-    QMap<int,DeviceChnConfig> m_channels;
+    QMap<int,DeviceChannel> m_channels;
     qint32 m_ad;
     qint32 m_weight;
     QString m_dev_id;
@@ -56,6 +64,7 @@ private:
     QHostAddress m_host;
     quint16 m_port;
     bool m_start_send;
+    bool m_use_sys_time;
     bool m_online; //设备是否在线
     bool m_paused; //是否暂停录制.
     int  m_timeout; //在线超时定时器.
@@ -71,7 +80,8 @@ private:
     QTimer timer;
 
     void SaveWave(ProtoMessage &msg);
-    void WriteValues(MsgSensorData &msg);
+
+    void WriteValues(SensorData &data);
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);

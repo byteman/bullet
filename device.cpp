@@ -5,6 +5,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
+#include "config.h"
 #define MAX_TIMEOUT 10
 
 /*
@@ -75,7 +76,7 @@ qint32 Device::weight() const
 
 bool Device::IsPaused(int chan)
 {
-    return m_channels[chan].paused;
+    return m_channels[chan].config.paused;
 }
 
 void Device::ReadParam()
@@ -239,20 +240,26 @@ void Device::setId(const QString &id)
     m_dev_id = id;
 }
 
-void Device::WriteValues(MsgSensorData& msg)
+QQueue<SensorData>* Device::GetHistoryData(int chan)
 {
-
+    if(!m_channels.contains(chan)){
+       return NULL;
+    }
+    return &m_channels[chan].values;
 }
 void Device::ProcessWave(int index,QByteArray &data)
 {
     MsgSensorData msd;
     msd.m_dev_serial = this->id();
     //qDebug() <<" sensor" << sizeof(SensorData);
+
     while(data.size() >= sizeof(SensorData)){
         SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
         data.remove(0,sizeof(SensorData));
+        WriteValues(value);
         msd.channels.push_back(value);
     }
+
     emit OnSensorData(this,msd);
 
 }
@@ -279,18 +286,35 @@ void Device::SaveWave(ProtoMessage &msg)
 
 
 }
+
+void Device::WriteValues(SensorData &data)
+{
+        qint32 span = Config::instance().m_rt_wave_min*60;
+
+        m_channels[data.addr].values.push_back(data);
+        do{
+            SensorData& first = m_channels[data.addr].values.front();
+            //如果超过20分钟*60秒，也抛弃.最多一秒一条数据.
+            if( (data.time - first.time) < span && m_channels[data.addr].values.size() < span){
+                //如果当前数据的时间没有大于第一个数据20min种，就说明数据还没有满,跳过,否则
+                break;
+            }
+            m_channels[data.addr].values.pop_front();
+        }while(1);
+
+}
 //修改某个设备某个通道的状态.
 void Device::UpdateState(int chan,bool pause)
 {
     if(m_channels.contains(chan)){
-        m_channels[chan].paused = pause;
+        m_channels[chan].config.paused = pause;
     }
 }
 
 void Device::UpdateChanConfig(int chan, DeviceChnConfig &cfg)
 {
     if(m_channels.contains(chan)){
-        m_channels[chan] = cfg;
+        m_channels[chan].config = cfg;
     }
 }
 ISession *Device::sess() const

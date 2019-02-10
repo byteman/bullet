@@ -13,6 +13,7 @@ class MyDevices:public QObject
     Q_OBJECT
 public:
     MyDevices(int max=32,QGroupBox* parent=NULL );
+    void SetTimeRange(int rangeS);
     void SetDeviceNum(int  start, int num);
     void SetMaxSampleNum(int max);
     void SetCenterAddr(int addr);
@@ -22,16 +23,20 @@ public:
     void SetRecState(int addr, bool paused);
     void DisplayWeight(int addr,int weight, quint16 state,quint16 dot);
     void SaveWave();
+    void ClearDisplay();
     //void LoadWave(QString file,ChannelsData& datas);
     void GetNum(int &start,int &num);
     int  GetEndAddr();
     void listWaveFiles(QStringList &files);
     void Resize();
+    void DisplayDataQueue(int addr,QQueue<SensorData> &dataQueue);
+    int  GetZoomWidget();
 public slots:
     void onDoubleClick(int addr,bool zoom);
     void onChannelConfigEvent(int addr);
     void onPlayClickEvent(int addr, bool played);
 signals:
+    void onWaveShow(int addr,bool zoom);
     void WaveFull();
     void onChannelConfig(int addr);
     void onPlayClick(int addr, bool played);

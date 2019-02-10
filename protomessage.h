@@ -209,8 +209,8 @@ struct ProtoHeader{
 };
 struct SensorData{
     quint8 addr;
-    quint32 weight;
-    quint32 time;
+    qint32 weight;
+    qint32 time;
 };
 #pragma pack(pop)
 

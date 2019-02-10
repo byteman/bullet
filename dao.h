@@ -40,18 +40,25 @@ public:
     //查询某个设备的某个通道某个时间段的历史数据.
     QSqlError DeviceDataQuery(QString serialNo,int chan, qint64 from, qint64 to, DeviceDataList& dataList);
 
+    bool ExistKey(QString key);
+    bool getParam(QString key, QString &value);
+    QSqlError updateParam(QString key, QString value);
+    QSqlError insertParam(QString key, QString value);
     //参数管理模块
     QSqlError WriteIntParam(QString key, int value);
     QSqlError WriteStringParam(QString key, QString value);
-    int ReadIntParam(QString key, int value,int defValue);
-    QString ReadStringParam(QString key, QString value,QString defValue);
-
-private:
+    bool ReadBoolParam(QString key, bool defValue);
+    int ReadIntParam(QString key, int defValue);
+    QString ReadStringParam(QString key, QString defValue);
     QSqlError CreateDataTable(QString serialNo);
+    QSqlError WriteBoolParam(QString key, bool value);
+private:
+
     QSqlDatabase db;
     QSqlError CreateDeviceTable();
     QSqlError CreateDeviceChannelConfigTable();
     bool DeviceChannalExists(QString serialNo, int chan);
+    QSqlError CreateParamTable();
 };
 
 #endif // DAO_H

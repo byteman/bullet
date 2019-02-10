@@ -8,7 +8,7 @@
 #define DEV_DEVICE_TABLE "tbl_device" //设备表
 #define DEV_DEVICE_CHAN_CFG_TABLE "tbl_device_chan_config" //设备通道配置表
 #define DEV_DEVICE_DATA_TABLE "tbl_device_data" //设备通道配置表
-
+#define DEV_DEVICE_PARAM_TABLE "tbl_param" //设备参数
 DAO::DAO()
 {
 
@@ -36,6 +36,12 @@ QSqlError DAO::Init(QString DataBase)
     if(err.isValid())
     {
         qDebug() << "CreateDeviceChannelConfigTable =" << err.text();
+        return err;
+    }
+    err = CreateParamTable();
+    if(err.isValid())
+    {
+        qDebug() << "CreateParamTable =" << err.text();
         return err;
     }
     return db.lastError();
@@ -298,8 +304,12 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
 {
     //清空某个表
     //delete * from tbl_xx_data;DELETE FROM sqlite_sequence WHERE name = ‘TableName’;
-    QString sql = QString("DELETE FROM tbl_%1_data; DELETE FROM sqlite_sequence WHERE name=%1").arg(serialNo).arg(serialNo);
+    QString sql = QString("DROP TABLE IF EXISTS tbl_%1_data;").arg(serialNo);
     QSqlQuery query;
+
+    query.exec(sql);
+
+    sql = QString(" DELETE FROM  sqlite_sequence WHERE name=%1;").arg(serialNo);
 
     query.exec(sql);
 
@@ -326,14 +336,124 @@ QSqlError DAO::DeviceDataQuery(QString serialNo, int chan, qint64 from, qint64 t
     return query.lastError();
 }
 
+bool DAO::ExistKey(QString key)
+{
+    QString sql = QString("select * from %1 where key=?;").arg(DEV_DEVICE_PARAM_TABLE);
+    QSqlQuery query;
+    query.prepare(sql);
+
+    query.addBindValue(key);
+
+
+    query.exec();
+
+    bool exist = query.first();
+
+    return exist;
+
+}
+
+bool DAO::getParam(QString key, QString &value)
+{
+    QString sql = QString("select * from %1 where key=?;").arg(DEV_DEVICE_PARAM_TABLE);
+    QSqlQuery query;
+    query.prepare(sql);
+
+    query.addBindValue(key);
+
+
+    query.exec();
+
+    bool exist = query.first();
+    if(exist){
+        value = query.value("value").toString();
+    }
+    return exist;
+}
+
+QSqlError DAO::updateParam(QString key, QString value)
+{
+    QString sql = QString("update %1 set value= :value where key= :key;").arg(DEV_DEVICE_PARAM_TABLE);
+    QSqlQuery query;
+    query.prepare(sql);
+
+    query.bindValue(":key", key);
+    query.bindValue(":value", value);
+    query.exec();
+
+    return query.lastError();
+}
+
+QSqlError DAO::insertParam(QString key, QString value)
+{
+    QString sql = QString("insert into %1(key,value) values(?,?);").arg(DEV_DEVICE_PARAM_TABLE);
+    QSqlQuery query;
+    query.prepare(sql);
+
+    query.addBindValue(key);
+    query.addBindValue(value);
+
+    query.exec();
+    return query.lastError();
+}
+
 QSqlError DAO::WriteIntParam(QString key, int value)
 {
-    return QSqlError();
+    if(ExistKey(key)){
+        return updateParam(key,QString("%1").arg(value));
+    }
+    return insertParam(key,QString("%1").arg(value));
+}
+QSqlError DAO::WriteBoolParam(QString key, bool value)
+{
+    if(ExistKey(key)){
+        return updateParam(key,QString("%1").arg(value?1:0));
+    }
+    return insertParam(key,QString("%1").arg(value?1:0));
 }
 
 QSqlError DAO::WriteStringParam(QString key, QString value)
 {
-    return QSqlError();
+    if(ExistKey(key)){
+        return updateParam(key,value);
+    }
+    return insertParam(key,value);
+}
+
+bool DAO::ReadBoolParam(QString key, bool defValue)
+{
+    QString value = "";
+    bool ok = false;
+    if(getParam(key,value)){
+        int v = value.toInt(&ok);
+        if(!ok) return defValue;
+        return v!=0?true:false;
+    }
+    return defValue;
+}
+
+int DAO::ReadIntParam(QString key, int defValue)
+{
+    QString value = "";
+    bool ok = false;
+    if(getParam(key,value)){
+        int v = value.toInt(&ok);
+        if(!ok) return defValue;
+        return v;
+    }
+    return defValue;
+}
+
+QString DAO::ReadStringParam(QString key, QString defValue)
+{
+    QString value = "";
+    bool ok = false;
+    if(getParam(key,value)){
+
+        if(!ok) return defValue;
+        return value;
+    }
+    return defValue;
 }
 QSqlError DAO::CreateDeviceTable()
 {
@@ -363,3 +483,13 @@ QSqlError DAO::CreateDataTable(QString serialNo)
     return query.lastError();
 
 }
+QSqlError DAO::CreateParamTable()
+{
+    QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_param` ( `key` TEXT NOT NULL UNIQUE, `value` TEXT );";
+
+    QSqlQuery query;
+    query.exec(sql_create);
+    return query.lastError();
+
+}
+//CREATE TABLE `tbl_param` ( `key` TEXT NOT NULL UNIQUE, `value` TEXT )

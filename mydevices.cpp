@@ -24,6 +24,15 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
     }
 
 }
+
+void MyDevices::SetTimeRange(int rangeS)
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+         widgets[i]->SetTimeRange(rangeS);
+    }
+
+}
 void MyDevices::zoomDevice(int addr)
 {
     clearAll();
@@ -45,6 +54,7 @@ void MyDevices::onDoubleClick(int addr,bool zoom)
 
         Resize();
     }
+    emit onWaveShow(addr,zoom);
 
 
 }
@@ -147,7 +157,24 @@ void MyDevices::SetRecState(int addr, bool paused)
     }
 }
 
+void MyDevices::DisplayDataQueue(int addr,QQueue<SensorData> &dataQueue)
+{
+    if(addr < widgets.size() && addr >= 0)
+    {
+        widgets[addr]->DisplayDataQueue(dataQueue);
+    }
+}
 
+int MyDevices::GetZoomWidget()
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+        if(widgets[i]->IsZoom()){
+            return widgets[i]->Addr();
+        }
+    }
+    return -1;
+}
 void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
 {
     if(addr < widgets.size())
@@ -155,6 +182,14 @@ void MyDevices::DisplayWeight(int addr, int weight, quint16 state, quint16 dot)
 
         widgets[addr]->DisplayWeight(weight,state,dot);
 
+    }
+}
+
+void MyDevices::ClearDisplay()
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+        widgets[i]->ClearDisplay();
     }
 }
 void MyDevices::GetNum(int &start, int &num)

@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QTreeWidgetItem>
+#include <QRadioButton>
 #include <math.h>
 #include <QTcpServer>
 #include <QListWidgetItem>
@@ -41,6 +42,7 @@ private:
      QString m_cur_dev_id;
      DeviceManager dvm;
      QIcon icon_device[2];
+     QVector<QRadioButton*> rbChanList;
      QIcon icon_channel;
      QIcon icon_dir;
      QIcon icon_file;
@@ -62,8 +64,13 @@ private:
      void Start();
      void reloadDeviceList();
      void refreshDeviceList();
+     void loadSysConfig();
+     void reloadDeviceList2();
+     bool GetCurrentDeviceId2(QString &id);
+     void loadChannels();
+     int GetSelectChannel();
 private slots:
-
+    void chan_click(int chan);
     void buttonClick();
     void on_menu_click(bool);
     void on_write_menu_click(bool);
@@ -93,6 +100,19 @@ private slots:
     void on_remove_device_click(bool);
     void onPlayClick(int addr, bool played);
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
+    void on_sbWaveMin_valueChanged(int arg1);
+
+    void on_edtPort_textChanged(const QString &arg1);
+
+    void onWaveShow(int addr, bool zoom);
+    void on_cbUseSysTime_stateChanged(int arg1);
+
+    void on_btnQuery_clicked();
+
+    void on_btnShou2_clicked();
+
+    void on_dteFrom_dateChanged(const QDate &date);
 
 protected:
     void timerEvent(QTimerEvent *);

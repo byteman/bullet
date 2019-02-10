@@ -19,6 +19,7 @@ public:
     ~WaveWidget();
     void DisplayChannel(int chan=0,bool bshow=false);
     void DisplayAllChannel(bool show);
+
     //void SetData(ChannelsData& waves);
     //void AppendDataArr(ChannelDataArray &wvd);
     void AppendData(int addr, float value);
@@ -30,10 +31,12 @@ public:
     void Show();
     void SetRange(int range);
     void AppendTimeData(int addr, double value);
+    void AppendTimeData(int addr, double time,double value);
 private:
 
     int m_num;
     int m_start;
+    int m_range;
     QWidget* m_parent;
     ILineChart* m_chart;
 
