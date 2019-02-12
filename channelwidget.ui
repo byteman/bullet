@@ -73,12 +73,12 @@ border-radius:1px;
 background-color: rgb(255, 85, 127);</string>
         </property>
         <property name="text">
-         <string>1</string>
+         <string/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QToolButton" name="tbtAlarm">
         <property name="text">
          <string>...</string>
         </property>
@@ -96,13 +96,16 @@ background-color: rgb(255, 85, 127);</string>
       </item>
       <item>
        <widget class="QToolButton" name="tbtPlay">
+        <property name="toolTipDuration">
+         <number>1</number>
+        </property>
         <property name="text">
          <string>...</string>
         </property>
         <property name="icon">
          <iconset resource="img.qrc">
-          <normaloff>:/image/start.png</normaloff>
-          <normalon>:/image/stop.png</normalon>:/image/start.png</iconset>
+          <normaloff>:/image/play2.png</normaloff>
+          <normalon>:/image/pause2.png</normalon>:/image/play2.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -112,6 +115,9 @@ background-color: rgb(255, 85, 127);</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonIconOnly</enum>

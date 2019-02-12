@@ -301,11 +301,19 @@ void MainWnd::changeDevice(QString dev_id)
         //修改显示的配置
         if(dvm.GetDeviceChan(dev_id,i,cfg)){
             devices->SetChanSetting(i,cfg);
+            Device* dev = dvm.GetDevice(dev_id);
+            if(dev!=NULL){
+                devices->SetTitle(i,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(i));
+            }else{
+                devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(i));
+            }
+
         }
         //修改设备对象的配置.
         dvm.SetChanConfig(dev_id,i,cfg);
     }
     devices->ClearDisplay();
+
     int addr = devices->GetZoomWidget();
     if(addr!=-1){
         onWaveShow(addr,true);
@@ -414,6 +422,8 @@ void MainWnd::reloadDeviceList()
         if(i == 0){
             ui->treeWidget->setCurrentItem(item);
             m_cur_dev_id = devices[i]->id();
+            changeDevice(m_cur_dev_id);
+
         }
     }
 }
@@ -614,10 +624,11 @@ void MainWnd::initUI()
     ui->btnMain->click();
     on_btnMenu_Max_clicked();
  //加载设备状态.
-    loadDeviceUI();
+
     initDeviceChannels();
     loadChannels();
     loadSysConfig();
+    loadDeviceUI();
 }
 void MainWnd::loadSysConfig()
 {

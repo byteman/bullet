@@ -13,7 +13,8 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
-    ui->lblChan->setText(tr("Address") + ":" + QString("%1").arg(addr));
+    ui->tbtAlarm->hide();
+    //ui->lblChan->setText(tr("Address") + ":" + QString("%1").arg(addr));
 
     SetOnline(true);
     ui->lbl_weight->setText("");
@@ -89,20 +90,32 @@ ChannelWidget::~ChannelWidget()
     delete ui;
 }
 
+void ChannelWidget::SetTitle(QString name)
+{
+    ui->lblChan->setText(name);
+
+    m_name = name;
+
+}
+
 void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
 {
     m_min_value = cfg.minValue;
     m_max_value = cfg.maxValue;
     m_paused    = cfg.paused;
+    disable(m_paused);
     ui->lbl_w_max->setText(QString(QStringLiteral("上超限:%1")).arg(m_max_value));
     ui->lbl_w_min->setText(QString(QStringLiteral("下超限:%1")).arg(m_min_value));
     ui->tbtPlay->setChecked(m_paused);
 }
 
-
+//禁用通道的时候，更改通道的颜色.
 void ChannelWidget::SetRecState(bool paused)
 {
     m_paused = paused;
+
+    disable(paused);
+
     ui->tbtPlay->setChecked(paused);
 }
 
@@ -176,11 +189,21 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
         m_waveWdg->AppendTimeData(m_addr-1,utils::int2float(wf,dot));
         m_waveWdg->DisplayAllChannel(true);
     }
-    AlarmCheck(weight);
+    if(!m_paused){
+      AlarmCheck(weight);
+    }
+
 
 
 }
-
+void ChannelWidget::disable(bool dis)
+{
+    if(dis)
+        ui->lblChan->setStyleSheet("background-color: red;");
+    else{
+        ui->lblChan->setStyleSheet("background-color: #26A65B;");
+    }
+}
 void ChannelWidget::SetOnline(bool online)
 {
     if(online){
@@ -189,6 +212,7 @@ void ChannelWidget::SetOnline(bool online)
         ui->lblChan->setStyleSheet("background-color: red;");
     }
 }
+
 void ChannelWidget::MaxAlarm(bool alarm)
 {
     if(alarm){

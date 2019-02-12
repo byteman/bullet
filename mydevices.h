@@ -19,6 +19,7 @@ public:
     void SetCenterAddr(int addr);
     void Timeout(int addr);
     void SetUnit(QString unit);
+    void SetTitle(int addr, QString title);
     void SetChanSetting(int addr,DeviceChnConfig& cfg);
     void SetRecState(int addr, bool paused);
     void DisplayWeight(int addr,int weight, quint16 state,quint16 dot);

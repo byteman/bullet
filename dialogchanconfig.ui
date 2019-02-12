@@ -10,8 +10,14 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>14</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>通道配置</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

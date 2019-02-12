@@ -140,6 +140,15 @@ void MyDevices::SetUnit(QString unit)
     }
 }
 
+void MyDevices::SetTitle(int addr, QString title)
+{
+    if(addr < widgets.size())
+    {
+        widgets[addr]->SetTitle(title);
+        //m_csv.Append(addr, "",m_end,false);
+    }
+}
+
 void MyDevices::SetChanSetting(int addr, DeviceChnConfig &cfg)
 {
     if(addr < widgets.size() && addr >= 0)

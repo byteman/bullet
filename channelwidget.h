@@ -19,6 +19,7 @@ public:
     explicit ChannelWidget(int addr,QWidget *parent = 0);
 
     ~ChannelWidget();
+    void SetTitle(QString name);
     void SetChanSetting(DeviceChnConfig& cfg);
     void SetRecState(bool paused);
     void SetTimeRange(int rangeS);
@@ -44,7 +45,7 @@ private:
     void MaxAlarm(bool alarm);
     void MinAlarm(bool alarm);
     void AlarmCheck(int weight);
-
+    QString m_name;
     int m_addr; //设备的通道地址.
     int m_timeout;
     bool m_paused;
@@ -58,6 +59,7 @@ private:
     // QObject interface
 
     void WriteValues(int &value);
+    void disable(bool dis);
 protected:
     virtual void timerEvent(QTimerEvent *);
 private slots:
