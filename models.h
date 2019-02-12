@@ -30,5 +30,5 @@ struct DeviceData{
     qint64 timestamp; //时间戳
     qint32 value; //测力值.
 };
-typedef QList<DeviceData> DeviceDataList;
+typedef QVector<DeviceData> DeviceDataList;
 #endif // MODELS_H

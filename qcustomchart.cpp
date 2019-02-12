@@ -61,7 +61,7 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
 {
 
    m_plot->axisRect()->setupFullAxesBox();
-   m_plot->legend->setVisible(true);
+   //m_plot->legend->setVisible(true);
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
    m_plot->yAxis->scaleRange(0,2000);

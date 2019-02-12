@@ -19,6 +19,7 @@
 #include "protomessage.h"
 #include "gpserver.h"
 #include <QLabel>
+#include "histwavewidget.h"
 namespace Ui {
 class MainWnd;
 }
@@ -32,14 +33,17 @@ public:
     ~MainWnd();
 
     bool GetCurrentDeviceId(QString &id);
+    bool LoadWave(QString id, int chan, qint64 from, qint64 to);
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
         Ui::MainWnd *ui;
      MyDevices* devices;
-     WaveWidget* wave;
+     QFutureWatcher<bool> *watcher;
+     HistWaveWidget* wave;
      QString m_cur_dev_id;
+     DeviceDataList m_ddl;
      DeviceManager dvm;
      QIcon icon_device[2];
      QVector<QRadioButton*> rbChanList;
@@ -69,6 +73,8 @@ private:
      bool GetCurrentDeviceId2(QString &id);
      void loadChannels();
      int GetSelectChannel();
+
+     QTreeWidgetItem *findItemById2(QString id);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -114,6 +120,12 @@ private slots:
 
     void on_dteFrom_dateChanged(const QDate &date);
 
+    void handleLoadWaveFinished();
+    void on_cbxTimeSpan_currentIndexChanged(int index);
+
+    void on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+
+    void myMoveEvent(QMouseEvent *);
 protected:
     void timerEvent(QTimerEvent *);
 

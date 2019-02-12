@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "config.h"
 #include <QDebug>
+#include <QtConcurrent/QtConcurrent>
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -147,6 +148,7 @@ void MainWnd::on_add_device_click(bool)
         dlg.GetDeviceInfo(dev_id,dev_name);
         dvm.AddDevice(dev_id,dev_name);
         reloadDeviceList();
+        reloadDeviceList2();
     }
 }
 bool MainWnd::GetCurrentDeviceId(QString& id)
@@ -182,6 +184,7 @@ void MainWnd::on_remove_device_click(bool)
          myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备失败"));
      }
      reloadDeviceList();
+      reloadDeviceList2();
 
 }
 //修改设备名称.
@@ -210,6 +213,7 @@ void MainWnd::on_modify_menu_click(bool)
         dlg.GetDeviceInfo(dev_id,dev_name);
         dvm.UpdateDevice(dev_id,dev_name);
         reloadDeviceList();
+         reloadDeviceList2();
     }
 }
 //复位设备.
@@ -235,9 +239,32 @@ QTreeWidgetItem* MainWnd::findItemById(QString id)
    }
     return NULL;
 }
+QTreeWidgetItem* MainWnd::findItemById2(QString id)
+{
+    QTreeWidgetItemIterator it(ui->treeWidget2);
+    while (*it) {
+        QTreeWidgetItem* item = *it;
+        QVariant v = item->data(0,Qt::UserRole);
+
+        QString d = v.value<QString>();
+
+          if (d == id)
+          {
+              return item;
+          }
+
+          ++it;
+   }
+    return NULL;
+}
 void MainWnd::DevOffline(Device *dev)
 {
     QTreeWidgetItem* item = findItemById(dev->id());
+    if(item!=NULL)
+    {
+        item->setIcon(0,icon_device[1]);
+    }
+    item = findItemById2(dev->id());
     if(item!=NULL)
     {
         item->setIcon(0,icon_device[1]);
@@ -251,6 +278,11 @@ void MainWnd::DevOnline(Device *dev)
     {
         item->setIcon(0,icon_device[0]);
     }
+    item = findItemById2(dev->id());
+        if(item!=NULL)
+        {
+            item->setIcon(0,icon_device[0]);
+        }
 }
 //1s 定时监测设备是否在线.
 void MainWnd::timerEvent(QTimerEvent *)
@@ -260,6 +292,17 @@ void MainWnd::timerEvent(QTimerEvent *)
     for(int i = 0; i < devices.size();i++)
     {
         QTreeWidgetItem* item = findItemById(devices[i]->id());
+        if(item!=NULL)
+        {
+            if(devices[i]->online())
+                item->setIcon(0,icon_device[0]);
+            else
+                item->setIcon(0,icon_device[1]);
+        }
+    }
+    for(int i = 0; i < devices.size();i++)
+    {
+        QTreeWidgetItem* item = findItemById2(devices[i]->id());
         if(item!=NULL)
         {
             if(devices[i]->online())
@@ -312,6 +355,7 @@ void MainWnd::changeDevice(QString dev_id)
         //修改设备对象的配置.
         dvm.SetChanConfig(dev_id,i,cfg);
     }
+    ui->treeWidget2->setCurrentItem(findItemById2(dev_id));
     devices->ClearDisplay();
 
     int addr = devices->GetZoomWidget();
@@ -362,7 +406,8 @@ void MainWnd::Start()
 MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MainWnd),
-    m_cur_dev_id("")
+    m_cur_dev_id(""),
+    watcher(NULL)
 {
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
@@ -517,10 +562,52 @@ void MainWnd::onWaveShow(int addr, bool zoom)
     if(data==NULL)return;
     devices->DisplayDataQueue(addr,*data);
 }
+void MainWnd::myMoveEvent(QMouseEvent *event) {
+    //获取鼠标坐标，相对父窗体坐标
+    int x_pos = event->pos().x();
+    int y_pos = event->pos().y();
+
+    //鼠标坐标转化为CustomPlot内部坐标
+    float x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
+    float y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
+
+    QString str,strToolTip;
+    str = QDateTime::fromMSecsSinceEpoch(x_val*1000).toString("yyyy-MM-dd HH:mm:ss");
+    strToolTip += "x:";
+    strToolTip += str;
+    strToolTip += "\n";
+
+
+
+    int x = wave->GetKeyIndex((qint64)x_val);
+    qDebug() << "xval=" <<(qint64)(x_val) << "x="<<x;
+    if(x==0){
+        return;
+    }
+
+    float y = ui->plot3->graph(0)->data()->at(x)->value;
+    str = QString::number(y);
+    strToolTip += "y:";
+    strToolTip += str;
+    strToolTip += "\n";
+
+
+    QPalette p = QToolTip::palette();
+    p.setColor(QPalette::Background,Qt::black);
+    QToolTip::setPalette(p);
+    QPoint bt;
+    bt.setX(event->pos().x() + 100);
+    bt.setY(event->pos().y() + 60);
+    QToolTip::showText(cursor().pos(), strToolTip, ui->plot3,QRect(event->pos(),bt),1000);
+}
 void MainWnd::initDeviceChannels()
 {
-    wave = new WaveWidget(ui->plot3,1);
-    wave->SetChannel(0,1);
+    wave = new HistWaveWidget(ui->plot3);
+    connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMoveEvent(QMouseEvent*)));
+
+    ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
+    ui->dteTo->setDateTime(QDateTime::currentDateTime());
+    on_cbxTimeSpan_currentIndexChanged(0);
     devices = new MyDevices(9,ui->gbDevices);
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
@@ -761,6 +848,20 @@ void MainWnd::on_cbUseSysTime_stateChanged(int arg1)
     qDebug() << arg1;
 }
 
+
+void MainWnd::handleLoadWaveFinished()
+{
+    wave->DisplayData(GetSelectChannel(), m_ddl);
+    ui->btnQuery->setEnabled(true);
+    ui->btnQuery->setText(QStringLiteral("查询"));
+}
+bool MainWnd::LoadWave(QString id, int chan, qint64 from, qint64 to)
+{
+    m_ddl.clear();
+    QSqlError err = DAO::instance().DeviceDataQuery(id,chan,from,to, m_ddl);
+    return !err.isValid();
+}
+
 void MainWnd::on_btnQuery_clicked()
 {
     QString id;
@@ -771,13 +872,17 @@ void MainWnd::on_btnQuery_clicked()
     if(chan == 0) return;
     qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
     qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
-    DeviceDataList ddl;
-    QSqlError err = DAO::instance().DeviceDataQuery(id,chan,from,to, ddl);
-    if(err.isValid()){
-        qDebug() << "err=" << err.text();
-        return;
+
+    if(watcher==NULL){
+        watcher = new QFutureWatcher<bool>(this);
+        connect(watcher, SIGNAL(finished()), this, SLOT(handleLoadWaveFinished()));
     }
 
+
+    const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chan,from,to);
+    watcher->setFuture(future);
+    ui->btnQuery->setText(QStringLiteral("查询中..."));
+    ui->btnQuery->setEnabled(false);
 
 }
 
@@ -797,5 +902,36 @@ void MainWnd::on_btnShou2_clicked()
 
 void MainWnd::on_dteFrom_dateChanged(const QDate &date)
 {
+
+}
+static qint64 time_span_list[]={
+        10*60, //10分
+        20*60,
+        1*3600,
+    2*3600,
+    5*3600,
+    10*3600
+        };
+void MainWnd::on_cbxTimeSpan_currentIndexChanged(int index)
+{
+    ui->dteTo->setDateTime(QDateTime::currentDateTime());
+    ui->dteFrom->setDateTime(QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch()-time_span_list[index]*1000));
+    //time_span_list
+}
+
+void MainWnd::on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+{
+    QString id;
+    if(!GetCurrentDeviceId2(id)){
+      return;
+    }
+    int chan = GetSelectChannel();
+    Device* dev = dvm.GetDevice(id);
+    if(dev!=NULL){
+        wave->SetTitle(QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(chan));
+    }else{
+        wave->SetTitle(QString(QStringLiteral("通道%1")).arg(chan));
+    }
+    wave->Clear();
 
 }

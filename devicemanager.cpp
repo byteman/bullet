@@ -342,7 +342,7 @@ void DeviceManager::Message(SessMessage msg)
         {
             dev_map[dev_id]->setSess(msg.getSession());
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
-            qDebug() << "get message cmd=" << input_msg.head.cmd_id;
+            //qDebug() << "get message cmd=" << input_msg.head.cmd_id;
             dev_map[dev_id]->onMessage(input_msg,output_msg);
             //是否需要回应，自动回应.
             if(!input_msg.is_ack )
