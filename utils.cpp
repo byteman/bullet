@@ -57,6 +57,11 @@ QString utils::utf82gbk(const std::string &inStr)
 
     return UTF82GBK(str);
 }
+
+QString utils::Time2String(qint64 xValue)
+{
+   return QDateTime::fromMSecsSinceEpoch(xValue*1000).toString("yyyy-MM-dd HH:mm:ss");
+}
 float utils::int2float(int wt, int dot)
 {
     float wf = (float)wt;

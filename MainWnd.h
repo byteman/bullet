@@ -20,6 +20,7 @@
 #include "gpserver.h"
 #include <QLabel>
 #include "histwavewidget.h"
+#include "MyTracer.h"
 namespace Ui {
 class MainWnd;
 }
@@ -40,6 +41,10 @@ protected:
 private:
         Ui::MainWnd *ui;
      MyDevices* devices;
+     MyTracer* m_xTracer;
+     MyTracer* m_tracer1;
+     MyTracer* m_lineTracer;
+
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
      QString m_cur_dev_id;

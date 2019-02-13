@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     dialogdevice.cpp \
     dialogchanconfig.cpp \
     config.cpp \
-    histwavewidget.cpp
+    histwavewidget.cpp \
+    MyTracer.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -97,7 +98,8 @@ HEADERS  += tcpserver.h \
     dialogdevice.h \
     dialogchanconfig.h \
     config.h \
-    histwavewidget.h
+    histwavewidget.h \
+    MyTracer.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

@@ -563,48 +563,34 @@ void MainWnd::onWaveShow(int addr, bool zoom)
     devices->DisplayDataQueue(addr,*data);
 }
 void MainWnd::myMoveEvent(QMouseEvent *event) {
-    //获取鼠标坐标，相对父窗体坐标
     int x_pos = event->pos().x();
     int y_pos = event->pos().y();
-
-    //鼠标坐标转化为CustomPlot内部坐标
-    float x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
-    float y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
-
-    QString str,strToolTip;
-    str = QDateTime::fromMSecsSinceEpoch(x_val*1000).toString("yyyy-MM-dd HH:mm:ss");
-    strToolTip += "x:";
-    strToolTip += str;
-    strToolTip += "\n";
+//这里如果是float x_val 和 y_val 会导致精度损失很大，导致显示跳.这个问题找了一整天.
+    double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
+    double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
+    qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
+    m_xTracer->updatePosition(x_val, y_val);
 
 
+    auto iter = ui->plot3->graph(0)->data()->findBegin(x_val);
+    double value1 = iter->mainValue();
 
-    int x = wave->GetKeyIndex((qint64)x_val);
-    qDebug() << "xval=" <<(qint64)(x_val) << "x="<<x;
-    if(x==0){
-        return;
-    }
+    m_tracer1->updatePosition(x_val, value1);
 
-    float y = ui->plot3->graph(0)->data()->at(x)->value;
-    str = QString::number(y);
-    strToolTip += "y:";
-    strToolTip += str;
-    strToolTip += "\n";
+    m_lineTracer->updatePosition(x_val, y_val);
 
-
-    QPalette p = QToolTip::palette();
-    p.setColor(QPalette::Background,Qt::black);
-    QToolTip::setPalette(p);
-    QPoint bt;
-    bt.setX(event->pos().x() + 100);
-    bt.setY(event->pos().y() + 60);
-    QToolTip::showText(cursor().pos(), strToolTip, ui->plot3,QRect(event->pos(),bt),1000);
+    ui->plot3->replot();//曲线重绘
 }
 void MainWnd::initDeviceChannels()
 {
     wave = new HistWaveWidget(ui->plot3);
     connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMoveEvent(QMouseEvent*)));
+    m_xTracer       = new MyTracer(ui->plot3, MyTracer::XAxisTracer, ui->plot3);//x轴
+    m_tracer1       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
+    //m_tracer2       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
+    m_lineTracer    = new MyTracer(ui->plot3, MyTracer::CrossLine, ui->plot3);//直线
 
+    //connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMouseMoveEvent(QMouseEvent*)));
     ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
     ui->dteTo->setDateTime(QDateTime::currentDateTime());
     on_cbxTimeSpan_currentIndexChanged(0);

@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
 **  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
@@ -8570,7 +8570,11 @@ double QCPAxis::pixelToCoord(double value) const
     if (mScaleType == stLinear)
     {
       if (!mRangeReversed)
+      {
+
         return (value-mAxisRect->left())/(double)mAxisRect->width()*mRange.size()+mRange.lower;
+
+      }
       else
         return -(value-mAxisRect->left())/(double)mAxisRect->width()*mRange.size()+mRange.upper;
     } else // mScaleType == stLogarithmic
