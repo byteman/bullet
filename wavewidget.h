@@ -24,6 +24,7 @@ public:
     //void AppendDataArr(ChannelDataArray &wvd);
     void AppendData(int addr, float value);
     void SetChannel(int start,int num);
+
     void CloseAll();
     void Clear();
     void SaveWave();
@@ -32,6 +33,7 @@ public:
     void SetRange(int range);
     void AppendTimeData(int addr, double value);
     void AppendTimeData(int addr, double time,double value);
+    void AddLine(QString name,QString label, bool up,double x, double y);
 private:
 
     int m_num;

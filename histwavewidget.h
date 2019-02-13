@@ -6,7 +6,7 @@
 #include "models.h"
 #include <QSqlError>
 #include "dao.h"
-
+#include "MyTracer.h"
 
 class HistWaveWidget:public QObject
 {

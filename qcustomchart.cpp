@@ -37,6 +37,12 @@ void QCustomChart::Init()
    m_plot->xAxis->setSubTickPen(QPen(TextColor, TextWidth));
    m_plot->yAxis->setSubTickPen(QPen(TextColor, TextWidth));
 
+//   minTracker = new MyTracer(m_plot,MyTracer::YAxisStaticLineUp);
+
+//   maxTracker = new MyTracer(m_plot,MyTracer::YAxisStaticLineDown);
+
+
+
 }
 void QCustomChart::myInit()
 {
@@ -54,6 +60,20 @@ void QCustomChart::myInit()
     // make left and bottom axes transfer their ranges to right and top axes:
     QObject::connect(m_plot->xAxis, SIGNAL(rangeChanged(QCPRange)), m_plot->xAxis2, SLOT(setRange(QCPRange)));
     QObject::connect(m_plot->yAxis, SIGNAL(rangeChanged(QCPRange)), m_plot->yAxis2, SLOT(setRange(QCPRange)));
+
+}
+
+
+void QCustomChart::AddLine(QString name, QString label, bool dir, double x, double y)
+{
+
+    if(!m_tracker.contains(name)){
+        m_tracker[name]=new MyTracer(m_plot,dir?MyTracer::YAxisStaticLineUp:MyTracer::YAxisStaticLineDown);
+    }
+
+
+    m_tracker[name]->setText(label);
+    m_tracker[name]->setXY(x,y);
 
 }
 QCustomChart::QCustomChart(QCustomPlot *parent, int num):
@@ -108,6 +128,18 @@ void QCustomChart::DisplayAllChannel(bool show)
 {
 
     ILineChart::DisplayAllChannel(show);
+
+//    minTracker->updatePosition(1000,-1000);
+//    maxTracker->updatePosition(1000,1000);
+
+    QMapIterator<QString,MyTracer*> i(m_tracker);
+    while (i.hasNext()) {
+        i.next();
+        double x,y;
+        i.value()->getXY(x,y);
+        i.value()->updatePosition(x,y);
+        //cout << i.key() << ": " << i.value() << endl;
+    }
 
     //如果数值一直不变，会导致Y轴持续变大.
     //m_plot->xAxis->setRange()

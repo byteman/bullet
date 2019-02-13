@@ -58,6 +58,11 @@ void WaveWidget::AppendTimeData(int addr, double time, double value)
     m_chart->AppendData2(chan,time,value);
     m_chart->SetRange(time,m_range);
 }
+
+void WaveWidget::AddLine(QString name, QString label, bool up, double x, double y)
+{
+    return m_chart->AddLine(name,label,up,x,y);
+}
 void WaveWidget::SetChannel(int start,int num)
 {
 

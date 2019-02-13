@@ -104,9 +104,13 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
     m_max_value = cfg.maxValue;
     m_paused    = cfg.paused;
     disable(m_paused);
-    ui->lbl_w_max->setText(QString(QStringLiteral("上超限:%1")).arg(m_max_value));
-    ui->lbl_w_min->setText(QString(QStringLiteral("下超限:%1")).arg(m_min_value));
+    QString maxStr = QString(QStringLiteral("上超限:%1")).arg(m_max_value);
+    QString minStr = QString(QStringLiteral("下超限:%1")).arg(m_min_value);
+    ui->lbl_w_max->setText(maxStr);
+    ui->lbl_w_min->setText(minStr);
     ui->tbtPlay->setChecked(m_paused);
+    m_waveWdg->AddLine("max",maxStr,false, 1000,m_max_value);
+    m_waveWdg->AddLine("min",minStr,true,1000,m_min_value);
 }
 
 //禁用通道的时候，更改通道的颜色.

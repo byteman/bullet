@@ -144,6 +144,11 @@ void ILineChart::SetRange(double key, int range)
 
 }
 
+void ILineChart::AddLine(QString name, QString label, bool up,double x, double y)
+{
+
+}
+
 double ILineChart::filter(double value)
 {
     return value;

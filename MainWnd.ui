@@ -1058,7 +1058,7 @@ QToolButton#btnShou:hover{
                 <number>10</number>
                </property>
                <property name="topMargin">
-                <number>50</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
                 <number>50</number>
@@ -1376,6 +1376,25 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
               </font>
              </property>
             </widget>
+            <widget class="QCheckBox" name="chkMeasure">
+             <property name="geometry">
+              <rect>
+               <x>630</x>
+               <y>20</y>
+               <width>171</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>启用测量工具</string>
+             </property>
+            </widget>
            </widget>
           </item>
          </layout>
@@ -1457,8 +1476,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

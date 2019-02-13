@@ -59,6 +59,8 @@ private:
      QMenu* menu2;
      QString m_cur_station;
      QTimer m_timer;
+     QRubberBand *rubberBand;
+     QPoint rubberOrigin;
      GPServer* srv;
      void loadDeviceUI();
      bool Init();
@@ -131,6 +133,14 @@ private slots:
     void on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 
     void myMoveEvent(QMouseEvent *);
+    void mouseRelease(QMouseEvent *event);
+    void mousePress(QMouseEvent *event);
+    void RestoreWave();
+    void on_btnRestore_clicked();
+
+    void on_chkMeasure_clicked(bool checked);
+
+    void mouseDoubleClick(QMouseEvent *event);
 protected:
     void timerEvent(QTimerEvent *);
 

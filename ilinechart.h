@@ -21,6 +21,7 @@ struct ILineChart{
     virtual void GetValueRange(double &min, double &max);
     virtual void SetFilter(IValueFilter* filter);
     virtual void SetRange(double key, int range);
+    virtual void AddLine(QString name,QString label, bool up,double x, double y);
 protected:
     QVector<IGraphicChannel*> channels;
     double filter(double value);

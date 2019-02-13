@@ -16,7 +16,9 @@ public:
 		XAxisTracer,
 		YAxisTracer,
 		DataTracer,
-		CrossLine
+        CrossLine,
+        YAxisStaticLineUp, //Y轴绝对线.
+        YAxisStaticLineDown, //Y轴绝对线.
 	};
 	explicit MyTracer(QCustomPlot *_plot, TracerType _type, QObject *parent = nullptr);
 	~MyTracer();
@@ -25,16 +27,19 @@ public:
 	void setText(const QString &text);
 	void setLabelPen(const QPen &pen);
 	void updatePosition(double xValue, double yValue);
-
+    void displayPosition(double xValue, double yValue);
+    void setVisible(bool visible);
+    void setXY(double x, double y);
+    void getXY(double &x, double &y);
 protected:
-	void setVisible(bool visible);
+
 protected:
     QCustomPlot *plot;
     QCPItemTracer *tracer;// 跟踪的点
     QCPItemText *label;   // 显示的数值
     QCPItemLine *arrow ;   // 箭头
     QCPItemStraightLine *line ; //无限延长的直线
-
+    double _x,_y;
     TracerType type;
     bool visible;
 };

@@ -562,9 +562,63 @@ void MainWnd::onWaveShow(int addr, bool zoom)
     if(data==NULL)return;
     devices->DisplayDataQueue(addr,*data);
 }
+void MainWnd::mousePress(QMouseEvent* event)
+{
+   if(event->button() == Qt::LeftButton)
+   {
+       rubberOrigin = event->pos();
+       rubberBand->setGeometry(QRect(rubberOrigin, QSize()));
+       rubberBand->show();
+   }
+}
+void MainWnd::mouseDoubleClick(QMouseEvent* event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        RestoreWave();
+    }
+}
+
+void MainWnd::mouseRelease(QMouseEvent* event)
+{
+    Q_UNUSED(event);
+      if (rubberBand->isVisible())
+      {
+          if(rubberBand->rect().width() < 2)
+          {
+              rubberBand->hide();
+              return;
+          }
+
+          const QRect zoomRect = rubberBand->geometry();
+          int xp1, yp1, xp2, yp2;
+          zoomRect.getCoords(&xp1, &yp1, &xp2, &yp2);
+          double x1 = ui->plot3->xAxis->pixelToCoord(xp1);
+          double x2 = ui->plot3->xAxis->pixelToCoord(xp2);
+          double y1 = ui->plot3->yAxis->pixelToCoord(yp1);
+          double y2 = ui->plot3->yAxis->pixelToCoord(yp2);
+
+          ui->plot3->xAxis->setRange(x1, x2);
+          ui->plot3->yAxis->setRange(y1, y2);
+
+          rubberBand->hide();
+          ui->plot3->replot();
+      }
+
+}
+void MainWnd::RestoreWave()
+{
+    ui->plot3->rescaleAxes();
+    ui->plot3->replot();
+}
 void MainWnd::myMoveEvent(QMouseEvent *event) {
     int x_pos = event->pos().x();
     int y_pos = event->pos().y();
+    if(rubberBand->isVisible())
+       rubberBand->setGeometry(QRect(rubberOrigin, event->pos()).normalized());
+    if(!ui->chkMeasure->isChecked()){
+        return;
+    }
 //这里如果是float x_val 和 y_val 会导致精度损失很大，导致显示跳.这个问题找了一整天.
     double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
     double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
@@ -584,7 +638,16 @@ void MainWnd::myMoveEvent(QMouseEvent *event) {
 void MainWnd::initDeviceChannels()
 {
     wave = new HistWaveWidget(ui->plot3);
+
+    rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot3);
+
     connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMoveEvent(QMouseEvent*)));
+    connect(ui->plot3, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
+    connect(ui->plot3, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
+    connect(ui->plot3, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
+
+
+
     m_xTracer       = new MyTracer(ui->plot3, MyTracer::XAxisTracer, ui->plot3);//x轴
     m_tracer1       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
     //m_tracer2       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
@@ -920,4 +983,19 @@ void MainWnd::on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeW
     }
     wave->Clear();
 
+}
+
+void MainWnd::on_btnRestore_clicked()
+{
+
+}
+
+void MainWnd::on_chkMeasure_clicked(bool checked)
+{
+    qDebug() << checked;
+
+     m_xTracer->setVisible(checked);
+     m_tracer1->setVisible(checked);
+     m_lineTracer->setVisible(checked);
+     ui->plot3->replot();
 }

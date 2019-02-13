@@ -91,6 +91,39 @@ type(_type),visible(false), QObject(parent)
 
 			break;
 		}
+        case YAxisStaticLineUp:
+        {
+
+            line->setPen(QPen(Qt::red,1, Qt::DashLine));
+            tracer->position->setTypeX(QCPItemPosition::ptAxisRectRatio);
+            tracer->position->setTypeY(QCPItemPosition::ptPlotCoords);
+            tracer->setSize(7);
+            label->setPositionAlignment(Qt::AlignTop | Qt::AlignHCenter);
+
+            arrow->end->setParentAnchor(tracer->position);
+            arrow->start->setParentAnchor(arrow->end);
+            arrow->start->setCoords(20, 0);//偏移量
+
+
+            break;
+        }
+        case YAxisStaticLineDown:
+        {
+
+            line->setPen(QPen(Qt::red,1, Qt::DashLine));
+            tracer->position->setTypeX(QCPItemPosition::ptAxisRectRatio);
+            tracer->position->setTypeY(QCPItemPosition::ptPlotCoords);
+            tracer->setSize(7);
+            label->setPositionAlignment(Qt::AlignTop | Qt::AlignHCenter);
+
+            arrow->end->setParentAnchor(tracer->position);
+            arrow->start->setParentAnchor(arrow->end);
+            arrow->start->setCoords(20, 0);//偏移量
+
+
+
+            break;
+        }
 		default:
 			break;
 		}
@@ -133,7 +166,19 @@ void MyTracer::setVisible(bool visible)
 	tracer->setVisible(visible);
 	label->setVisible(visible);
 	arrow->setVisible(visible);
-	line->setVisible(visible);
+    line->setVisible(visible);
+}
+
+void MyTracer::setXY(double x, double y)
+{
+   this->_x = x;
+    this->_y = y;
+}
+
+void MyTracer::getXY(double &x, double &y)
+{
+    x = this->_x;
+    y = this->_y;
 }
 
 void MyTracer::updatePosition(double xValue, double yValue)
@@ -174,13 +219,52 @@ void MyTracer::updatePosition(double xValue, double yValue)
 	}
 	case CrossLine:
 	{
-		line->point1->setCoords(xValue, yValue);
-		line->point2->setCoords(xValue, yValue - 100.0);
+        line->point1->setCoords(xValue, yValue);
+        line->point2->setCoords(xValue, yValue - 100.0);
 
 		break;
 	}
+    case YAxisStaticLineUp:
+    {
+        tracer->position->setCoords(0.1, yValue);
+        label->position->setCoords(0, 15);
+        arrow->start->setCoords(0, 15);
+        arrow->end->setCoords(0, 0);
+        line->point1->setCoords(0, yValue);
+        line->point2->setCoords(xValue, yValue);
+        break;
+    }
+    case YAxisStaticLineDown:
+    {
+        tracer->position->setCoords(0.9, yValue);
+        label->position->setCoords(0, -35);
+        arrow->start->setCoords(0, -15);
+        arrow->end->setCoords(0, 0);
+        line->point1->setCoords(0, yValue);
+        line->point2->setCoords(xValue, yValue);
+
+        break;
+    }
 
 	default:
 		break;
-	}
+    }
+}
+
+void MyTracer::displayPosition(double xValue, double yValue)
+{
+//    if (!visible)
+//    {
+//        line->setVisible(visible);
+//        visible = true;
+//    }
+//    switch (type) {
+//        case YAxisStaticLine:
+//        {
+//            line->point1->setCoords(0, yValue);
+//            line->point2->setCoords(xValue, yValue);
+
+//            break;
+//        }
+//    }
 }
