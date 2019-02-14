@@ -68,7 +68,7 @@ void QCustomChart::AddLine(QString name, QString label, bool dir, double x, doub
 {
 
     if(!m_tracker.contains(name)){
-        m_tracker[name]=new MyTracer(m_plot,dir?MyTracer::YAxisStaticLineUp:MyTracer::YAxisStaticLineDown);
+        m_tracker[name]=new MyTracer(m_plot,dir?MyTracer::YAxisStaticLineDown :MyTracer::YAxisStaticLineUp);
     }
 
 
@@ -151,7 +151,7 @@ void QCustomChart::SetRange(double key, int range)
 {
     //rescale一定要放到setRange的前面，否则setRange没有作用.
     m_plot->rescaleAxes();
-    m_plot->yAxis->scaleRange(1.2);
+   // m_plot->yAxis->scaleRange(1.2);
     m_plot->xAxis->setRange(key,range,Qt::AlignRight);
 
 }

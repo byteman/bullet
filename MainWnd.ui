@@ -343,7 +343,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -544,7 +544,7 @@ QToolButton#btnShou:hover{
      <widget class="QWidget" name="page2">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="topMargin">
-        <number>50</number>
+        <number>10</number>
        </property>
        <item>
         <widget class="QScrollArea" name="scrollArea">
@@ -565,8 +565,8 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>534</width>
-            <height>226</height>
+            <width>1143</width>
+            <height>576</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
