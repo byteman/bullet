@@ -26,6 +26,7 @@ public:
 
     //检查设备是否在线.
     void checkOnline();
+    bool checkCanSave(qint64 time,int saveInt);
     QString name() const;
     void setName(const QString &name);
     void onMessage(ProtoMessage &reqest, ProtoMessage &response);
@@ -56,6 +57,8 @@ public:
 private:
     QMap<int,DeviceChannel> m_channels;
     qint32 m_ad;
+    qint64 m_last_save_ts;
+
     qint32 m_weight;
     QString m_dev_id;
     quint16 m_serial_id;

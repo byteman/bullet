@@ -11,9 +11,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    ChannelWidget w(1);
-//    w.show();
-
     //加载样式表
     QFile file(":/qss/psblack.css");
     if (file.open(QFile::ReadOnly)) {

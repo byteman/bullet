@@ -3,7 +3,8 @@
 #include "dao.h"
 #include "config.h"
 DeviceManager::DeviceManager():
-    m_use_sys_time(true)
+    m_use_sys_time(true),
+    m_save_int_s(3)
 {
 
 }
@@ -38,8 +39,8 @@ bool DeviceManager::Init()
 
     DeviceInfoList devList;
     DAO::instance().DeviceList(devList);
-
-    m_use_sys_time = DAO::instance().ReadIntParam("use_sys_time",true);
+    m_save_int_s = Config::instance().m_save_intS;
+    m_use_sys_time = Config::instance().m_use_sys_time;
     for(int i = 0; i < devList.size();i++)
     {
         addOneDevice(devList[i].serialNo,devList[i].name);
@@ -102,6 +103,13 @@ bool DeviceManager::ResetDevice(QString dev_id,quint8 delay_s)
         return false;
     return dev_map[dev_id]->Reset(delay_s);
 }
+
+bool DeviceManager::SetSaveInt(int s)
+{
+    m_save_int_s = s;
+    return true;
+}
+
 
 
 void DeviceManager::calib(QString dev_id,quint8 chan,quint8 index, int weight)
@@ -265,7 +273,13 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
 
     if(Config::instance().m_use_sys_time){
         time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
+        if(!dev->checkCanSave(time,Config::instance().m_save_intS)){
+            //系统时钟模式还没有达到保存时间，就返回.
+            //qDebug() << "time not reach!";
+            return;
+        }
     }
+
     for(int i = 0; i <msg.channels.size();i++)
     {
         //如果这个设备的这个通道已经禁用了。
@@ -278,6 +292,8 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
          dd.timestamp = msg.channels[i].time;
          if(Config::instance().m_use_sys_time){
              dd.timestamp = time;
+             //判断是否可以存储了
+
          }
          ddl.push_back(dd);
     }

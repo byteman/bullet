@@ -24,7 +24,14 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
     }
 
 }
+void MyDevices::SetSaveInt(int rangeS)
+{
+//    for(int i = 0; i < widgets.size();i++)
+//    {
+//         widgets[i]->SetTimeRange(rangeS);
+//    }
 
+}
 void MyDevices::SetTimeRange(int rangeS)
 {
     for(int i = 0; i < widgets.size();i++)

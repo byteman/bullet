@@ -770,6 +770,7 @@ void MainWnd::loadSysConfig()
 {
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
+    ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
 
 }
@@ -998,4 +999,10 @@ void MainWnd::on_chkMeasure_clicked(bool checked)
      m_tracer1->setVisible(checked);
      m_lineTracer->setVisible(checked);
      ui->plot3->replot();
+}
+
+void MainWnd::on_sbSaveInt_valueChanged(int arg1)
+{
+    //采样时间变化.
+    Config::instance().SetSaveInt(arg1);
 }

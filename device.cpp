@@ -20,6 +20,7 @@ Device::Device():
     m_timeout(MAX_TIMEOUT),
     m_serial_id(0),
     m_sess(NULL),
+    m_last_save_ts(0),
     m_start_send(true)
 {
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
@@ -142,6 +143,19 @@ void Device::checkOnline()
     {
         m_online = false;
     }
+}
+
+
+
+bool Device::checkCanSave(qint64 time,int saveInt)
+{
+    if(time - m_last_save_ts > saveInt){
+        m_last_save_ts = time;
+        return true;
+    }
+    //时间往后走了
+    if(time < m_last_save_ts){m_last_save_ts = time;return true;}
+    return false;
 }
 QString Device::name() const
 {

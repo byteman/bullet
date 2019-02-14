@@ -122,11 +122,15 @@ void ChannelWidget::SetRecState(bool paused)
 
     ui->tbtPlay->setChecked(paused);
 }
-
+//void ChannelWidget::SetSaveInt(int rangeS)
+//{
+//    m_waveWdg->SetRange(rangeS);
+//}
 void ChannelWidget::SetTimeRange(int rangeS)
 {
     m_waveWdg->SetRange(rangeS);
 }
+
 
 void ChannelWidget::Timeout()
 {

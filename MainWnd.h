@@ -141,6 +141,8 @@ private slots:
     void on_chkMeasure_clicked(bool checked);
 
     void mouseDoubleClick(QMouseEvent *event);
+    void on_sbSaveInt_valueChanged(int arg1);
+
 protected:
     void timerEvent(QTimerEvent *);
 

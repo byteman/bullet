@@ -24,6 +24,7 @@ public:
     bool ResetDevice(QString dev_id,quint8 delay_s);
 
 //设备管理接口.
+    bool SetSaveInt(int s);
     bool RemoveDevice(QString dev_id);
     bool AddDevice(QString dev_id,QString dev_name);
     bool UpdateDevice(QString dev_id,QString dev_name);
@@ -61,6 +62,7 @@ private:
     QMutex dev_lock;
     ProtoParser parser;
     bool m_use_sys_time;
+    int  m_save_int_s;
 
 
     bool addOneDevice(QString &serialNo, QString &name);

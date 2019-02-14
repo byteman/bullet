@@ -17,6 +17,7 @@ bool Config::Init()
     m_rt_wave_min  = DAO::instance().ReadIntParam("rt_wave_min",20);
     m_lang = (Lang)DAO::instance().ReadIntParam("lang",(int)LANG_ZH);
     m_local_port = DAO::instance().ReadIntParam("port",8881);
+    m_save_intS= DAO::instance().ReadIntParam("saveInt",3);
     return true;
 }
 
@@ -38,5 +39,12 @@ bool Config::SetLocalPort(int port)
 {
     DAO::instance().WriteIntParam("port",port);
     m_local_port = port;
+    return true;
+}
+
+bool Config::SetSaveInt(int timeS)
+{
+    DAO::instance().WriteIntParam("saveInt",timeS);
+    m_save_intS = timeS;
     return true;
 }
