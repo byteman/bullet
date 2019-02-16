@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>260</height>
+    <width>423</width>
+    <height>303</height>
    </rect>
   </property>
   <property name="font">
@@ -59,7 +59,7 @@
        <property name="minimumSize">
         <size>
          <width>300</width>
-         <height>150</height>
+         <height>200</height>
         </size>
        </property>
        <property name="title">
@@ -184,6 +184,11 @@
          <height>30</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>保存</string>
        </property>
@@ -196,6 +201,11 @@
          <width>0</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>取消</string>

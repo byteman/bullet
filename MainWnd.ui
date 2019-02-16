@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1165</width>
-    <height>709</height>
+    <height>711</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -565,7 +565,7 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1143</width>
+            <width>1135</width>
             <height>576</height>
            </rect>
           </property>
@@ -695,16 +695,19 @@ margin-top:0px;
                   </property>
                   <layout class="QGridLayout" name="gridLayout">
                    <property name="leftMargin">
-                    <number>10</number>
+                    <number>20</number>
                    </property>
                    <property name="topMargin">
-                    <number>0</number>
+                    <number>20</number>
                    </property>
                    <property name="rightMargin">
-                    <number>10</number>
+                    <number>20</number>
                    </property>
                    <property name="bottomMargin">
-                    <number>10</number>
+                    <number>20</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>15</number>
                    </property>
                    <item row="1" column="1">
                     <widget class="QLabel" name="label_2">
@@ -1212,25 +1215,152 @@ QToolButton#btnShou:hover{
 	border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));
 }</string>
             </property>
-            <widget class="QPushButton" name="btnQuery">
-             <property name="geometry">
-              <rect>
-               <x>430</x>
-               <y>60</y>
-               <width>161</width>
-               <height>41</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton{
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>开始时间</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDateTimeEdit" name="dteFrom">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="label_8">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>时间范围</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QComboBox" name="cbxTimeSpan">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <item>
+                <property name="text">
+                 <string>最近10分钟</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>最近20分钟</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>最近1个小时</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>最近2小时</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>最近5小时</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>最近10小时</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QCheckBox" name="chkMeasure">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>启用测量工具</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>结束时间</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDateTimeEdit" name="dteTo">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="btnQuery">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 
 border-raidus:0px;
 border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));
@@ -1247,177 +1377,13 @@ padding:4px 4px 2px 4px;
 border-color:#00BB9E;
 background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 #525252);
 }</string>
-             </property>
-             <property name="text">
-              <string>查 询</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_8">
-             <property name="geometry">
-              <rect>
-               <x>340</x>
-               <y>20</y>
-               <width>76</width>
-               <height>25</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>时间范围</string>
-             </property>
-            </widget>
-            <widget class="QComboBox" name="cbxTimeSpan">
-             <property name="geometry">
-              <rect>
-               <x>430</x>
-               <y>20</y>
-               <width>161</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <item>
-              <property name="text">
-               <string>最近10分钟</string>
-              </property>
+               </property>
+               <property name="text">
+                <string>查 询</string>
+               </property>
+              </widget>
              </item>
-             <item>
-              <property name="text">
-               <string>最近20分钟</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>最近1个小时</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>最近2小时</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>最近5小时</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>最近10小时</string>
-              </property>
-             </item>
-            </widget>
-            <widget class="QLabel" name="label_7">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>69</y>
-               <width>76</width>
-               <height>25</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>结束时间</string>
-             </property>
-            </widget>
-            <widget class="QDateTimeEdit" name="dteTo">
-             <property name="geometry">
-              <rect>
-               <x>116</x>
-               <y>69</y>
-               <width>185</width>
-               <height>30</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_6">
-             <property name="geometry">
-              <rect>
-               <x>30</x>
-               <y>20</y>
-               <width>76</width>
-               <height>25</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>开始时间</string>
-             </property>
-            </widget>
-            <widget class="QDateTimeEdit" name="dteFrom">
-             <property name="geometry">
-              <rect>
-               <x>116</x>
-               <y>20</y>
-               <width>185</width>
-               <height>30</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="chkMeasure">
-             <property name="geometry">
-              <rect>
-               <x>630</x>
-               <y>20</y>
-               <width>171</width>
-               <height>31</height>
-              </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>启用测量工具</string>
-             </property>
-            </widget>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -1499,8 +1465,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="main.qrc"/>
   <include location="img.qrc"/>
+  <include location="main.qrc"/>
  </resources>
  <connections/>
 </ui>

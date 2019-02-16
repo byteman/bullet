@@ -668,6 +668,7 @@ void MainWnd::initDeviceChannels()
 }
 void MainWnd::initUI()
 {
+    qDebug() << "MainWnd id=" << QThread::currentThreadId();
     this->setProperty("form", true);
     this->setProperty("canMove", true);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);

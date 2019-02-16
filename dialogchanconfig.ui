@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>526</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="font">
@@ -57,7 +57,7 @@
          <widget class="QLabel" name="label_3">
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -76,7 +76,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -95,7 +95,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -114,7 +114,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -127,7 +127,7 @@
          <widget class="QLabel" name="label_2">
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -140,7 +140,7 @@
          <widget class="QLabel" name="label_4">
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -153,7 +153,7 @@
          <widget class="QLabel" name="label">
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -172,7 +172,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Arial</family>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -222,6 +222,11 @@
          <height>30</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>保存</string>
        </property>
@@ -234,6 +239,11 @@
          <width>0</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>取消</string>
