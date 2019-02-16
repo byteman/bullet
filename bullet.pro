@@ -56,7 +56,10 @@ SOURCES += main.cpp\
     dialogchanconfig.cpp \
     config.cpp \
     histwavewidget.cpp \
-    MyTracer.cpp
+    MyTracer.cpp \
+    dialogupdate.cpp \
+    alpostfile.cpp \
+    httpclient.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -99,7 +102,10 @@ HEADERS  += tcpserver.h \
     dialogchanconfig.h \
     config.h \
     histwavewidget.h \
-    MyTracer.h
+    MyTracer.h \
+    dialogupdate.h \
+    alpostfile.h \
+    httpclient.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -107,7 +113,8 @@ FORMS    += MainWnd.ui \
     dialogcalib.ui \
     frmmessagebox.ui \
     dialogdevice.ui \
-    dialogchanconfig.ui
+    dialogchanconfig.ui \
+    dialogupdate.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

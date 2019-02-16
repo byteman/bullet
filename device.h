@@ -36,7 +36,7 @@ public:
     ISession *sess() const;
     void setSess(ISession *sess);
     void setHostPort(QHostAddress host,quint16 port);
-
+    bool GetHostAddr(QString &ip);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     void ReadParam();
     void WriteParam(MsgDevicePara &para);

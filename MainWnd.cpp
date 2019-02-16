@@ -187,6 +187,33 @@ void MainWnd::on_remove_device_click(bool)
       reloadDeviceList2();
 
 }
+#include "dialogupdate.h"
+void MainWnd::on_update_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    Device* dev = dvm.GetDevice(id);
+    if(dev==NULL)
+    {
+        qDebug()<<"Can not GetDevice " << id;
+        return;
+    }
+    QString ip;
+    dev->GetHostAddr(ip);
+    const QUrl regUrl(QString("http://%1").arg(ip));
+    QDesktopServices::openUrl(regUrl);
+
+//    DialogUpdate dlg;
+
+
+//    dlg.SetServerHost(ip);
+//    dlg.exec();
+}
+
 //修改设备名称.
 void MainWnd::on_modify_menu_click(bool)
 {
@@ -558,9 +585,10 @@ void MainWnd::onWaveShow(int addr, bool zoom)
     if(!GetCurrentDeviceId(id)){
         return;
     }
-    QQueue<SensorData>* data = dvm.GetDevice(id)->GetHistoryData(addr);
-    if(data==NULL)return;
-    devices->DisplayDataQueue(addr,*data);
+    //devices->clearAll();
+//    QQueue<SensorData>* data = dvm.GetDevice(id)->GetHistoryData(addr);
+//    if(data==NULL)return;
+//    devices->DisplayDataQueue(addr,*data);
 }
 void MainWnd::mousePress(QMouseEvent* event)
 {
@@ -753,6 +781,10 @@ void MainWnd::initUI()
     action = new QAction(QString::fromLocal8Bit("修改设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_modify_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("升级设备"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
 
 
     action = new QAction(QString::fromLocal8Bit("添加设备"),this);

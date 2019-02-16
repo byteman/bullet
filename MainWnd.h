@@ -143,6 +143,7 @@ private slots:
     void mouseDoubleClick(QMouseEvent *event);
     void on_sbSaveInt_valueChanged(int arg1);
 
+    void on_update_menu_click(bool);
 protected:
     void timerEvent(QTimerEvent *);
 

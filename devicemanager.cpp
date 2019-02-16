@@ -270,7 +270,7 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
 {
     DeviceDataList ddl;
     qint32 time = 0;
-    qDebug() << "id=" << QThread::currentThreadId();
+   // qDebug() << "id=" << QThread::currentThreadId();
     if(Config::instance().m_use_sys_time){
         time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
         if(!dev->checkCanSave(time,Config::instance().m_save_intS)){

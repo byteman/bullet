@@ -348,6 +348,13 @@ void Device::setHostPort(QHostAddress host, quint16 port)
     m_port = port;
 }
 
+bool Device::GetHostAddr(QString &ip)
+{
+
+    ip = m_host.toString();
+    return true;
+}
+
 
 
 
