@@ -38,8 +38,15 @@ public:
     QSqlError DeviceDataRemove(QString serialNo);
 
     //查询某个设备的某个通道某个时间段的历史数据.
-    QSqlError DeviceDataQuery(QString serialNo,int chan, qint64 from, qint64 to, DeviceDataList& dataList);
-
+    QSqlError DeviceDataQuery(QString serialNo,
+                              int chan,
+                              qint64 from,
+                              qint64 to,
+                              DeviceDataList& dataList);
+    QSqlError DeviceDataQuery(QString serialNo,
+                              qint64 from,
+                              qint64 to,
+                              MultiDeviceDataMap& dataList);
     bool ExistKey(QString key);
     bool getParam(QString key, QString &value);
     QSqlError updateParam(QString key, QString value);

@@ -2,6 +2,7 @@
 #define UDPSERVER_H
 #include <QObject>
 #include <QUdpSocket>
+#include <QThread>
 #include "sessmessage.h"
 #include "udpsession.h"
 #include <QTimer>
@@ -10,19 +11,23 @@ class UdpServer:public QObject
     Q_OBJECT
 public:
     UdpServer();
-    bool start(int port);
     bool stop();
+    bool start(int port);
 signals:
     void ListenResult(bool result);
     void HasStop();
     void Message(SessMessage msg);
 protected slots:
     void readPendingDatagrams();
-    void timeout();
+    void socketError(QAbstractSocket::SocketError err);
+private slots:
+    void onStart();
 private:
-    QUdpSocket  socket;
+    bool stopped;
+    int _port;
+    QThread thread;
+    QUdpSocket  *socket;
     UdpSession* udp_sess;
-    QTimer timer;
 
 };
 

@@ -2,6 +2,7 @@
 #define MODELS_H
 
 #include <QString>
+#include <QMap>
 struct DeviceInfo{
     QString serialNo;
     QString name;
@@ -31,4 +32,5 @@ struct DeviceData{
     qint32 value; //测力值.
 };
 typedef QVector<DeviceData> DeviceDataList;
+typedef QMap<int,DeviceDataList> MultiDeviceDataMap;
 #endif // MODELS_H

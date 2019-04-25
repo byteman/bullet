@@ -316,8 +316,29 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
     return query.lastError();
 
 }
+QSqlError DAO::DeviceDataQuery(QString serialNo,
+                          qint64 from,
+                          qint64 to,
+                          MultiDeviceDataMap& dataList)
+{
+    QMapIterator<int,DeviceDataList> i(dataList);
+    while (i.hasNext()) {
+        i.next();
+        DeviceDataQuery(serialNo,
+                        i.key(),
+                        from,
+                        to,
+                        dataList[i.key()]);
+    }
+    return QSqlError();
+
+}
 //查询某个设备某个通道的历史数据.
-QSqlError DAO::DeviceDataQuery(QString serialNo, int chan, qint64 from, qint64 to, DeviceDataList &dataList)
+QSqlError DAO::DeviceDataQuery(QString serialNo,
+                               int chan,
+                               qint64 from,
+                               qint64 to,
+                               DeviceDataList &dataList)
 {
     QString sql = QString("select time,chan,value from tbl_%1_data where chan =? and time > ? and time < ?; ").arg(serialNo);
     QSqlQuery query;

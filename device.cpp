@@ -21,9 +21,10 @@ Device::Device():
     m_serial_id(0),
     m_sess(NULL),
     m_last_save_ts(0),
-    m_start_send(true)
+    m_start_send(true),
+    m_packet_count(0)
 {
-    connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
+    //connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
 }
 bool Device::online() const
 {
@@ -41,7 +42,7 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
     msg.head.cmd_id = cmd;
     memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
     //msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
+    //msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = m_sess_id++;
     msg.is_ack = false;
     msg.data.push_back(buf);
@@ -49,6 +50,16 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
     msg.toByteArray(data);
     return SendData(data);
 
+}
+
+void Device::ResetCount()
+{
+    m_packet_count = 0;
+}
+
+int Device::GetCount()
+{
+    return m_packet_count;
 }
 bool Device::calib(quint8 chan, int point,int weight)
 {
@@ -172,7 +183,7 @@ void Device::DevNotify(QString msg)
     emit Notify(msg);
     qDebug() << msg;
 }
-void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
+bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 {
     m_timeout = MAX_TIMEOUT;
     m_online = true;
@@ -189,6 +200,9 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         }
         m_packet_count++;
         SaveWave(req);
+
+        resp.data.append((const char*)&req.head.sesson_id,sizeof(quint32));
+
     }
     //注册和心跳包的回应
     else if(req.head.cmd_id == MSG_HEART)
@@ -242,6 +256,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
           qDebug() << "onResetResult----";
             emit ResetResult(this,true);
     }
+    return true;
 
 }
 QString Device::id() const
@@ -273,7 +288,7 @@ void Device::ProcessWave(int index,QByteArray &data)
         WriteValues(value);
         msd.channels.push_back(value);
     }
-
+    //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit OnSensorData(this,msd);
 
 }

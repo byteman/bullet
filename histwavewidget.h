@@ -23,6 +23,7 @@ public:
     int  GetKeyIndex(qint64 key);
     void SetTitle(QString title);
     void Clear();
+    void DisplayData(MultiDeviceDataMap &ddl);
 private:
     QMap<qint64,int> m_keys;
     QWidget* m_parent;
@@ -31,7 +32,7 @@ private:
 
 
     void Init();
-    void AddChannel();
+    void AddChannel(int i);
 
 
 };

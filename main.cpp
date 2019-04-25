@@ -4,7 +4,7 @@
 #include "appinit.h"
 #include <QTextCodec>
 #include <QFile>
-#include <Poco/Environment.h>
+//#include <QBreakpadHandler.h>
 #include <QDebug>
 #include "channelwidget.h"
 int main(int argc, char *argv[])
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         qApp->setStyleSheet(qss);
         file.close();
     }
-    qDebug() <<"version=" << Poco::Environment::libraryVersion();
+    //qDebug() <<"version=" << Poco::Environment::libraryVersion();
     a.setFont(QFont("Microsoft Yahei", 9));
     AppInit::Instance()->start();
 

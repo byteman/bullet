@@ -104,6 +104,20 @@ bool DeviceManager::ResetDevice(QString dev_id,quint8 delay_s)
     return dev_map[dev_id]->Reset(delay_s);
 }
 
+void DeviceManager::ResetDeviceCount(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->ResetCount();
+}
+
+int DeviceManager::GetDeviceCount(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return 0;
+    return dev_map[dev_id]->GetCount();
+}
+
 bool DeviceManager::SetSaveInt(int s)
 {
     m_save_int_s = s;
@@ -359,9 +373,9 @@ void DeviceManager::Message(SessMessage msg)
             dev_map[dev_id]->setSess(msg.getSession());
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
             //qDebug() << "get message cmd=" << input_msg.head.cmd_id;
-            dev_map[dev_id]->onMessage(input_msg,output_msg);
-            //是否需要回应，自动回应.
-            if(!input_msg.is_ack )
+            bool succ = dev_map[dev_id]->onMessage(input_msg,output_msg);
+            //是否需要回应，并且成功处理数据，才进行回应.
+            if(!input_msg.is_ack && succ)
             {
                 QByteArray arr;
                 output_msg.head = input_msg.head;

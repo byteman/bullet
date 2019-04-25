@@ -22,7 +22,8 @@ public:
 //复位
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(QString dev_id,quint8 delay_s);
-
+    void ResetDeviceCount(QString dev_id);
+    int  GetDeviceCount(QString dev_id);
 //设备管理接口.
     bool SetSaveInt(int s);
     bool RemoveDevice(QString dev_id);

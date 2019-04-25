@@ -29,7 +29,7 @@ public:
     bool checkCanSave(qint64 time,int saveInt);
     QString name() const;
     void setName(const QString &name);
-    void onMessage(ProtoMessage &reqest, ProtoMessage &response);
+    bool onMessage(ProtoMessage &reqest, ProtoMessage &response);
     QString id() const;
     void setId(const QString &id);
     void RemoveFile(QString file);
@@ -42,7 +42,8 @@ public:
     void WriteParam(MsgDevicePara &para);
     void ReadRt();
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
-
+    void ResetCount();
+    int  GetCount();
     bool Reset(quint8 delay_s);
     bool calib(quint8 chan,  int point,int weigh);
     quint32 ad() const;

@@ -203,12 +203,13 @@ struct ProtoHeader{
     quint16 magic; // 0xFE 0x7F
     quint16 length;// 整条数据包的总长度
     qint8   device_id[12]; //设备编号 001122334455 mac地址是12字节
-    quint16 serial_id; //序号
-    quint16 sesson_id; //会话编号
+    //quint32 serial_id; //序号
+    quint32 sesson_id; //会话编号
     quint8  cmd_id; //命令编号
 };
 struct SensorData{
     quint8 addr;
+    quint8 valid;
     qint32 weight;
     qint32 time;
 };
@@ -272,8 +273,8 @@ public:
         head.length = sizeof(ProtoHeader) + 1+ data.size();
         output.append((const char*)&head.length,sizeof(quint16));
         output.append((const char*)head.device_id,12);
-        output.append((const char*)&head.serial_id,sizeof(quint16));
-        output.append((const char*)&head.sesson_id,sizeof(quint16));
+        //output.append((const char*)&head.serial_id,sizeof(quint16));
+        output.append((const char*)&head.sesson_id,sizeof(quint32));
         output.append((const char*)&head.cmd_id,sizeof(quint8));
 
         output.append(data);
@@ -287,8 +288,8 @@ public:
         head.length = sizeof(ProtoHeader) + 1+ data.size();
         output.append((const char*)&head.length,sizeof(quint16));
         output.append((const char*)&head.device_id,sizeof(quint32));
-        output.append((const char*)&head.serial_id,sizeof(quint16));
-        output.append((const char*)&head.sesson_id,sizeof(quint16));
+        //output.append((const char*)&head.serial_id,sizeof(quint16));
+        output.append((const char*)&head.sesson_id,sizeof(quint32));
         output.append((const char*)&head.cmd_id,sizeof(quint8));
 
         output.append(data);

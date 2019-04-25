@@ -10,6 +10,13 @@
 #include "dialogchanconfig.h"
 #include "utils.h"
 #include "config.h"
+#include "xlsxdocument.h"
+#include "xlsxchartsheet.h"
+#include "xlsxcellrange.h"
+#include "xlsxchart.h"
+#include "xlsxrichstring.h"
+#include "xlsxworkbook.h"
+#include "main.h"
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
 #define MAX_CHAN_NR 8
@@ -20,7 +27,7 @@ void MainWnd::AddLog(QString msg)
 }
 void MainWnd::StartReceiver()
 {
-    srv = new GPServer();
+    srv = new UdpServer();
 
     if(!srv->start(Config::instance().m_local_port)){
         AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
@@ -49,8 +56,30 @@ bool MainWnd::InitDvm()
 //1.参数的加载
 //2.界面的初始化
 //3.系统的启动.
+
+typedef int(*funcPtrSum)(GoInt p0,GoInt p1);
+void testGo()
+{
+    HINSTANCE hInstance = LoadLibraryA("c:/main.dll");
+     if (NULL != hInstance)
+     {
+         qDebug() <<"LoadLib succ";
+         funcPtrSum pFnSum = (funcPtrSum)GetProcAddress(hInstance,"Sum");
+         if (pFnSum)
+         {
+             qDebug() << "call Sum";
+             GoInt32 result = pFnSum(5, 4);
+             printf("Add(5,4) = %d\n", result);
+         }
+
+     }else{
+         qDebug() <<"load failed";
+     }
+
+}
 bool MainWnd::Init()
 {
+
     //首先初始化数据管理模块.
     QSqlError err =  DAO::instance().Init("measure.db");
     if(err.isValid()){
@@ -75,7 +104,7 @@ void MainWnd::Message(SessMessage s)
 {
     //if(pause)return;
    // if(s.getData().size() <   m_debug_bytes)
-    AddLog(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
+    //AddLog(QString("recv-> %1:%2 ").arg(s.getHost().toString()).arg(s.getPort())+FormatHex(s.getData()));
 }
 
 void MainWnd::onResetResult(Device *, bool)
@@ -136,6 +165,16 @@ void MainWnd::on_menu_click(bool)
 void MainWnd::on_write_menu_click(bool)
 {
 
+}
+void MainWnd::on_get_count_click(bool)
+{
+   int count = dvm.GetDeviceCount(m_cur_dev_id);
+   QMessageBox::information(this,QStringLiteral("信息"),QString("count=%1").arg(count));
+
+}
+void MainWnd::on_reset_count_click(bool)
+{
+    dvm.ResetDeviceCount(m_cur_dev_id);
 }
 //添加一个设备.
 void MainWnd::on_add_device_click(bool)
@@ -500,15 +539,25 @@ void MainWnd::reloadDeviceList()
     }
 }
 #include <QSignalMapper>
-int MainWnd::GetSelectChannel()
+QVector<int> MainWnd::GetSelectChannel()
 {
+    QVector<int> channels;
     for(int i = 0; i < rbChanList.size(); i++)
     {
         if(rbChanList[i]->isChecked()){
-            return i+1;
+            channels.push_back(i+1);
+
         }
     }
-    return 0;
+
+    return channels;
+}
+void MainWnd::SelectAll(bool en)
+{
+    for(int i= 0; i< rbChanList.size();i++)
+    {
+        rbChanList[i]->setChecked(en);
+    }
 }
 void MainWnd::loadChannels()
 {
@@ -786,10 +835,19 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
 
+    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
+    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
 
+
+//GetCount
     action = new QAction(QString::fromLocal8Bit("添加设备"),this);
     menu2->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
+
     ui->btnMain->click();
     on_btnMenu_Max_clicked();
  //加载设备状态.
@@ -934,14 +992,20 @@ void MainWnd::on_cbUseSysTime_stateChanged(int arg1)
 
 void MainWnd::handleLoadWaveFinished()
 {
-    wave->DisplayData(GetSelectChannel(), m_ddl);
+    wave->DisplayData(m_ddl);
     ui->btnQuery->setEnabled(true);
     ui->btnQuery->setText(QStringLiteral("查询"));
 }
-bool MainWnd::LoadWave(QString id, int chan, qint64 from, qint64 to)
+//在后台线程进行数据查询
+bool MainWnd::LoadWave(QString id, QVector<int> chan, qint64 from, qint64 to)
 {
     m_ddl.clear();
-    QSqlError err = DAO::instance().DeviceDataQuery(id,chan,from,to, m_ddl);
+    for(int i = 0; i < chan.size(); i++)
+    {
+        DeviceDataList dll;
+        m_ddl[chan[i]] = dll;
+    }
+    QSqlError err = DAO::instance().DeviceDataQuery(id,from,to, m_ddl);
     return !err.isValid();
 }
 
@@ -951,8 +1015,13 @@ void MainWnd::on_btnQuery_clicked()
     if(!GetCurrentDeviceId2(id)){
         return;
     }
-    int chan = GetSelectChannel();
-    if(chan == 0) return;
+    QVector<int> chans = GetSelectChannel();
+    if(chans.size() == 0)
+    {
+        wave->Clear();
+        return;
+    }
+
     qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
     qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
 
@@ -962,7 +1031,7 @@ void MainWnd::on_btnQuery_clicked()
     }
 
 
-    const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chan,from,to);
+    const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
     watcher->setFuture(future);
     ui->btnQuery->setText(QStringLiteral("查询中..."));
     ui->btnQuery->setEnabled(false);
@@ -1008,14 +1077,14 @@ void MainWnd::on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeW
     if(!GetCurrentDeviceId2(id)){
       return;
     }
-    int chan = GetSelectChannel();
-    Device* dev = dvm.GetDevice(id);
-    if(dev!=NULL){
-        wave->SetTitle(QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(chan));
-    }else{
-        wave->SetTitle(QString(QStringLiteral("通道%1")).arg(chan));
-    }
-    wave->Clear();
+//    int chan = GetSelectChannel();
+//    Device* dev = dvm.GetDevice(id);
+//    if(dev!=NULL){
+//        wave->SetTitle(QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(chan));
+//    }else{
+//        wave->SetTitle(QString(QStringLiteral("通道%1")).arg(chan));
+//    }
+//    wave->Clear();
 
 }
 
@@ -1038,4 +1107,55 @@ void MainWnd::on_sbSaveInt_valueChanged(int arg1)
 {
     //采样时间变化.
     Config::instance().SetSaveInt(arg1);
+}
+
+void MainWnd::on_chkSelAll_clicked()
+{
+    SelectAll(ui->chkSelAll->isChecked());
+}
+#include "asyncexport.h"
+#include <QFileDialog>
+void MainWnd::on_btnExport_clicked()
+{
+    QString id;
+    if(!GetCurrentDeviceId2(id)){
+        return;
+    }
+    QVector<int> chans = GetSelectChannel();
+    if(chans.size() == 0)
+    {
+        return;
+    }
+
+    qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
+    qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
+
+    QString fileName = QFileDialog::getSaveFileName(this,QStringLiteral("保存文件"),
+                               id+".csv",
+                               tr("csv (*.csv)"));
+    qDebug() << "Filename=" << fileName;
+    AsyncExportManager::instance().AddTask(id,chans,from,to,fileName);
+
+     myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
+}
+#include <dialogmerge.h>
+void MainWnd::on_btnMerge_clicked()
+{
+    //出现设备选择框
+    QString id;
+    if(!GetCurrentDeviceId2(id)){
+        return;
+    }
+    QVector<int> chans = GetSelectChannel();
+    if(chans.size() == 0)
+    {
+        return;
+    }
+    DialogMerge dlg;
+    dlg.SetDevice(id,chans);
+    if(QDialog::Rejected == dlg.exec()){
+        //点击了取消
+        return;
+    }
+
 }

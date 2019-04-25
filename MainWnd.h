@@ -34,7 +34,7 @@ public:
     ~MainWnd();
 
     bool GetCurrentDeviceId(QString &id);
-    bool LoadWave(QString id, int chan, qint64 from, qint64 to);
+    bool LoadWave(QString id, QVector<int> chan, qint64 from, qint64 to);
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -48,10 +48,10 @@ private:
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
      QString m_cur_dev_id;
-     DeviceDataList m_ddl;
+     MultiDeviceDataMap m_ddl;
      DeviceManager dvm;
      QIcon icon_device[2];
-     QVector<QRadioButton*> rbChanList;
+     QVector<QCheckBox*> rbChanList;
      QIcon icon_channel;
      QIcon icon_dir;
      QIcon icon_file;
@@ -61,7 +61,7 @@ private:
      QTimer m_timer;
      QRubberBand *rubberBand;
      QPoint rubberOrigin;
-     GPServer* srv;
+     UdpServer* srv;
      void loadDeviceUI();
      bool Init();
      QTreeWidgetItem *findItemById(QString id);
@@ -79,9 +79,10 @@ private:
      void reloadDeviceList2();
      bool GetCurrentDeviceId2(QString &id);
      void loadChannels();
-     int GetSelectChannel();
+     QVector<int> GetSelectChannel();
 
      QTreeWidgetItem *findItemById2(QString id);
+     void SelectAll(bool en);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -98,7 +99,7 @@ private slots:
     void on_btnMenu_Close_clicked();
     void on_btnExit_clicked();
     void on_treeWidget_customContextMenuRequested(const QPoint &pos);
-
+    void on_reset_count_click(bool);
     // QWidget interface
     void DevOffline(Device *dev);
     void DevOnline(Device *dev);
@@ -144,6 +145,13 @@ private slots:
     void on_sbSaveInt_valueChanged(int arg1);
 
     void on_update_menu_click(bool);
+    void on_chkSelAll_clicked();
+
+    void on_btnExport_clicked();
+
+    void on_btnMerge_clicked();
+
+    void on_get_count_click(bool);
 protected:
     void timerEvent(QTimerEvent *);
 

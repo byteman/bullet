@@ -9,3 +9,4 @@ ui_mainwindow.h
 release
 build-test-Desktop_Qt_5_10_1_MinGW_32bit-Debug
 *.csv
+ui_*.h

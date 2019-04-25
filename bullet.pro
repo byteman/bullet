@@ -14,8 +14,10 @@ debug{
     message("debug");
     OBJECTS_DIR=debug
 }
+INCLUDEPATH+=./qtcsv ./qtcsv/include
 INCLUDEPATH+=./ext/
-LIBS+=-L./ext/lib -lPocoNetd -lPocoFoundationd
+LIBS+=-L./ext/lib
+
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
     tcpserver.cpp \
@@ -37,9 +39,6 @@ SOURCES += main.cpp\
     ifilter.cpp \
     shiftfilter.cpp \
     utils.cpp \
-    gpserver.cpp \
-    gpsession.cpp \
-    mysocket.cpp \
     csvfile.cpp \
     syncfile.cpp \
     appinit.cpp \
@@ -59,7 +58,19 @@ SOURCES += main.cpp\
     MyTracer.cpp \
     dialogupdate.cpp \
     alpostfile.cpp \
-    httpclient.cpp
+    httpclient.cpp \
+    asyncexport.cpp \
+    qtcsv/sources/contentiterator.cpp \
+    qtcsv/sources/reader.cpp \
+    qtcsv/sources/stringdata.cpp \
+    qtcsv/sources/variantdata.cpp \
+    qtcsv/sources/writer.cpp \
+    dialogselectchan.cpp \
+    dialogmerge.cpp \
+    chanselect.cpp \
+    mergemanager.cpp \
+    xlsx/statemanager.cpp \
+    xlsx/stateinfo.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -83,9 +94,6 @@ HEADERS  += tcpserver.h \
     ifilter.h \
     shiftfilter.h \
     utils.h \
-    gpserver.h \
-    gpsession.h \
-    mysocket.h \
     csvfile.h \
     syncfile.h \
     MainWnd.h \
@@ -105,7 +113,17 @@ HEADERS  += tcpserver.h \
     MyTracer.h \
     dialogupdate.h \
     alpostfile.h \
-    httpclient.h
+    httpclient.h \
+    asyncexport.h \
+    qtcsv/sources/contentiterator.h \
+    qtcsv/sources/filechecker.h \
+    qtcsv/sources/symbols.h \
+    dialogselectchan.h \
+    dialogmerge.h \
+    chanselect.h \
+    mergemanager.h \
+    xlsx/statemanager.h \
+    xlsx/stateinfo.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -114,7 +132,10 @@ FORMS    += MainWnd.ui \
     frmmessagebox.ui \
     dialogdevice.ui \
     dialogchanconfig.ui \
-    dialogupdate.ui
+    dialogupdate.ui \
+    dialogselectchan.ui \
+    dialogmerge.ui \
+    chanselect.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd
@@ -126,5 +147,27 @@ RESOURCES += \
     main.qrc
 RC_FILE=icon.rc
 DISTFILES +=
+QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
+win32:DEFINES += _TTY_WIN_
+win32:DEFINES += "WINVER=0x0501"
+win32:DEFINES += "_WIN32_WINNT=0x0501"
+
+INCLUDEPATH += ext/include/CuteLogger
+INCLUDEPATH += ext/qBreakpad/handler
+
+LIBS += -Lext/qBreakpad/handler
+
+CONFIG(release, debug|release) {
+        #LIBS+=-lqBreakpad
+#支持在release模式下还能够调试
+        QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+        QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
+}
+
+QXLSX_PARENTPATH=./QXlsx       # current QXlsx path is . (. means curret directory)
+QXLSX_HEADERPATH=./QXlsx/header/  # current QXlsx header path is ./header/
+QXLSX_SOURCEPATH=./QXlsx/source/  # current QXlsx source path is ./source/
+
+include(./QXlsx/QXlsx.pri)
 
 #msvc:QMAKE_CXXFLAGS += -execution-charset:utf-8
