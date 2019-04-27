@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1252</width>
+    <width>1254</width>
     <height>761</height>
    </rect>
   </property>
@@ -82,21 +82,6 @@
       <item>
        <widget class="QWidget" name="widgetTop" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
          <item>
           <widget class="QToolButton" name="btnMain">
            <property name="sizePolicy">
@@ -154,6 +139,29 @@
            </property>
            <property name="checked">
             <bool>false</bool>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextUnderIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnReport">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>生成报表</string>
+           </property>
+           <property name="icon">
+            <iconset resource="main.qrc">
+             <normaloff>:/image/main_help.png</normaloff>:/image/main_help.png</iconset>
            </property>
            <property name="toolButtonStyle">
             <enum>Qt::ToolButtonTextUnderIcon</enum>
@@ -343,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -565,8 +573,8 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>548</width>
-            <height>237</height>
+            <width>1232</width>
+            <height>576</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -837,6 +845,29 @@ margin-top:0px;
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
                       </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="2">
+                    <widget class="QLineEdit" name="edtHost">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="label_12">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>主机名称</string>
                      </property>
                     </widget>
                    </item>
@@ -1471,6 +1502,210 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="page">
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>160</y>
+         <width>131</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>主机名称</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cbxHost">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>170</y>
+         <width>331</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cbxTestNo">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>240</y>
+         <width>331</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>240</y>
+         <width>181</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>测试单号</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="geometry">
+        <rect>
+         <x>840</x>
+         <y>80</y>
+         <width>351</width>
+         <height>481</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="title">
+        <string>电芯条码</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <property name="topMargin">
+         <number>30</number>
+        </property>
+        <item>
+         <widget class="QListWidget" name="listFiles">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="btnExecReport">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>340</y>
+         <width>331</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+
+border-raidus:0px;
+border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));
+background-color: rgb(0, 170, 255);
+border-width:1px;
+border-style:sold;
+}
+
+QPushButton:hove{
+border-raidus:0px;
+border-style:solid;
+border-width:0px 0px 2px 0px;
+padding:4px 4px 2px 4px;
+border-color:#00BB9E;
+background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 #525252);
+}</string>
+       </property>
+       <property name="text">
+        <string>生成压力数据报告</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>80</y>
+         <width>241</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>控制柜文件目录</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="edtDataDir">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>84</y>
+         <width>331</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btnSelFile">
+       <property name="geometry">
+        <rect>
+         <x>661</x>
+         <y>84</y>
+         <width>101</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>选择...</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="page4">
       <layout class="QVBoxLayout" name="verticalLayout_2">

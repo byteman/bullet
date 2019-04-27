@@ -476,10 +476,8 @@ int DAO::ReadIntParam(QString key, int defValue)
 QString DAO::ReadStringParam(QString key, QString defValue)
 {
     QString value = "";
-    bool ok = false;
-    if(getParam(key,value)){
 
-        if(!ok) return defValue;
+    if(getParam(key,value)){
         return value;
     }
     return defValue;

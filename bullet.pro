@@ -70,7 +70,9 @@ SOURCES += main.cpp\
     chanselect.cpp \
     mergemanager.cpp \
     xlsx/statemanager.cpp \
-    xlsx/stateinfo.cpp
+    xlsx/stateinfo.cpp \
+    dialogreport.cpp \
+    gotypes.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -123,7 +125,9 @@ HEADERS  += tcpserver.h \
     chanselect.h \
     mergemanager.h \
     xlsx/statemanager.h \
-    xlsx/stateinfo.h
+    xlsx/stateinfo.h \
+    dialogreport.h \
+    gotypes.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -135,7 +139,8 @@ FORMS    += MainWnd.ui \
     dialogupdate.ui \
     dialogselectchan.ui \
     dialogmerge.ui \
-    chanselect.ui
+    chanselect.ui \
+    dialogreport.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

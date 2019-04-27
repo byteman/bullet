@@ -10,15 +10,10 @@
 #include "dialogchanconfig.h"
 #include "utils.h"
 #include "config.h"
-#include "xlsxdocument.h"
-#include "xlsxchartsheet.h"
-#include "xlsxcellrange.h"
-#include "xlsxchart.h"
-#include "xlsxrichstring.h"
-#include "xlsxworkbook.h"
 #include "main.h"
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
+#include "xlsx/statemanager.h"
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -57,31 +52,73 @@ bool MainWnd::InitDvm()
 //2.界面的初始化
 //3.系统的启动.
 
-typedef int(*funcPtrSum)(GoInt p0,GoInt p1);
-void testGo()
+
+typedef GoInt (*funcBuildReport)(GoString p0,char** res);
+#if 0
+void testhttp(funcHttpGet HttpGet){
+    const char* str="http://www.baidu.com";
+    GoString gstr;
+    gstr.p=str;
+    gstr.n = (ptrdiff_t)strlen(str) ;
+    char* res=nullptr;
+    qDebug() << "ready call http";
+    HttpGet(gstr,&res);
+     qDebug() << "return";
+     if(res!=nullptr){
+         qDebug() << "return ok len=" << strlen(res);
+         QString strMsg = QString(res);
+         qDebug() << "------------";
+         //printf("data=%s\n",res);
+          // QByteArray a(res,strlen(res));
+         qDebug() << "msg=" << strMsg.left(10);
+         qDebug() << "=============";
+     }
+
+
+
+
+    //qDebug("%s\n",res);
+    //free(res);
+    res=nullptr;
+}
+#endif
+static  funcBuildReport pFnBuildReport  = NULL;
+
+void initGoLibrary()
 {
-    HINSTANCE hInstance = LoadLibraryA("c:/main.dll");
+     HINSTANCE hInstance = LoadLibraryA("report.dll");
      if (NULL != hInstance)
      {
          qDebug() <<"LoadLib succ";
-         funcPtrSum pFnSum = (funcPtrSum)GetProcAddress(hInstance,"Sum");
-         if (pFnSum)
+         pFnBuildReport = (funcBuildReport)GetProcAddress(hInstance,"GenerateReport");
+         if (pFnBuildReport)
          {
-             qDebug() << "call Sum";
-             GoInt32 result = pFnSum(5, 4);
-             printf("Add(5,4) = %d\n", result);
+             qDebug() << "Find GenerateReport";
          }
+//             const char* str="http://www.baidu.com";
+
+
+//             GoString gstr;
+//             gstr.p=str;
+//             gstr.n = (ptrdiff_t)strlen(str) ;
+//             char* res=nullptr;
+//             GoInt code = pFnBuildReport(gstr,&res);
+//             qDebug() <<"code=" << code << "msg" << QString(res);
+//         }
 
      }else{
-         qDebug() <<"load failed";
+         qDebug() <<"load report.dll failed";
      }
 
 }
 bool MainWnd::Init()
 {
 
+    //StateManager::instance().parse("state.xlms");
+    initGoLibrary();
     //首先初始化数据管理模块.
-    QSqlError err =  DAO::instance().Init("measure.db");
+
+    QSqlError err =  DAO::instance().Init(QCoreApplication::applicationDirPath()+"/measure.db");
     if(err.isValid()){
         //初始化失败
         AddLog(err.text());
@@ -863,6 +900,37 @@ void MainWnd::loadSysConfig()
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
     ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
+    ui->edtHost->setText(Config::instance().m_host_name);
+}
+static bool loading = false;
+//加载状态文件.
+void MainWnd::loadStateFile()
+{
+    loading = true;
+    ui->edtDataDir->setText(Config::instance().m_data_dir);
+    ui->cbxHost->clear();
+    ui->cbxTestNo->clear();
+    ui->listFiles->clear();
+    if(!StateManager::instance().parse(Config::instance().m_data_dir+QStringLiteral("/TW压力测试状态表.xlsm")))
+    {
+        qDebug() << "loadStateFile failed";
+        QMessageBox::information(this,"info",QStringLiteral("找不到TW压力测试状态表.xlsm"));
+        this->AddLog("loadStateFile failed");
+        return;
+    }
+#if 1
+    CellTestHost& host = StateManager::instance().GetState();
+    ui->cbxHost->clear();
+    QMap<QString,CellTestOrderList>::const_iterator i = host.constBegin();
+    while (i != host.constEnd()) {
+        qDebug() << i.key();
+        ui->cbxHost->addItem(i.key());
+        ++i;
+    }
+
+#endif
+    loading = false;
+    ui->cbxHost->setCurrentText(Config::instance().m_host_name);
 
 }
 void MainWnd::buttonClick()
@@ -885,8 +953,11 @@ void MainWnd::buttonClick()
         ui->stackedWidget->setCurrentIndex(1);
     } else if (name == "btnData") {
         ui->stackedWidget->setCurrentIndex(2);
-    } else if (name == "btnHelp") {
+    } else if (name == "btnReport") {
         ui->stackedWidget->setCurrentIndex(3);
+        loadStateFile();
+    }else if (name == "btnHelp") {
+        ui->stackedWidget->setCurrentIndex(4);
     } else if (name == "btnExit") {
         this->close();
     }
@@ -1139,6 +1210,7 @@ void MainWnd::on_btnExport_clicked()
      myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
 }
 #include <dialogmerge.h>
+#include <dialogreport.h>
 void MainWnd::on_btnMerge_clicked()
 {
     //出现设备选择框
@@ -1151,11 +1223,161 @@ void MainWnd::on_btnMerge_clicked()
     {
         return;
     }
-    DialogMerge dlg;
-    dlg.SetDevice(id,chans);
+    DialogReport dlg;
+
+//    DialogMerge dlg;
+//    dlg.SetDevice(id,chans);
     if(QDialog::Rejected == dlg.exec()){
         //点击了取消
         return;
     }
 
+}
+
+void MainWnd::on_btnHelp_clicked()
+{
+
+}
+
+void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
+{
+     if(loading) return;
+    QString x = arg1;
+   CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
+
+   ui->cbxTestNo->clear();
+   QMap<QString,QVector<CellState>>::const_iterator i = orders.constBegin();
+   while (i != orders.constEnd()) {
+       //cout << i.key() << ": " << i.value() << endl;
+       ui->cbxTestNo->addItem(i.key());
+       ++i;
+   }
+
+}
+
+void MainWnd::on_cbxTestNo_currentIndexChanged(const QString &arg1)
+{
+    //列出所有的电芯
+
+    if(loading) return;
+   CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
+    ui->listFiles->clear();
+   if(orders.contains(arg1)){
+       for(int i = 0; i < orders[arg1].size(); i++)
+       {
+           ui->listFiles->addItem(orders[arg1].at(i).CellNo);
+       }
+
+   }
+
+
+}
+/**
+
+type MergeChanInfo struct{
+
+    DevId string //设备名称
+    DevChan int //通道编号
+
+    CtrlName string //控制柜的名称
+    CtrlChan string //控制柜的通道名  这两个结合起来可以得到控制柜的文件名.
+
+    FileType string  //控制柜文件类型.
+    FileName string //控制柜的文件名称
+    CellNo string //电芯编号
+
+}
+
+func BuildPressReport(
+    channels []MergeChanInfo,
+    testNo string , //测试的单号
+    temp string , //测试的温度
+    )
+
+ */
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
+QString MainWnd::buildReportInput()
+{
+    CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
+    QString order = ui->cbxTestNo->currentText();
+    QJsonDocument doc;
+    QJsonObject root;
+    if(orders.contains(order)){
+        QJsonArray arr;
+
+
+        root["order_no"] = order;
+        root["temp"] = "50";
+        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
+                .arg(Config::instance().m_data_dir)
+                .arg(ui->cbxHost->currentText())
+                .arg(order).arg(order).arg("45");
+        root["db"] = QCoreApplication::applicationDirPath()+"/measure.db";
+
+        QVector<CellState> &states =  orders[order];
+        for(int i = 0; i <states.size(); i++)
+        {
+             QJsonObject o;
+
+
+             o["dev_chan"] = orders[order].at(i).PressDevChan;
+             o["dev_name"] = orders[order].at(i).PressDevId;
+             o["file_name"] = QString("%1/%2/%3/%4.xlsx")
+                     .arg(Config::instance().m_data_dir)
+                     .arg(ui->cbxHost->currentText())
+                     .arg(order)
+                     .arg(states[i].CellNo);
+             o["cell_no"] =states[i].CellNo;
+
+            arr.push_back(o);
+        }
+        root["chan_array"] = arr;
+
+
+    }
+    doc.setObject(root);
+    return doc.toJson();
+}
+
+#include "gotypes.h"
+void MainWnd::on_btnExecReport_clicked()
+{
+    //启动导出，在某个路径下查找电芯文件的路径
+    //默认规则是 电芯文件放到 工单号的目录下.
+    //选择工单后，就到工单目录下去查找该工单的所有文件
+    //然后对每个文件调用保存工具
+    if(pFnBuildReport){
+        QGoString str(buildReportInput());
+
+//        std::string input = buildReportInput().toStdString();
+//        GoString gstr;
+//        gstr.p= input.c_str();
+//        gstr.n = (ptrdiff_t)strlen(gstr.p) ;
+        char* res=nullptr;
+ //       qDebug() << "data=>" << gstr.n;
+        int code = pFnBuildReport(str.toGoString(),&res);
+
+        qDebug() << "code=" << code << "result=" << res;
+    }
+
+}
+
+void MainWnd::on_btnSelFile_clicked()
+{
+
+    QString path  = QFileDialog::getExistingDirectory(this);
+    if(path.length()< 2){
+        return;
+    }
+    ui->edtDataDir->setText(path);
+    Config::instance().SetDataDir(path);
+    loadStateFile();
+}
+
+void MainWnd::on_edtHost_textChanged(const QString &arg1)
+{
+    Config::instance().SetHostName(arg1);
 }

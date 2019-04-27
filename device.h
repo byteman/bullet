@@ -86,6 +86,7 @@ private:
     void SaveWave(ProtoMessage &msg);
 
     void WriteValues(SensorData &data);
+    bool WriteValues(MsgSensorData &msg);
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);

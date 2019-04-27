@@ -83,6 +83,8 @@ private:
 
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
+     void loadStateFile();
+     QString buildReportInput();
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -152,6 +154,18 @@ private slots:
     void on_btnMerge_clicked();
 
     void on_get_count_click(bool);
+    void on_btnHelp_clicked();
+
+    void on_cbxHost_currentIndexChanged(const QString &arg1);
+
+    void on_cbxTestNo_currentIndexChanged(const QString &arg1);
+
+    void on_btnExecReport_clicked();
+
+    void on_btnSelFile_clicked();
+
+    void on_edtHost_textChanged(const QString &arg1);
+
 protected:
     void timerEvent(QTimerEvent *);
 

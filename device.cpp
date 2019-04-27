@@ -276,6 +276,46 @@ QQueue<SensorData>* Device::GetHistoryData(int chan)
     }
     return &m_channels[chan].values;
 }
+#include "dao.h"
+bool Device::WriteValues(MsgSensorData& msg)
+{
+    DeviceDataList ddl;
+    qint32 time = 0;
+   // qDebug() << "id=" << QThread::currentThreadId();
+    if(Config::instance().m_use_sys_time){
+        time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
+        if(!checkCanSave(time,Config::instance().m_save_intS)){
+            //系统时钟模式还没有达到保存时间，就返回.
+            //qDebug() << "time not reach!";
+            return true;
+        }
+    }
+
+    for(int i = 0; i <msg.channels.size();i++)
+    {
+        //如果这个设备的这个通道已经禁用了。
+         if(IsPaused(msg.channels[i].addr)){
+             continue;
+         }
+         DeviceData dd;
+         dd.chan = msg.channels[i].addr;
+         dd.value = msg.channels[i].weight;
+         dd.timestamp = msg.channels[i].time;
+         if(Config::instance().m_use_sys_time){
+             dd.timestamp = time;
+             //判断是否可以存储了
+
+         }
+         ddl.push_back(dd);
+    }
+
+    QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
+    if(err.isValid()){
+        qDebug() << "DeviceDataAdd err=" << err.text();
+        return false;
+    }
+    return true;
+}
 void Device::ProcessWave(int index,QByteArray &data)
 {
     MsgSensorData msd;
@@ -288,6 +328,7 @@ void Device::ProcessWave(int index,QByteArray &data)
         WriteValues(value);
         msd.channels.push_back(value);
     }
+     WriteValues(msd);
     //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit OnSensorData(this,msd);
 

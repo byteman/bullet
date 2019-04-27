@@ -21,9 +21,9 @@ struct CellState
     QString TestState; //测试状态 下柜 在柜
 };
 //订单对应电芯
-typedef QMap<QString,QVector<CellState>> CellTestOrder;
+typedef QMap<QString,QVector<CellState>> CellTestOrderList;
 
 
-typedef QMap<QString,CellTestOrder> CellTestHost;
+typedef QMap<QString,CellTestOrderList> CellTestHost;
 
 #endif // STATEINFO_H

@@ -16,11 +16,15 @@ struct Config
     bool SetRtWaveMin(int min);
     bool SetLocalPort(int port);
     bool SetSaveInt(int timeS);
+    bool SetDataDir(QString path);
+    bool SetHostName(QString host);
     bool m_use_sys_time;
     int  m_local_port; //本机监听端口.
     int  m_rt_wave_min; //实时波形时间
     Lang  m_lang; //语言类型.
     int  m_save_intS; //本地保存时间间隔.
+    QString m_data_dir;
+    QString m_host_name; //主机名称.
 };
 
 #endif // CONFIG_H

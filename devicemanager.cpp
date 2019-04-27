@@ -321,7 +321,7 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
 void DeviceManager::onSensorMsg(Device* dev,MsgSensorData msData)
 {
      emit SensorMsg(dev,msData);
-     WriteValues(dev,msData);
+     //WriteValues(dev,msData);
 }
 void DeviceManager::onReadParam(Device *dev, MsgDevicePara para)
 {
