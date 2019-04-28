@@ -26,7 +26,7 @@ public:
 	void setBrush(const QBrush &brush);
 	void setText(const QString &text);
 	void setLabelPen(const QPen &pen);
-    void setChanString(const QString &text);
+    void setChan(const int ch);
 	void updatePosition(double xValue, double yValue);
     void displayPosition(double xValue, double yValue);
     void setVisible(bool visible);
@@ -42,7 +42,7 @@ protected:
     QCPItemStraightLine *line ; //无限延长的直线
     double _x,_y;
     TracerType type;
-    QString m_chan;
+    int m_chan;
     bool visible;
 };
 

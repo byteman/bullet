@@ -6,7 +6,7 @@ void MyPlotTrace::AddTrace(QCustomPlot *plot,int ch)
     trace.m_xTracer       = new MyTracer(plot, MyTracer::XAxisTracer,plot);//x轴
     trace.m_tracer1       = new MyTracer(plot, MyTracer::DataTracer, plot);
     trace.m_lineTracer    = new MyTracer(plot, MyTracer::CrossLine,  plot);//直线
-    trace.m_tracer1->setChanString(QString(QStringLiteral("ch%1:")).arg(ch+1));
+    trace.m_tracer1->setChan(ch+1);
     trace.m_enable = false;
     m_tracers.push_back(trace);
 }

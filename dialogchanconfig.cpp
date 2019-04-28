@@ -20,6 +20,8 @@ void DialogChanConfig::SetChanConfig(QString serialNo,int chan,DeviceChnConfig &
 {
     ui->edtDevName->setText(serialNo);
     ui->edtChan->setText(QString("%1").arg(chan));
+    ui->edtChanName->setText(cfg.chanName);
+
     ui->edtMaxValue->setText(QString("%1").arg(cfg.maxValue));
     ui->edtMinValue->setText(QString("%1").arg(cfg.minValue));
 }
@@ -34,6 +36,7 @@ void DialogChanConfig::on_btnOK_clicked()
 {
     cfg.maxValue = ui->edtMaxValue->text().toInt();
     cfg.minValue = ui->edtMinValue->text().toInt();
+    cfg.chanName = ui->edtChanName->text();
     this->accept();
 }
 

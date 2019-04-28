@@ -152,7 +152,7 @@ QSqlError DAO::DeviceChannalAdd(QString serialNo, int chan,DeviceChnConfig& cfg)
 
     query.addBindValue(serialNo);
     query.addBindValue(chan);
-    query.addBindValue(QString("%1").arg(chan));
+    query.addBindValue(cfg.chanName);
     query.addBindValue(cfg.maxValue);
     query.addBindValue(cfg.minValue);
     query.addBindValue(cfg.paused);

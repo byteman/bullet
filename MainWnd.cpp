@@ -179,6 +179,8 @@ void MainWnd::onChannelClick(int addr)
     qDebug() << m_cur_dev_id << " chan=" << addr;
     DialogChanConfig dlg;
     DeviceChnConfig cfg;
+    //cfg.chanName = QString(QStringLiteral("通道%1")).arg(addr+1);
+
     dvm.GetDeviceChan(m_cur_dev_id,addr,cfg);
     dlg.SetChanConfig(m_cur_dev_id,addr,cfg);
     int result = dlg.exec();
@@ -186,7 +188,21 @@ void MainWnd::onChannelClick(int addr)
         dlg.GetChanConfig(cfg);
         dvm.UpdateDeviceChan(m_cur_dev_id,addr,cfg);
         devices->SetChanSetting(addr,cfg);
-
+        Device* dev = dvm.GetDevice(m_cur_dev_id);
+        if(cfg.chanName.length() > 0){
+            //已经配置了名字，用新的名字
+            if(dev!=NULL){
+                devices->SetTitle(addr,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
+            }else{
+                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
+            }
+        }else{
+            if(dev!=NULL){
+                devices->SetTitle(addr,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(addr));
+            }else{
+                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(addr));
+            }
+        }
     }
 }
 
@@ -448,11 +464,21 @@ void MainWnd::changeDevice(QString dev_id)
         if(dvm.GetDeviceChan(dev_id,i,cfg)){
             devices->SetChanSetting(i,cfg);
             Device* dev = dvm.GetDevice(dev_id);
-            if(dev!=NULL){
-                devices->SetTitle(i,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(i));
+            if(cfg.chanName.length() > 0){
+                //已经配置了名字，用新的名字
+                if(dev!=NULL){
+                    devices->SetTitle(i,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
+                }else{
+                    devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
+                }
             }else{
-                devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(i));
+                if(dev!=NULL){
+                    devices->SetTitle(i,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(i));
+                }else{
+                    devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(i));
+                }
             }
+
 
         }
         //修改设备对象的配置.

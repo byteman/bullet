@@ -20,7 +20,7 @@ struct DeviceChnConfig{
         maxValue = 0;
         minValue = 0;
         chanNr = 0;
-        chanName="0";
+        chanName="";
         paused = 0;
     }
 };
