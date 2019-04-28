@@ -104,6 +104,14 @@ void HistWaveWidget::Clear()
     m_plot->rescaleAxes();
     m_plot->replot();
 }
+
+void HistWaveWidget::ShowChan(int chan, bool en)
+{
+    if( (chan < 0) || chan >= m_plot->graphCount()){
+        return;
+    }
+    m_plot->graph(chan)->setVisible(en);
+}
 void HistWaveWidget::SetTitle(QString title)
 {
     m_plot->xAxis2->setLabel(title);
@@ -111,7 +119,16 @@ void HistWaveWidget::SetTitle(QString title)
 }
 void HistWaveWidget::AddChannel(int index)
 {
-    static QColor colors[MAX_CHAN] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+    static QColor colors[MAX_CHAN] = {
+                                      Qt::white,
+                                      Qt::yellow,
+                                      Qt::red,
+                                      Qt::magenta,
+                                      Qt::green,
+                                      Qt::darkGreen,
+                                      Qt::blue,
+                                      Qt::cyan
+                                     };
 
 
     QCPGraph* graph =  m_plot->addGraph();

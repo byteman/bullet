@@ -20,7 +20,7 @@
 #include "gpserver.h"
 #include <QLabel>
 #include "histwavewidget.h"
-#include "MyTracer.h"
+#include "myplottrace.h"
 namespace Ui {
 class MainWnd;
 }
@@ -41,9 +41,8 @@ protected:
 private:
         Ui::MainWnd *ui;
      MyDevices* devices;
-     MyTracer* m_xTracer;
-     MyTracer* m_tracer1;
-     MyTracer* m_lineTracer;
+
+     MyPlotTrace *m_tracer;
 
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
@@ -165,6 +164,10 @@ private slots:
     void on_btnSelFile_clicked();
 
     void on_edtHost_textChanged(const QString &arg1);
+
+    void on_chkMeasure_clicked();
+
+    void on_chkSelAll_clicked(bool checked);
 
 protected:
     void timerEvent(QTimerEvent *);

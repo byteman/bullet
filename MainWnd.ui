@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1254</width>
-    <height>761</height>
+    <height>765</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -573,7 +573,7 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1232</width>
+            <width>1224</width>
             <height>576</height>
            </rect>
           </property>
@@ -1393,40 +1393,6 @@ QToolButton#btnShou:hover{
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
-              <widget class="QPushButton" name="btnMerge">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <pointsize>14</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton{
-
-border-raidus:0px;
-border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));
-background-color: rgb(0, 170, 255);
-border-width:1px;
-border-style:sold;
-}
-
-QPushButton:hove{
-border-raidus:0px;
-border-style:solid;
-border-width:0px 0px 2px 0px;
-padding:4px 4px 2px 4px;
-border-color:#00BB9E;
-background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 #525252);
-}</string>
-               </property>
-               <property name="text">
-                <string>合并报告</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="3">
               <widget class="QPushButton" name="btnQuery">
                <property name="font">
@@ -1781,8 +1747,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

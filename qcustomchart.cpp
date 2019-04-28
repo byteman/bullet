@@ -142,8 +142,10 @@ void QCustomChart::DisplayAllChannel(bool show)
     }
 
     //如果数值一直不变，会导致Y轴持续变大.
-    //m_plot->xAxis->setRange()
-    //m_plot->yAxis->setScaleRatio(m_plot->yAxis,1.3);
+
+    if(channels.size() > 1){
+        m_plot->yAxis->scaleRange(1.2);
+    }
     m_plot->replot();
 }
 

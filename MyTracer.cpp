@@ -153,7 +153,12 @@ void MyTracer::setBrush(const QBrush &brush)
 
 void MyTracer::setLabelPen(const QPen &pen)
 {
-	label->setPen(pen);
+    label->setPen(pen);
+}
+
+void MyTracer::setChanString(const QString &text)
+{
+    m_chan = text;
 }
 
 void MyTracer::setText(const QString &text)
@@ -214,7 +219,7 @@ void MyTracer::updatePosition(double xValue, double yValue)
 		tracer->position->setCoords(xValue, yValue);
 		label->position->setCoords(25, 0);
 		//setText(toQString(MStrTools::Time2String(xValue)) + "\n "+ QString::number(yValue, 'f', 1));
-		setText( QString::number(yValue, 'f', 1));
+        setText(m_chan + QString::number(yValue, 'f', 1));
 		break;
 	}
 	case CrossLine:

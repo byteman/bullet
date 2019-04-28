@@ -72,7 +72,8 @@ SOURCES += main.cpp\
     xlsx/statemanager.cpp \
     xlsx/stateinfo.cpp \
     dialogreport.cpp \
-    gotypes.cpp
+    gotypes.cpp \
+    myplottrace.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -127,7 +128,8 @@ HEADERS  += tcpserver.h \
     xlsx/statemanager.h \
     xlsx/stateinfo.h \
     dialogreport.h \
-    gotypes.h
+    gotypes.h \
+    myplottrace.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

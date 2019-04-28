@@ -622,6 +622,17 @@ void MainWnd::loadChannels()
 void MainWnd::chan_click(int chan)
 {
     qDebug() << "chan " << chan << " clicked";
+    //1.更新波形通道的显示
+    //2.更新是否显示跟踪线
+    bool en = rbChanList[chan]->isChecked();
+    wave->ShowChan(chan,en);
+    if(ui->chkMeasure->isChecked()){
+        m_tracer->Show(chan,en);
+    }else{
+        m_tracer->Show(chan,false);
+    }
+
+    ui->plot3->replot();
 }
 //设备相关的UI初始化.
 void MainWnd::loadDeviceUI()
@@ -737,16 +748,7 @@ void MainWnd::myMoveEvent(QMouseEvent *event) {
     double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
     double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
     qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
-    m_xTracer->updatePosition(x_val, y_val);
-
-
-    auto iter = ui->plot3->graph(0)->data()->findBegin(x_val);
-    double value1 = iter->mainValue();
-
-    m_tracer1->updatePosition(x_val, value1);
-
-    m_lineTracer->updatePosition(x_val, y_val);
-
+    m_tracer->UpdatePosition(x_val,y_val);
     ui->plot3->replot();//曲线重绘
 }
 void MainWnd::initDeviceChannels()
@@ -761,11 +763,7 @@ void MainWnd::initDeviceChannels()
     connect(ui->plot3, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
 
 
-
-    m_xTracer       = new MyTracer(ui->plot3, MyTracer::XAxisTracer, ui->plot3);//x轴
-    m_tracer1       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
-    //m_tracer2       = new MyTracer(ui->plot3, MyTracer::DataTracer, ui->plot3);
-    m_lineTracer    = new MyTracer(ui->plot3, MyTracer::CrossLine, ui->plot3);//直线
+    m_tracer = new MyPlotTrace(ui->plot3,8);
 
     //connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMouseMoveEvent(QMouseEvent*)));
     ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
@@ -1166,11 +1164,16 @@ void MainWnd::on_btnRestore_clicked()
 
 void MainWnd::on_chkMeasure_clicked(bool checked)
 {
-    qDebug() << checked;
+     qDebug() << checked;
+     if(!checked){
+         m_tracer->ShowAll(false);
+     }else{
+         for(int i = 0 ; i < rbChanList.size();i++)
+         {
+             m_tracer->Show(i,rbChanList[i]->isChecked());
+         }
+     }
 
-     m_xTracer->setVisible(checked);
-     m_tracer1->setVisible(checked);
-     m_lineTracer->setVisible(checked);
      ui->plot3->replot();
 }
 
@@ -1351,13 +1354,7 @@ void MainWnd::on_btnExecReport_clicked()
     //然后对每个文件调用保存工具
     if(pFnBuildReport){
         QGoString str(buildReportInput());
-
-//        std::string input = buildReportInput().toStdString();
-//        GoString gstr;
-//        gstr.p= input.c_str();
-//        gstr.n = (ptrdiff_t)strlen(gstr.p) ;
         char* res=nullptr;
- //       qDebug() << "data=>" << gstr.n;
         int code = pFnBuildReport(str.toGoString(),&res);
 
         qDebug() << "code=" << code << "result=" << res;
@@ -1380,4 +1377,14 @@ void MainWnd::on_btnSelFile_clicked()
 void MainWnd::on_edtHost_textChanged(const QString &arg1)
 {
     Config::instance().SetHostName(arg1);
+}
+
+void MainWnd::on_chkMeasure_clicked()
+{
+
+}
+
+void MainWnd::on_chkSelAll_clicked(bool checked)
+{
+
 }

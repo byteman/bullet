@@ -51,8 +51,7 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
 
     xlsx.selectSheet(sheet);
     int row=1;
-    //QString order = "";
-    //QVector<CellState> csList;
+
     do{
         CellState cs;
         row++;
@@ -63,14 +62,14 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
         }
 
         if(!getCellString(xlsx,row,2,cs.TestNo) || cs.TestNo.length() < 1){
-            qDebug("get %s testNo row=%d col=%d failed",sheet.toStdString().c_str(),row,2);
+            //qDebug("get %s testNo row=%d col=%d failed",sheet.toStdString().c_str(),row,2);
             continue;
         }
         getCellString(xlsx,row,3,cs.TestUser);
         getCellString(xlsx,row,4,cs.ProjGroup);
         getCellString(xlsx,row,5,cs.PressDev);
         if(!parsePressDev(cs)){
-            qDebug("get %s parsePressDev row=%d col=%d failed",sheet.toStdString().c_str(),row,5);
+            //qDebug("get %s parsePressDev row=%d col=%d failed",sheet.toStdString().c_str(),row,5);
             continue;
         }
         getCellString(xlsx,row,6,cs.ChargeDev);
@@ -87,8 +86,12 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
 //分析文件
 bool StateManager::parse(QString filename)
 {
+    QTime tm;
+    tm.start();
+
     QXlsx::Document xlsx(filename);
     if (!xlsx.load()) return false;
+    qDebug() << "load elasped" << tm.elapsed();
     hosts.clear();
     QStringList sheets =  xlsx.sheetNames();
    //读取有多少个主机列表.
@@ -96,8 +99,9 @@ bool StateManager::parse(QString filename)
     {
         CellTestOrderList order;
         QString sheet = sheets[i];
-
+        tm.restart();
         parseOrder(xlsx,sheet, order);
+        qDebug() << "load elasped" << tm.elapsed();
         //分析每台电脑上的订单.
         hosts[sheet] = order;
     }
