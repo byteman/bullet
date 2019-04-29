@@ -233,6 +233,10 @@ void MainWnd::on_reset_count_click(bool)
 void MainWnd::on_add_device_click(bool)
 {
     qDebug() << "add device";
+    if(dvm.DeviceCount() >=8 ){
+         myHelper::ShowMessageBoxError(QStringLiteral("最多添加8个设备"));
+         return;
+    }
     DialogDevice dlg;
     int result = dlg.exec();
     if(result == QDialog::Accepted){
@@ -296,14 +300,12 @@ void MainWnd::on_update_menu_click(bool)
     }
     QString ip;
     dev->GetHostAddr(ip);
-    const QUrl regUrl(QString("http://%1").arg(ip));
-    QDesktopServices::openUrl(regUrl);
-
-//    DialogUpdate dlg;
+    qDebug() << "ip=" << ip;
+    DialogUpdate dlg;
 
 
-//    dlg.SetServerHost(ip);
-//    dlg.exec();
+    dlg.SetServerHost(ip);
+    dlg.exec();
 }
 
 //修改设备名称.
@@ -708,10 +710,10 @@ void MainWnd::onWaveShow(int addr, bool zoom)
     if(!GetCurrentDeviceId(id)){
         return;
     }
-    //devices->clearAll();
+   // devices->clearAll();
 //    QQueue<SensorData>* data = dvm.GetDevice(id)->GetHistoryData(addr);
 //    if(data==NULL)return;
-//    devices->DisplayDataQueue(addr,*data);
+//    devices->DisplayDataQueue(addr-1,*data);
 }
 void MainWnd::mousePress(QMouseEvent* event)
 {

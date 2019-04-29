@@ -79,11 +79,11 @@ private:
     QString GetFileName();
     void DevNotify(QString msg);
 
-    void ProcessWave(int index, QByteArray &data);
+    bool ProcessWave(int index, QByteArray &data);
 
     QTimer timer;
 
-    void SaveWave(ProtoMessage &msg);
+    bool SaveWave(ProtoMessage &msg);
 
     void WriteValues(SensorData &data);
     bool WriteValues(MsgSensorData &msg);

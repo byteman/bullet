@@ -2,7 +2,9 @@
 #define DIALOGUPDATE_H
 
 #include <QDialog>
-#include "alpostfile.h"
+#include <QFile>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include "httpclient.h"
 namespace Ui {
 class DialogUpdate;
@@ -18,17 +20,27 @@ public:
     void SetServerHost(QString addr);
 
 private slots:
+
+   void replyFinished(QNetworkReply*);
+   void loadError(QNetworkReply::NetworkError);
+   void loadProgress(qint64 bytesSent,qint64 bytesTotal);
+
     void on_btnStartUpdate_clicked();
 
     void on_btnSelectFile_clicked();
-
+    void onResetFinished(AjaxResponse resp);
     void sigReplyMessage(int, QString);
-    void onReloadFinished(AjaxResponse);
+    void on_btnExit_clicked();
+
+    void on_edtDevIp_textChanged(const QString &arg1);
+
 private:
     Ui::DialogUpdate *ui;
-    ALPostFile* post;
-    Ajax ajax;
+    QNetworkReply *reply;
+    QFile *file;
     QString m_addr;
+    Ajax ajax;
+    QString GetResetURL();
 };
 
 #endif // DIALOGUPDATE_H

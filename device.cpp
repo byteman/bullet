@@ -199,10 +199,10 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             //StartRecWave(req.head.sesson_id,m_start_send);
         }
         m_packet_count++;
-        SaveWave(req);
+
 
         resp.data.append((const char*)&req.head.sesson_id,sizeof(quint32));
-
+        return SaveWave(req);
     }
     //注册和心跳包的回应
     else if(req.head.cmd_id == MSG_HEART)
@@ -316,7 +316,7 @@ bool Device::WriteValues(MsgSensorData& msg)
     }
     return true;
 }
-void Device::ProcessWave(int index,QByteArray &data)
+bool Device::ProcessWave(int index,QByteArray &data)
 {
     MsgSensorData msd;
     msd.m_dev_serial = this->id();
@@ -331,10 +331,10 @@ void Device::ProcessWave(int index,QByteArray &data)
      WriteValues(msd);
     //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit OnSensorData(this,msd);
-
+    return true;
 }
 
-void Device::SaveWave(ProtoMessage &msg)
+bool Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
 
@@ -352,7 +352,7 @@ void Device::SaveWave(ProtoMessage &msg)
     //qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
     QByteArray wvData = msg.data.mid(12, nsize);
 
-    ProcessWave(sample_start, wvData);
+    return ProcessWave(sample_start, wvData);
 
 
 }
@@ -407,7 +407,11 @@ void Device::setHostPort(QHostAddress host, quint16 port)
 bool Device::GetHostAddr(QString &ip)
 {
 
-    ip = m_host.toString();
+    quint32 nip = m_host.toIPv4Address();
+    ip = QString("%1.%2.%3.%4").
+            arg((nip>>24)&0xff).
+            arg((nip>>16)&0xff).arg((nip>>8)&0xff).arg(nip&0xff);
+    //ip = m_host.toString();
     return true;
 }
 

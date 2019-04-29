@@ -185,10 +185,20 @@ bool DeviceManager::RemoveDevice(QString dev_id)
 
     return !err.isValid();
 }
+int DeviceManager::DeviceCount()
+{
+    int num = 0;
+    QSqlError err = DAO::instance().DeviceCount(num);
+    if(err.isValid()){
+        qDebug() << err;
+    }
+    return num;
+}
 //添加设备
 //1.数据库中添加一个设备.
 bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
 {
+
     //添加一个设备到设备表
     QSqlError err = DAO::instance().DeviceAdd(dev_id,dev_name);
     if(err.isValid()){

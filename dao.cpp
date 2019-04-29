@@ -66,6 +66,19 @@ QSqlError DAO::ConnectDB(QString host, int port, QString UserName, QString PassW
     return db.lastError();
 
 }
+
+QSqlError DAO::DeviceCount(int &count)
+{
+    QString sql = QString("select count(*) as cout from tbl_device");
+
+    QSqlQuery query;
+    query.exec(sql);
+    while (query.next())
+    {
+        count   = query.value("cout").toInt();
+    }
+    return query.lastError();
+}
 //添加一个新设备.
 QSqlError DAO::DeviceAdd(QString serialNo, QString name)
 {

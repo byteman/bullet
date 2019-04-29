@@ -73,7 +73,8 @@ SOURCES += main.cpp\
     xlsx/stateinfo.cpp \
     dialogreport.cpp \
     gotypes.cpp \
-    myplottrace.cpp
+    myplottrace.cpp \
+    machinechecker.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -129,7 +130,8 @@ HEADERS  += tcpserver.h \
     xlsx/stateinfo.h \
     dialogreport.h \
     gotypes.h \
-    myplottrace.h
+    myplottrace.h \
+    machinechecker.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

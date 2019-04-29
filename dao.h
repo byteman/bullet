@@ -15,6 +15,7 @@ public:
     QSqlError Init(QString DataBase);
     QSqlError ConnectDB(QString host, int port, QString UserName, QString PassWord, QString DataBase);
     //设备管理
+    QSqlError DeviceCount(int &count);
     QSqlError DeviceAdd(QString serialNo,QString name);
     QSqlError DeviceRemove(QString serialNo);
     QSqlError DeviceUpdate(QString serialNo, QString name);

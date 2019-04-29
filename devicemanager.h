@@ -45,6 +45,7 @@ public:
     QString GetLastError();
     //bool UpdateRecState(QString &dev_id, int chan, bool pause);
     bool SetChanConfig(QString &dev_id, int chan,DeviceChnConfig& cfg);
+    int DeviceCount();
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
