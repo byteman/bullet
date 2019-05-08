@@ -41,7 +41,7 @@ protected:
 private:
         Ui::MainWnd *ui;
      MyDevices* devices;
-
+    bool bQueryOrderState;
      MyPlotTrace *m_tracer;
 
      QFutureWatcher<bool> *watcher;
@@ -83,7 +83,8 @@ private:
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
      void loadStateFile();
-     QString buildReportInput();
+     QString buildReportInput(QString order);
+     void updateOrderState();
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -180,6 +181,7 @@ protected:
     virtual void closeEvent(QCloseEvent *);
 protected slots:
     void onResetResult(Device *, bool);
+    void on_report_click(QString order);
 };
 
 #endif // UIDEMO01_H

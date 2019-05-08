@@ -1,0 +1,1 @@
+select *,datetime(time, 'unixepoch', 'localtime') as tt  from tbl_304a26522da5_data where chan=1 and value > 1000;

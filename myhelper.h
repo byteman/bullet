@@ -73,6 +73,7 @@ public:
     static void ShowMessageBoxError(QString info)
     {
         frmMessageBox *msg = new frmMessageBox;
+
         msg->SetMessage(info, 2);
         msg->exec();
     }
