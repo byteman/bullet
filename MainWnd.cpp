@@ -1356,7 +1356,7 @@ QString MainWnd::buildReportInput()
 
              o["dev_chan"] = orders[order].at(i).PressDevChan;
              o["dev_name"] = orders[order].at(i).PressDevId;
-             o["file_name"] = QString("%1/%2/%3/%4.xlsx")
+             o["file_name"] = QString("%1/%2/%3/%4.xls")
                      .arg(Config::instance().m_data_dir)
                      .arg(ui->cbxHost->currentText())
                      .arg(order)

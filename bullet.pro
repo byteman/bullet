@@ -6,6 +6,7 @@
 
 QT       += core  gui network
 
+#CONFIG += console
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets sql printsupport
 
 TARGET = bullet
@@ -74,7 +75,8 @@ SOURCES += main.cpp\
     dialogreport.cpp \
     gotypes.cpp \
     myplottrace.cpp \
-    machinechecker.cpp
+    machinechecker.cpp \
+    cmddebug.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -131,7 +133,8 @@ HEADERS  += tcpserver.h \
     dialogreport.h \
     gotypes.h \
     myplottrace.h \
-    machinechecker.h
+    machinechecker.h \
+    cmddebug.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

@@ -8,11 +8,12 @@
 #include <QDebug>
 #include "channelwidget.h"
 #include <machinechecker.h>
+#include "cmddebug.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-
+    InitConsoleWindow();
     MachineChecker checker;
     if(checker.CheckMac("B0:35:9F:87:D9:FE")){
         //加载样式表
