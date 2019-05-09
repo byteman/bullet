@@ -1,11 +1,29 @@
 ﻿#include "utils.h"
 #include <QDebug>
+#include <QDir>
 Utils::Utils()
 {
 
 }
 
 
+/**
+ * @brief mkMutiDir  创建多级目录
+ * @param path	     未创建的目录
+ * @return 	     返回已创建的目录
+ */
+QString utils::MkMutiDir(const QString path){
+    QDir dir(path);
+    if ( dir.exists(path)){
+        return path;
+    }
+    QString parentDir = MkMutiDir(path.mid(0,path.lastIndexOf('/')));
+    QString dirname = path.mid(path.lastIndexOf('/') + 1);
+    QDir parentPath(parentDir);
+    if ( !dirname.isEmpty() )
+        parentPath.mkpath(dirname);
+    return parentDir + "/" + dirname;
+}
 
 TimeStamp::TimeStamp(QString _tag):
     tag(_tag)

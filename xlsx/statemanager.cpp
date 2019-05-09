@@ -105,6 +105,7 @@ bool StateManager::parse(QString filename)
         //分析每台电脑上的订单.
         hosts[sheet] = order;
     }
+
     return true;
 
 }

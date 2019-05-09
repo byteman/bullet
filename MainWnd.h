@@ -21,6 +21,7 @@
 #include <QLabel>
 #include "histwavewidget.h"
 #include "myplottrace.h"
+#include <QFileSystemWatcher>
 namespace Ui {
 class MainWnd;
 }
@@ -49,6 +50,7 @@ private:
      QString m_cur_dev_id;
      MultiDeviceDataMap m_ddl;
      DeviceManager dvm;
+     QFileSystemWatcher* fileWatcher;
      QIcon icon_device[2];
      QVector<QCheckBox*> rbChanList;
      QIcon icon_channel;
@@ -170,6 +172,8 @@ private slots:
 
     void on_chkSelAll_clicked(bool checked);
 
+    void on_btnReload_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -182,6 +186,7 @@ protected:
 protected slots:
     void onResetResult(Device *, bool);
     void on_report_click(QString order);
+    void fileChange(const QString &path);
 };
 
 #endif // UIDEMO01_H

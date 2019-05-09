@@ -443,12 +443,9 @@ void MainWnd::updateOrderState()
            }
 
         }
-//        if(code != 0){
-//           QJsonDocument doc =  QJsonDocument::fromJson(res);
-//           QJsonObject o = doc.object();
-//           myHelper::ShowMessageBoxError(o["message"].toString());
-//        }
+
         qDebug() << "result=" << res;
+
     }
 }
 //1s 定时监测设备是否在线.
@@ -478,7 +475,7 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[1]);
         }
     }
-    bQueryOrderState = true;
+
     if(bQueryOrderState){
 
        updateOrderState();
@@ -968,12 +965,25 @@ void MainWnd::initUI()
 
     ui->btnMain->click();
     on_btnMenu_Max_clicked();
+
+
+    fileWatcher = new QFileSystemWatcher(this);
+
+    fileWatcher->addPath(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm"));
+
+    connect(fileWatcher,&QFileSystemWatcher::fileChanged,this,&MainWnd::fileChange);
+
  //加载设备状态.
 
     initDeviceChannels();
     loadChannels();
     loadSysConfig();
     loadDeviceUI();
+}
+void MainWnd::fileChange(const QString &path)
+{
+    qDebug() << path << "change";
+    loadStateFile();
 }
 void MainWnd::loadSysConfig()
 {
@@ -992,10 +1002,10 @@ void MainWnd::loadStateFile()
     ui->cbxHost->clear();
     //ui->cbxTestNo->clear();
     //ui->listFiles->clear();
-    if(!StateManager::instance().parse(Config::instance().m_data_dir+QStringLiteral("/TW压力测试状态表.xlsm")))
+    if(!StateManager::instance().parse(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm")))
     {
         qDebug() << "loadStateFile failed";
-        QMessageBox::information(this,"info",QStringLiteral("找不到TW压力测试状态表.xlsm"));
+        QMessageBox::information(this,"info",QStringLiteral("目录下找不到压力测试状态表.xlsm"));
         this->AddLog("loadStateFile failed");
         return;
     }
@@ -1027,7 +1037,7 @@ void MainWnd::buttonClick()
             btn->setChecked(false);
         }
     }
-
+    bQueryOrderState = false;
     if (name == "btnMain") {
         ui->stackedWidget->setCurrentIndex(0);
     } else if (name == "btnConfig") {
@@ -1035,6 +1045,7 @@ void MainWnd::buttonClick()
     } else if (name == "btnData") {
         ui->stackedWidget->setCurrentIndex(2);
     } else if (name == "btnReport") {
+        bQueryOrderState = true;
         ui->stackedWidget->setCurrentIndex(3);
         loadStateFile();
     }else if (name == "btnHelp") {
@@ -1386,7 +1397,9 @@ void MainWnd::on_report_click(QString order)
            QJsonObject o = doc.object();
            myHelper::ShowMessageBoxError(o["message"].toString());
         }
+
         qDebug() << "code=" << code << "result=" << res;
+
     }
 
 }
@@ -1452,7 +1465,8 @@ QString MainWnd::buildReportInput(QString order)
                 .arg(ui->cbxHost->currentText())
                 .arg(order).arg(order).arg(temp);
         root["db"] = QCoreApplication::applicationDirPath()+"/measure.db";
-
+        root["dir_path"]=Config::instance().m_data_dir;
+        root["host"] = ui->cbxHost->currentText();
         QVector<CellState> &states =  orders[order];
         for(int i = 0; i <states.size(); i++)
         {
@@ -1461,11 +1475,11 @@ QString MainWnd::buildReportInput(QString order)
 
              o["dev_chan"] = orders[order].at(i).PressDevChan;
              o["dev_name"] = orders[order].at(i).PressDevId;
-             o["file_name"] = QString("%1/%2/%3/%4.xls")
-                     .arg(Config::instance().m_data_dir)
-                     .arg(ui->cbxHost->currentText())
-                     .arg(order)
-                     .arg(states[i].CellNo);
+//             o["file_name"] = QString("%1/%2/%3/%4.xls")
+//                     .arg(Config::instance().m_data_dir)
+//                     .arg(ui->cbxHost->currentText())
+//                     .arg(order)
+//                     .arg(states[i].CellNo);
              o["cell_no"] =states[i].CellNo;
 
             arr.push_back(o);
@@ -1504,6 +1518,9 @@ void MainWnd::on_btnSelFile_clicked()
     }
     ui->edtDataDir->setText(path);
     Config::instance().SetDataDir(path);
+    fileWatcher->removePaths(fileWatcher->files());
+    fileWatcher->addPath(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm"));
+
     loadStateFile();
 }
 
@@ -1520,4 +1537,10 @@ void MainWnd::on_chkMeasure_clicked()
 void MainWnd::on_chkSelAll_clicked(bool checked)
 {
 
+}
+
+void MainWnd::on_btnReload_clicked()
+{
+    //重新加载数据
+    loadStateFile();
 }
