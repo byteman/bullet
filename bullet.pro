@@ -76,7 +76,8 @@ SOURCES += main.cpp\
     gotypes.cpp \
     myplottrace.cpp \
     machinechecker.cpp \
-    cmddebug.cpp
+    cmddebug.cpp \
+    asyncexporttask.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -134,7 +135,8 @@ HEADERS  += tcpserver.h \
     gotypes.h \
     myplottrace.h \
     machinechecker.h \
-    cmddebug.h
+    cmddebug.h \
+    asyncexporttask.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

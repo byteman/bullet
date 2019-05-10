@@ -3,6 +3,9 @@
 #include "dao.h"
 #include "qtcsv/writer.h"
 #include "qtcsv/stringdata.h"
+#include <QFuture>
+#include "asyncexporttask.h"
+#include <QDebug>
 AsyncExportManager::AsyncExportManager():
     QObject(NULL)
 {
@@ -22,64 +25,31 @@ bool AsyncExportManager::AddTask(QString serialNo,
                                  QString dest)
 {
 
-    MultiDeviceDataMap ddm;
-    for(int i = 0; i < chans.size(); i++)
-    {
-        DeviceDataList dll;
-        ddm[chans[i]] = dll;
-    }
-    QSqlError err = DAO::instance().DeviceDataQuery(serialNo,from,to, ddm);
+   AsyncExportTask *task = new AsyncExportTask(serialNo,chans,from,to,dest);
+   connect(task,SIGNAL(onSucc(AsyncExportTask*,QString)),this,SLOT(on_Succ(AsyncExportTask*,QString)));
 
+   connect(task,SIGNAL(onFail(AsyncExportTask*,QString)),this,SLOT(on_Fail(AsyncExportTask*,QString)));
 
-    QMapIterator<int,DeviceDataList> i(ddm);
+   connect(task,SIGNAL(onProgress(AsyncExportTask*,int)),this,SLOT(on_Progress(AsyncExportTask*,int)));
 
-    QtCSV::StringData strData;
-    QStringList strHeader;
-    int first = -1;
-    strHeader << "时间";
-    while(i.hasNext()){
-        i.next();
-        if(first == -1){
-            first = i.key();
-        }
+   //tasks[task->uuid()] = task;
+   return task->start();
+}
 
-        strHeader << QString("%1").arg(i.key());
-    }
-    if(first == -1) return false;
-    int num = ddm[first].size();
+void AsyncExportManager::on_Progress(AsyncExportTask* task, int progress)
+{
+    qDebug() << "task" << task->serialNo() << "=" << progress;
+    emit onProgress(task->serialNo(),progress,0);
+}
 
-    for(int i = 0; i <num ;i++)
-    {
-        QStringList strList;
-        for(int j = 0; j < chans.size(); j++)
-        {
-            int addr = chans[j];
-            DeviceDataList& ddl = ddm[addr];
-            if(i >= ddl.size()) continue;
+void AsyncExportManager::on_Fail(AsyncExportTask* task, QString err)
+{
+    task->deleteLater();
+}
 
-            if(j == 0){
-
-                strList << QString("%1").arg(QDateTime::fromMSecsSinceEpoch(ddl[i].timestamp*1000).toString("yyyy-MM-dd hh:mm:ss"));
-            }
-            strList << QString("%1").arg(ddl[i].value);
-        }
-        strData.addRow(strList);
-    }
-    QString filePath = dest;
-    /**
-     * @brief QtCSV::Writer::write
-     *  static bool write(const QString& filePath,
-                        const AbstractData& data,
-                        const QString& separator = QString(","),
-                        const QString& textDelimiter = QString("\""),
-                        const WriteMode& mode = REWRITE,
-                        const QStringList& header = QStringList(),
-                        const QStringList& footer = QStringList(),
-                        QTextCodec* codec = QTextCodec::codecForName("UTF-8"));
-
-     */
-    QtCSV::Writer::write(filePath, strData,QString(","),QString("\""),QtCSV::Writer::REWRITE,strHeader);
-    return !err.isValid();
-
+void AsyncExportManager::on_Succ(AsyncExportTask* task, QString err)
+{
+    emit onSucc(task->serialNo(),err);
+    task->deleteLater();
 }
 

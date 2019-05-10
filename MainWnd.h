@@ -36,6 +36,7 @@ public:
 
     bool GetCurrentDeviceId(QString &id);
     bool LoadWave(QString id, QVector<int> chan, qint64 from, qint64 to);
+    bool GetCurrentDeviceId2Name(QString &name);
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -187,6 +188,8 @@ protected slots:
     void onResetResult(Device *, bool);
     void on_report_click(QString order);
     void fileChange(const QString &path);
+    void onProgress(QString serialNo,int prog,int err);
+    void onSucc(QString serialNo,QString err);
 };
 
 #endif // UIDEMO01_H

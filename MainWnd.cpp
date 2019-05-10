@@ -15,6 +15,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include "xlsx/statemanager.h"
 #include "gotypes.h"
+#include "asyncexport.h"
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -259,6 +260,15 @@ bool MainWnd::GetCurrentDeviceId2(QString& id)
          return false;
     }
     id = item->data(0,Qt::UserRole).toString();
+    return true;
+}
+bool MainWnd::GetCurrentDeviceId2Name(QString& name)
+{
+    QTreeWidgetItem* item =  ui->treeWidget2->currentItem();
+    if(item==NULL){
+         return false;
+    }
+    name = item->text(0);
     return true;
 }
 //删除一个设备.
@@ -973,6 +983,9 @@ void MainWnd::initUI()
 
     connect(fileWatcher,&QFileSystemWatcher::fileChanged,this,&MainWnd::fileChange);
 
+    connect(&AsyncExportManager::instance(),SIGNAL(onProgress(QString,int,int)),this,SLOT(onProgress(QString,int,int)));
+    connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
+
  //加载设备状态.
 
     initDeviceChannels();
@@ -984,6 +997,17 @@ void MainWnd::fileChange(const QString &path)
 {
     qDebug() << path << "change";
     loadStateFile();
+}
+
+void MainWnd::onProgress(QString serialNo, int prog, int err)
+{
+    ui->btnExport->setText(QString(QStringLiteral("已完成%1%")).arg(prog));
+}
+
+void MainWnd::onSucc(QString serialNo, QString err)
+{
+    ui->btnExport->setText(QStringLiteral("导出数据"));
+    ui->btnExport->setEnabled(true);
 }
 void MainWnd::loadSysConfig()
 {
@@ -1285,7 +1309,10 @@ void MainWnd::on_chkSelAll_clicked()
 #include <QFileDialog>
 void MainWnd::on_btnExport_clicked()
 {
-    QString id;
+    QString id,name;
+    if(!GetCurrentDeviceId2Name(name)){
+        return;
+    }
     if(!GetCurrentDeviceId2(id)){
         return;
     }
@@ -1299,12 +1326,13 @@ void MainWnd::on_btnExport_clicked()
     qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
 
     QString fileName = QFileDialog::getSaveFileName(this,QStringLiteral("保存文件"),
-                               id+".csv",
+                               name+".csv",
                                tr("csv (*.csv)"));
     qDebug() << "Filename=" << fileName;
     AsyncExportManager::instance().AddTask(id,chans,from,to,fileName);
-
-     myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
+    ui->btnExport->setText(QStringLiteral("正在导出"));
+    ui->btnExport->setEnabled(false);
+    // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
 }
 #include <dialogmerge.h>
 #include <dialogreport.h>
