@@ -312,6 +312,15 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
     db.commit();
     return QSqlError();
 }
+QSqlError DAO::DeviceDataRemove(QString serialNo,qint64 from,qint64 to)
+{
+    QString sql = QString("delete from tbl_%1_data where time < ?;").arg(serialNo);
+    QSqlQuery query;
+    query.prepare(sql);
+    query.addBindValue(to);
+    query.exec(sql);
+    return query.lastError();
+}
 //删除某个设备的全部数据.
 QSqlError DAO::DeviceDataRemove(QString serialNo)
 {
@@ -328,6 +337,24 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
 
     return query.lastError();
 
+}
+
+QSqlError DAO::DeviceDataInfo(QString serialNo, qint64 &start, qint64 &end, qint64 &count)
+{
+    QString sql = QString("select min(time) as start,max(time) as end,count(id) as total from tbl_%1_data ; ").arg(serialNo);
+    QSqlQuery query;
+    query.prepare(sql);
+
+
+    query.exec();
+    while (query.next())
+    {
+
+        start   = query.value("start").toLongLong();
+        end =   query.value("end").toLongLong();
+        count = query.value("total").toLongLong();
+    }
+    return query.lastError();
 }
 QSqlError DAO::DeviceDataQuery(QString serialNo,
                           qint64 from,
@@ -452,6 +479,16 @@ QSqlError DAO::WriteBoolParam(QString key, bool value)
         return updateParam(key,QString("%1").arg(value?1:0));
     }
     return insertParam(key,QString("%1").arg(value?1:0));
+}
+
+QSqlError DAO::DbRecycle()
+{
+    //VACUUM
+    QString sql_create = "VACUUM;";
+
+    QSqlQuery query;
+    query.exec(sql_create);
+    return query.lastError();
 }
 
 QSqlError DAO::WriteStringParam(QString key, QString value)

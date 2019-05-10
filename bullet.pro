@@ -77,7 +77,8 @@ SOURCES += main.cpp\
     myplottrace.cpp \
     machinechecker.cpp \
     cmddebug.cpp \
-    asyncexporttask.cpp
+    asyncexporttask.cpp \
+    dialogclearup.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -136,7 +137,8 @@ HEADERS  += tcpserver.h \
     myplottrace.h \
     machinechecker.h \
     cmddebug.h \
-    asyncexporttask.h
+    asyncexporttask.h \
+    dialogclearup.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -149,7 +151,8 @@ FORMS    += MainWnd.ui \
     dialogselectchan.ui \
     dialogmerge.ui \
     chanselect.ui \
-    dialogreport.ui
+    dialogreport.ui \
+    dialogclearup.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

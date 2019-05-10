@@ -289,6 +289,20 @@ void MainWnd::on_remove_device_click(bool)
       reloadDeviceList2();
 
 }
+#include "dialogclearup.h"
+void MainWnd::on_clearup_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    DialogClearUp dlg;
+    dlg.SetSerialNo(id);
+    dlg.exec();
+}
+
 #include "dialogupdate.h"
 void MainWnd::on_update_menu_click(bool)
 {
@@ -959,6 +973,10 @@ void MainWnd::initUI()
     action = new QAction(QString::fromLocal8Bit("升级设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("数据清理"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
     action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
     menu->addAction(action);

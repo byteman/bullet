@@ -49,7 +49,7 @@ bool AsyncExportTask::_run()
     QtCSV::StringData strData;
     QStringList strHeader;
     int first = -1;
-    strHeader << "时间";
+    strHeader << QStringLiteral("时间");
 
     int count = 0;
     while(i.hasNext()){

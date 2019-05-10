@@ -190,6 +190,7 @@ protected slots:
     void fileChange(const QString &path);
     void onProgress(QString serialNo,int prog,int err);
     void onSucc(QString serialNo,QString err);
+    void on_clearup_menu_click(bool);
 };
 
 #endif // UIDEMO01_H

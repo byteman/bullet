@@ -37,6 +37,8 @@ public:
     QSqlError DeviceDataAdd(QString serialNo,DeviceDataList& data);
     //清空某个设备的所有数据.
     QSqlError DeviceDataRemove(QString serialNo);
+    QSqlError DeviceDataRemove(QString serialNo,qint64 from,qint64 to);
+    QSqlError DeviceDataInfo(QString serialNo,qint64 &start,qint64 &end, qint64 &count);
 
     //查询某个设备的某个通道某个时间段的历史数据.
     QSqlError DeviceDataQuery(QString serialNo,
@@ -60,6 +62,9 @@ public:
     QString ReadStringParam(QString key, QString defValue);
     QSqlError CreateDataTable(QString serialNo);
     QSqlError WriteBoolParam(QString key, bool value);
+
+    QSqlError DbRecycle();
+
 private:
 
     QSqlDatabase db;
