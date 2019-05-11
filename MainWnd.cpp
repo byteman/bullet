@@ -16,6 +16,7 @@
 #include "xlsx/statemanager.h"
 #include "gotypes.h"
 #include "asyncexport.h"
+#include <QInputDialog>
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -229,7 +230,7 @@ void MainWnd::on_reset_count_click(bool)
 //添加一个设备.
 void MainWnd::on_add_device_click(bool)
 {
-    qDebug() << "add device";
+    if(!this->CheckPassWord())return;
     if(dvm.DeviceCount() >=8 ){
          myHelper::ShowMessageBoxError(QStringLiteral("最多添加8个设备"));
          return;
@@ -274,7 +275,7 @@ bool MainWnd::GetCurrentDeviceId2Name(QString& name)
 //删除一个设备.
 void MainWnd::on_remove_device_click(bool)
 {
-
+    if(!this->CheckPassWord())return;
      QString id;
      if(!GetCurrentDeviceId(id))
      {
@@ -290,8 +291,19 @@ void MainWnd::on_remove_device_click(bool)
 
 }
 #include "dialogclearup.h"
+bool MainWnd::CheckPassWord()
+{
+    if("123456" != QInputDialog::getText(this,
+                          QStringLiteral("权限验证"),
+                          QStringLiteral("请输入密码")))
+    {
+        return false;
+    }
+    return true;
+}
 void MainWnd::on_clearup_menu_click(bool)
 {
+    if(!CheckPassWord() )return;
     QString id;
     if(!GetCurrentDeviceId(id))
     {
@@ -306,6 +318,7 @@ void MainWnd::on_clearup_menu_click(bool)
 #include "dialogupdate.h"
 void MainWnd::on_update_menu_click(bool)
 {
+    if(!this->CheckPassWord())return;
     QString id;
     if(!GetCurrentDeviceId(id))
     {
@@ -360,6 +373,7 @@ void MainWnd::on_modify_menu_click(bool)
 //复位设备.
 void MainWnd::on_reset_menu_click(bool)
 {
+    if(!CheckPassWord() )return;
     dvm.ResetDevice(m_cur_dev_id,1);
 }
 QTreeWidgetItem* MainWnd::findItemById(QString id)
@@ -796,6 +810,10 @@ void MainWnd::mousePress(QMouseEvent* event)
        rubberOrigin = event->pos();
        rubberBand->setGeometry(QRect(rubberOrigin, QSize()));
        rubberBand->show();
+   }else if(event->button() == Qt::RightButton)
+   {
+        //记录当前的值
+
    }
 }
 void MainWnd::mouseDoubleClick(QMouseEvent* event)
@@ -953,10 +971,10 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
-    menu->addAction(action);
+//    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
+//    menu->addAction(action);
 
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
 
     action = new QAction(QString::fromLocal8Bit("复位设备"),this);
     menu->addAction(action);
@@ -978,12 +996,12 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
-    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
+//    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
+//    menu->addAction(action);
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
+//    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
+//    menu->addAction(action);
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
 
 
 //GetCount
@@ -1032,12 +1050,12 @@ void MainWnd::loadSysConfig()
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
     ui->sbSaveInt->setValue(Config::instance().m_save_intS);
-    ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
+    //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     ui->edtHost->setText(Config::instance().m_host_name);
 }
 static bool loading = false;
 //加载状态文件.
-void MainWnd::loadStateFile()
+void MainWnd::loadStateFile(bool create)
 {
     loading = true;
     ui->edtDataDir->setText(Config::instance().m_data_dir);
@@ -1058,6 +1076,20 @@ void MainWnd::loadStateFile()
     while (i != host.constEnd()) {
         qDebug() << i.key();
         ui->cbxHost->addItem(i.key());
+        if(create){
+            CellTestOrderList::const_iterator it = i.value().constBegin();
+            while (it != i.value().constEnd()) {
+                QString cell=QString("%1/%2/%3").
+                        arg(Config::instance().
+                            m_data_dir).
+                        arg(i.key()).arg(it.key());
+                utils::MkMutiDir(cell);
+                ++it;
+            }
+
+        }
+
+
         ++i;
     }
 
@@ -1588,5 +1620,5 @@ void MainWnd::on_chkSelAll_clicked(bool checked)
 void MainWnd::on_btnReload_clicked()
 {
     //重新加载数据
-    loadStateFile();
+    loadStateFile(true);
 }

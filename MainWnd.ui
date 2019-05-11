@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -573,8 +573,8 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>548</width>
-            <height>237</height>
+            <width>1224</width>
+            <height>576</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -717,8 +717,8 @@ margin-top:0px;
                    <property name="verticalSpacing">
                     <number>15</number>
                    </property>
-                   <item row="1" column="1">
-                    <widget class="QLabel" name="label_2">
+                   <item row="2" column="2">
+                    <widget class="QSpinBox" name="sbWaveMin">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -727,12 +727,9 @@ margin-top:0px;
                        <bold>false</bold>
                       </font>
                      </property>
-                     <property name="text">
-                      <string>数据时间</string>
-                     </property>
                     </widget>
                    </item>
-                   <item row="4" column="1">
+                   <item row="3" column="1">
                     <widget class="QLabel" name="label_4">
                      <property name="font">
                       <font>
@@ -746,18 +743,6 @@ margin-top:0px;
                     </widget>
                    </item>
                    <item row="3" column="2">
-                    <widget class="QSpinBox" name="sbWaveMin">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="2">
                     <widget class="QComboBox" name="cbxLang">
                      <property name="font">
                       <font>
@@ -772,7 +757,7 @@ margin-top:0px;
                      </item>
                     </widget>
                    </item>
-                   <item row="5" column="2">
+                   <item row="4" column="2">
                     <widget class="QLineEdit" name="edtPort">
                      <property name="font">
                       <font>
@@ -782,35 +767,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
-                    <widget class="QCheckBox" name="cbUseSysTime">
-                     <property name="font">
-                      <font>
-                       <family>Arial</family>
-                       <pointsize>16</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>采用电脑时间</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="5" column="1">
-                    <widget class="QLabel" name="label">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>监听端口</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="1">
+                   <item row="2" column="1">
                     <widget class="QLabel" name="label_3">
                      <property name="font">
                       <font>
@@ -825,8 +782,8 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
-                    <widget class="QLabel" name="label_9">
+                   <item row="4" column="1">
+                    <widget class="QLabel" name="label">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -834,17 +791,7 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>采样间隔(秒)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QSpinBox" name="sbSaveInt">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
+                      <string>监听端口</string>
                      </property>
                     </widget>
                    </item>
@@ -855,6 +802,29 @@ margin-top:0px;
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
                       </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QSpinBox" name="sbSaveInt">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLabel" name="label_9">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>采样间隔(秒)</string>
                      </property>
                     </widget>
                    </item>
@@ -1722,8 +1692,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="main.qrc"/>
   <include location="img.qrc"/>
+  <include location="main.qrc"/>
  </resources>
  <connections/>
 </ui>

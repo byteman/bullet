@@ -13,6 +13,7 @@ DialogParams::DialogParams(DeviceManager* _dvm,QString id,QWidget *parent) :
 
     dvm->ReadParam(id);
     ui->edtDevId->setText(id);
+    ui->edtTimeOut->setEnabled(false);
 }
 
 DialogParams::~DialogParams()

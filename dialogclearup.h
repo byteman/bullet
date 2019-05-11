@@ -2,7 +2,7 @@
 #define DIALOGCLEARUP_H
 
 #include <QDialog>
-
+#include <QFuture>
 namespace Ui {
 class DialogClearUp;
 }
@@ -16,6 +16,10 @@ public:
     ~DialogClearUp();
     void SetSerialNo(QString dev);
 
+
+    bool ClearUp(QString id, qint64 from, qint64 to);
+protected slots:
+    void clearUpFinished();
 private slots:
     void on_btnExit_clicked();
 
@@ -24,6 +28,7 @@ private slots:
 private:
     Ui::DialogClearUp *ui;
     QString m_serialNo;
+    QFutureWatcher<bool> *watcher;
 };
 
 #endif // DIALOGCLEARUP_H

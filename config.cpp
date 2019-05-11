@@ -14,7 +14,7 @@ Config &Config::instance()
 }
 bool Config::Init()
 {
-    m_use_sys_time = DAO::instance().ReadBoolParam("use_sys_time",false);
+    m_use_sys_time = false;//DAO::instance().ReadBoolParam("use_sys_time",false);
     m_rt_wave_min  = DAO::instance().ReadIntParam("rt_wave_min",20);
     m_lang = (Lang)DAO::instance().ReadIntParam("lang",(int)LANG_ZH);
     m_local_port = DAO::instance().ReadIntParam("port",8881);
@@ -26,8 +26,8 @@ bool Config::Init()
 
 bool Config::SetUseSysTime(bool use)
 {
-    DAO::instance().WriteIntParam("use_sys_time",use);
-    m_use_sys_time = use;
+//    DAO::instance().WriteIntParam("use_sys_time",use);
+//    m_use_sys_time = use;
     return true;
 }
 

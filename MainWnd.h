@@ -85,9 +85,10 @@ private:
 
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
-     void loadStateFile();
+     void loadStateFile(bool create=false);
      QString buildReportInput(QString order);
      void updateOrderState();
+     bool CheckPassWord();
 private slots:
     void chan_click(int chan);
     void buttonClick();

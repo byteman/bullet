@@ -47,7 +47,7 @@
     </font>
    </property>
    <property name="text">
-    <string>清空</string>
+    <string>清除</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -74,9 +74,9 @@
   <widget class="QPushButton" name="btnClearUp">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>50</x>
      <y>270</y>
-     <width>191</width>
+     <width>271</width>
      <height>51</height>
     </rect>
    </property>
