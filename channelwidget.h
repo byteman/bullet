@@ -20,6 +20,7 @@ public:
 
     ~ChannelWidget();
     void SetTitle(QString name);
+    void SetOnline(bool online);
     void SetChanSetting(DeviceChnConfig& cfg);
     void SetRecState(bool paused);
     void SetTimeRange(int rangeS);
@@ -40,7 +41,7 @@ signals:
     void onPlayClick(int addr, bool played);
 private:
     Ui::ChannelWidget *ui;
-    void SetOnline(bool online);
+
     void resetTimeout();
     void MaxAlarm(bool alarm);
     void MinAlarm(bool alarm);

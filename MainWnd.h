@@ -1,6 +1,6 @@
 ﻿#ifndef MAIN_WND_H
 #define MAIN_WND_H
-
+#include "myping.h"
 #include <QDialog>
 #include "mydevices.h"
 #include <QMainWindow>
@@ -12,7 +12,7 @@
 #include <QTcpServer>
 #include <QListWidgetItem>
 #include "tcpserver.h"
-#include "udpserver.h"
+#include "gpserver.h"
 #include "sessmessage.h"
 #include "devicemanager.h"
 #include "wavewidget.h"
@@ -22,6 +22,7 @@
 #include "histwavewidget.h"
 #include "myplottrace.h"
 #include <QFileSystemWatcher>
+
 namespace Ui {
 class MainWnd;
 }
@@ -45,7 +46,7 @@ private:
      MyDevices* devices;
     bool bQueryOrderState;
      MyPlotTrace *m_tracer;
-
+    MyPing ping;
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
      QString m_cur_dev_id;
@@ -63,7 +64,7 @@ private:
      QTimer m_timer;
      QRubberBand *rubberBand;
      QPoint rubberOrigin;
-     UdpServer* srv;
+     GPServer* srv;
      void loadDeviceUI();
      bool Init();
      QTreeWidgetItem *findItemById(QString id);
@@ -176,6 +177,12 @@ private slots:
 
     void on_btnReload_clicked();
 
+    void on_btnLocalIP_clicked();
+
+    void on_btnPing_clicked();
+
+    void on_btnClear_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -192,6 +199,7 @@ protected slots:
     void onProgress(QString serialNo,int prog,int err);
     void onSucc(QString serialNo,QString err);
     void on_clearup_menu_click(bool);
+    void onReply(QString msg);
 };
 
 #endif // UIDEMO01_H

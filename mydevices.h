@@ -33,6 +33,7 @@ public:
     void DisplayDataQueue(int addr,QQueue<SensorData> &dataQueue);
     int  GetZoomWidget();
     void SetSaveInt(int rangeS);
+    void SetOnline(bool online);
 public slots:
     void onDoubleClick(int addr,bool zoom);
     void onChannelConfigEvent(int addr);

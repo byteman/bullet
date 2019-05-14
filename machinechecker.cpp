@@ -8,7 +8,7 @@ MachineChecker::MachineChecker()
 
 bool MachineChecker::CheckMac(QString mac)
 {
-    return true;
+
     foreach (QNetworkInterface netInterface, QNetworkInterface::allInterfaces())
     {
         //设备名

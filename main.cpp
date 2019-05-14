@@ -15,7 +15,9 @@ int main(int argc, char *argv[])
 
     //InitConsoleWindow();
     MachineChecker checker;
-    if(checker.CheckMac("B0:35:9F:87:D9:FE")){
+    if(checker.CheckMac("08:57:00:F6:08:DC") ||
+            checker.CheckMac("B0:35:9F:87:D9:FE")){
+    //if(checker.CheckMac("B0:35:9F:87:D9:FE")){
         //加载样式表
         QFile file(":/qss/psblack.css");
         if (file.open(QFile::ReadOnly)) {

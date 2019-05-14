@@ -32,6 +32,14 @@ void MyDevices::SetSaveInt(int rangeS)
 //    }
 
 }
+
+void MyDevices::SetOnline(bool online)
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+         widgets[i]->SetOnline(online);
+    }
+}
 void MyDevices::SetTimeRange(int rangeS)
 {
     for(int i = 0; i < widgets.size();i++)

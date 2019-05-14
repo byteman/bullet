@@ -16,8 +16,8 @@ debug{
     OBJECTS_DIR=debug
 }
 INCLUDEPATH+=./qtcsv ./qtcsv/include
-INCLUDEPATH+=./ext/
-LIBS+=-L./ext/lib
+INCLUDEPATH+=./ext/ ./ext/include
+LIBS+=-L./ext/lib -lWS2_32
 
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
@@ -29,8 +29,8 @@ SOURCES += main.cpp\
     protomessage.cpp \
     protoparser.cpp \
     wavefile.cpp \
-    udpserver.cpp \
-    udpsession.cpp \
+    gpserver.cpp \
+    gpsession.cpp \
     wavewidget.cpp \
     qcustomplot.cpp \
     igraphicchannel.cpp \
@@ -78,7 +78,9 @@ SOURCES += main.cpp\
     machinechecker.cpp \
     cmddebug.cpp \
     asyncexporttask.cpp \
-    dialogclearup.cpp
+    dialogclearup.cpp \
+    nettools.cpp \
+    myping.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -91,8 +93,8 @@ HEADERS  += tcpserver.h \
     protoparser.h \
     parser.h \
     wavefile.h \
-    udpserver.h \
-    udpsession.h \
+    gpserver.h \
+    gpsession.h \
     wavewidget.h \
     qcustomplot.h \
     igraphicchannel.h \
@@ -138,7 +140,9 @@ HEADERS  += tcpserver.h \
     machinechecker.h \
     cmddebug.h \
     asyncexporttask.h \
-    dialogclearup.h
+    dialogclearup.h \
+    nettools.h \
+    myping.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

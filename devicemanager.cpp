@@ -358,7 +358,9 @@ void DeviceManager::Message(SessMessage msg)
     ProtoMessage temp_msg;
     ProtoMessage output_msg;
     parser.pushData(msg.getData());
+//    QTime time;
 
+//    time.start();
     if(parser.parseData(msg.getData(),temp_msg))
     {
         //Q dev_id = temp_msg.head.device_id;
@@ -399,7 +401,7 @@ void DeviceManager::Message(SessMessage msg)
         input_msg.clear();
 
     }
-
+    //qDebug()<<time.elapsed()<<"ms";
 }
 
 void DeviceManager::onNotify(QString msg)

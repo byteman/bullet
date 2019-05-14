@@ -206,8 +206,10 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
 }
 void ChannelWidget::disable(bool dis)
 {
-    if(dis)
+    if(dis){
+
         ui->lblChan->setStyleSheet("background-color: red;");
+    }
     else{
         ui->lblChan->setStyleSheet("background-color: #26A65B;");
     }
@@ -215,9 +217,14 @@ void ChannelWidget::disable(bool dis)
 void ChannelWidget::SetOnline(bool online)
 {
     if(online){
+
+        // this->setStyleSheet("background-color: #26A65B;");
         ui->lblChan->setStyleSheet("background-color: #26A65B;");
+
     }else{
+        // this->setStyleSheet("background-color: red;");
         ui->lblChan->setStyleSheet("background-color: red;");
+        ui->lbl_weight->setText("通讯故障");
     }
 }
 

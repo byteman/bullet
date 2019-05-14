@@ -89,6 +89,9 @@ void GPServer::onStart()
     Poco::Timespan span(10000);
     qDebug() << "gps onstart";
     while(!_quit){
+        QTime time;
+
+        time.start();
         if(_socket->poll(span, Poco::Net::Socket::SELECT_READ))
         {
             try
@@ -108,7 +111,7 @@ void GPServer::onStart()
                 //qDebug() << "sender:" << sender.toString() + " port:" << senderPort << datagram.toHex();
 
                 emit Message(msg);
-
+                qDebug()<<time.elapsed()<<"ms";
 
             }
             catch (Poco::Exception& exc)

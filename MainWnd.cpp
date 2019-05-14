@@ -23,19 +23,31 @@ void MainWnd::AddLog(QString msg)
 {
     ui->txtLog->append(msg);
 }
+#include "nettools.h"
 void MainWnd::StartReceiver()
 {
-    srv = new UdpServer();
+    srv = new GPServer();
 
     if(!srv->start(Config::instance().m_local_port)){
         AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
     }
+//    QStringList ip = NetTools::get_local_ip();
+//    for(int i = 0; i< ip.size();i++)
+//    {
+//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
+//    }
     connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
+    connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
 
+
+}
+void MainWnd::onReply(QString msg)
+{
+    AddLog(msg);
 }
 bool MainWnd::InitDvm()
 {
@@ -468,7 +480,7 @@ void MainWnd::updateOrderState()
                         msg = QStringLiteral("未开始");
                         break;
                    case 1:
-                       msg = QStringLiteral("正在生成报告...");
+                       msg = o2["message"].toString();//QStringLiteral("正在生成报告...");
                        break;
                    case 2:
                        msg = QStringLiteral("生成报告成功");
@@ -500,6 +512,7 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[0]);
             else
                 item->setIcon(0,icon_device[1]);
+            //this->devices->SetOnline(devices[i]->online());
         }
     }
     for(int i = 0; i < devices.size();i++)
@@ -1379,6 +1392,9 @@ void MainWnd::on_btnExport_clicked()
                                name+".csv",
                                tr("csv (*.csv)"));
     qDebug() << "Filename=" << fileName;
+    if(fileName.length() < 3){
+        return;
+    }
     AsyncExportManager::instance().AddTask(id,chans,from,to,fileName);
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
@@ -1545,6 +1561,7 @@ QString MainWnd::buildReportInput(QString order)
         root["db"] = QCoreApplication::applicationDirPath()+"/measure.db";
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
+        root["skip_error"] = true;
         QVector<CellState> &states =  orders[order];
         for(int i = 0; i <states.size(); i++)
         {
@@ -1621,4 +1638,34 @@ void MainWnd::on_btnReload_clicked()
 {
     //重新加载数据
     loadStateFile(true);
+}
+
+void MainWnd::on_btnLocalIP_clicked()
+{
+   // QStringList ip = NetTools::get_local_ip();
+    QStringList mac = NetTools::get_devices();
+//    for(int i = 0; i< ip.size();i++)
+//    {
+//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
+//    }
+
+    for(int i = 0; i< mac.size();i++)
+    {
+        AddLog(QString("%1").arg(mac.at(i)));
+    }
+
+}
+
+void MainWnd::on_btnPing_clicked()
+{
+    QString target = ui->edtPingIp->text();
+    if(target.length() < 7){
+        return;
+    }
+    ping.ping(target,4);
+}
+
+void MainWnd::on_btnClear_clicked()
+{
+    ui->txtLog->clear();
 }
