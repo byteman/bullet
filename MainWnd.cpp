@@ -489,7 +489,7 @@ void MainWnd::updateOrderState()
                        msg = o2["message"].toString();
                        break;
                }
-               item->setText(4,msg);
+               item->setText(5,msg);
            }
 
         }
@@ -512,7 +512,7 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[0]);
             else
                 item->setIcon(0,icon_device[1]);
-            //this->devices->SetOnline(devices[i]->online());
+            this->devices->SetOnline(devices[i]->online());
         }
     }
     for(int i = 0; i < devices.size();i++)
@@ -1070,6 +1070,7 @@ static bool loading = false;
 //加载状态文件.
 void MainWnd::loadStateFile(bool create)
 {
+    qDebug() << "loadStateFile";
     loading = true;
     ui->edtDataDir->setText(Config::instance().m_data_dir);
     ui->cbxHost->clear();
@@ -1080,11 +1081,12 @@ void MainWnd::loadStateFile(bool create)
         qDebug() << "loadStateFile failed";
         QMessageBox::information(this,"info",QStringLiteral("目录下找不到压力测试状态表.xlsm"));
         this->AddLog("loadStateFile failed");
+        loading = false;
         return;
     }
 #if 1
     CellTestHost& host = StateManager::instance().GetState();
-    ui->cbxHost->clear();
+
     QMap<QString,CellTestOrderList>::const_iterator i = host.constBegin();
     while (i != host.constEnd()) {
         qDebug() << i.key();
@@ -1108,7 +1110,10 @@ void MainWnd::loadStateFile(bool create)
 
 #endif
     loading = false;
+     qDebug() << "loadStateFile ok----";
     ui->cbxHost->setCurrentText(Config::instance().m_host_name);
+    qDebug() << "loadStateFile ok";
+    emit on_cbxHost_currentIndexChanged(Config::instance().m_host_name);
 
 }
 void MainWnd::buttonClick()
@@ -1432,14 +1437,19 @@ void MainWnd::on_btnHelp_clicked()
 
 void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 {
+    qDebug() << "onchage" << arg1 << loading;
      if(loading) return;
     QString x = arg1;
    CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
+   if(orders.size() == 0){
+      return;
+   }
     QSignalMapper *signalMapper = new QSignalMapper(this);
+    QSignalMapper *signalMapper2 = new QSignalMapper(this);
    ui->orderList->clear();
    //ui->cbxTestNo->clear();
    QMap<QString,QVector<CellState>>::const_iterator i = orders.constBegin();
-   uint id = 0;
+
    while (i != orders.constEnd()) {
        //cout << i.key() << ": " << i.value() << endl;
        //ui->cbxTestNo->addItem(i.key());
@@ -1464,20 +1474,40 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
        QPushButton *btnReport = new QPushButton(QStringLiteral("生成报告"));
         btnReport->setGeometry(0,0,80,40);
 
+        QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
+         btnOpenDir->setGeometry(0,0,80,40);
+
+       connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
+       //QString dir = QString("%1").arg(1);
+        QString dir = QString(QStringLiteral("%1/%2/%3"))
+                       .arg(Config::instance().m_data_dir)
+                       .arg(x)
+                       .arg(i.key());
+
+       signalMapper2->setMapping(btnOpenDir, dir);
+
        connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
        signalMapper->setMapping(btnReport, i.key());
 
 
 
-
        ui->orderList->setItemWidget(item, 3, btnReport);
+       ui->orderList->setItemWidget(item, 4, btnOpenDir);
 
 
        ++i;
    }
    connect(signalMapper, SIGNAL(mapped(QString)),
                this, SLOT(on_report_click(QString)));
+   connect(signalMapper2, SIGNAL(mapped(QString)),
+               this, SLOT(on_opendir_click(QString)));
 
+}
+
+void MainWnd::on_opendir_click(QString dir)
+{
+    bool ok = QDesktopServices::openUrl(QUrl(dir));
+    qDebug() << "open " << dir << " result=" << ok;
 }
 void MainWnd::on_report_click(QString order)
 {

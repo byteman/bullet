@@ -86,12 +86,12 @@ void GPServer::onStart()
     }
     udp_sess = new GpsSession(_socket);
     _quit = false;
-    Poco::Timespan span(10000);
+    Poco::Timespan span(100000);
     qDebug() << "gps onstart";
     while(!_quit){
-        QTime time;
+        //QTime time;
 
-        time.start();
+        //time.start();
         if(_socket->poll(span, Poco::Net::Socket::SELECT_READ))
         {
             try
@@ -111,7 +111,7 @@ void GPServer::onStart()
                 //qDebug() << "sender:" << sender.toString() + " port:" << senderPort << datagram.toHex();
 
                 emit Message(msg);
-                qDebug()<<time.elapsed()<<"ms";
+                //qDebug()<<time.elapsed()<<"ms";
 
             }
             catch (Poco::Exception& exc)

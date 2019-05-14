@@ -200,6 +200,7 @@ protected slots:
     void onSucc(QString serialNo,QString err);
     void on_clearup_menu_click(bool);
     void onReply(QString msg);
+    void on_opendir_click(QString order);
 };
 
 #endif // UIDEMO01_H

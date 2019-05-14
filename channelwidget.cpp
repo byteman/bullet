@@ -35,7 +35,7 @@ void ChannelWidget::Show()
        ui->lbl_weight->hide();
        m_waveWdg->Show();
     }else{
-       ui->lbl_weight->setStyleSheet("font-size : 48pt");
+       ui->lbl_weight->setStyleSheet("font-size : 40pt");
        ui->lbl_weight->show();
        m_waveWdg->Hide();
 
@@ -224,7 +224,7 @@ void ChannelWidget::SetOnline(bool online)
     }else{
         // this->setStyleSheet("background-color: red;");
         ui->lblChan->setStyleSheet("background-color: red;");
-        ui->lbl_weight->setText("通讯故障");
+        ui->lbl_weight->setText(QStringLiteral("  通讯故障"));
     }
 }
 
