@@ -279,9 +279,9 @@ QQueue<SensorData>* Device::GetHistoryData(int chan)
 #include "dao.h"
 bool Device::WriteValues(MsgSensorData& msg)
 {
-    static DeviceDataList ddl;
+    DeviceDataList ddl;
     qint32 time = 0;
-    static QTime last;
+    //static QTime last;
 
     //qDebug() << "id=" << QThread::currentThreadId();
     if(Config::instance().m_use_sys_time){
@@ -310,15 +310,15 @@ bool Device::WriteValues(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
-    if(ddl.size() < 800 &&  last.elapsed() < 3000){
-        //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
-       return true;
-    }
-    //重新开始计时
-    last.restart();
+//    if(ddl.size() < 80 &&  last.elapsed() < 3000){
+//        //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
+//       return true;
+//    }
+//    //重新开始计时
+//    last.restart();
     QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
     //写入后需要清空数据
-    ddl.clear();
+    //ddl.clear();
     if(err.isValid()){
         qDebug() << "DeviceDataAdd err=" << err.text();
         return false;

@@ -503,6 +503,8 @@ void MainWnd::timerEvent(QTimerEvent *)
 {
     QList<Device*> devices;
     dvm.ListDevice(devices);
+    static QString curId;
+    bool find = this->GetCurrentDeviceId(curId);
     for(int i = 0; i < devices.size();i++)
     {
         QTreeWidgetItem* item = findItemById(devices[i]->id());
@@ -512,7 +514,10 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[0]);
             else
                 item->setIcon(0,icon_device[1]);
-            this->devices->SetOnline(devices[i]->online());
+            if(find && curId==devices[i]->id()){
+                this->devices->SetOnline(devices[i]->online());
+            }
+
         }
     }
     for(int i = 0; i < devices.size();i++)
@@ -558,6 +563,7 @@ void MainWnd::changeDevice(QString dev_id)
     if(devices==NULL){
         return;
     }
+    devices->ClearDisplay();
     for(int i = 1; i <= MAX_CHAN_NR; i++)
     {
         DeviceChnConfig cfg;
@@ -587,7 +593,7 @@ void MainWnd::changeDevice(QString dev_id)
         dvm.SetChanConfig(dev_id,i,cfg);
     }
     ui->treeWidget2->setCurrentItem(findItemById2(dev_id));
-    devices->ClearDisplay();
+
 
     int addr = devices->GetZoomWidget();
     if(addr!=-1){

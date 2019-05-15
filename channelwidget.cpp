@@ -111,6 +111,8 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
     ui->tbtPlay->setChecked(m_paused);
     m_waveWdg->AddLine("max",maxStr,false, 1000,m_max_value);
     m_waveWdg->AddLine("min",minStr,true,1000,m_min_value);
+    if(m_paused)
+        ui->lbl_weight->setText(QStringLiteral("暂停"));
 }
 
 //禁用通道的时候，更改通道的颜色.
@@ -121,6 +123,8 @@ void ChannelWidget::SetRecState(bool paused)
     disable(paused);
 
     ui->tbtPlay->setChecked(paused);
+    if(paused)
+    ui->lbl_weight->setText(QStringLiteral("暂停"));
 }
 //void ChannelWidget::SetSaveInt(int rangeS)
 //{
