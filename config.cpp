@@ -2,6 +2,7 @@
 #include "dao.h"
 #include "singletonholder.h"
 #include <QDir>
+#include <QSettings>
 Config::Config()
 {
 
@@ -14,6 +15,13 @@ Config &Config::instance()
 }
 bool Config::Init()
 {
+    QSettings config("bullet.ini", QSettings::IniFormat);
+
+    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
+    m_enable_buffer= config.value("/config/db_buf_en",false).toBool();
+    m_buf_num= config.value("/config/db_buf_len",80).toInt();
+    m_buf_time= config.value("/config/db_buf_time",3000).toInt();
+
     m_use_sys_time = false;//DAO::instance().ReadBoolParam("use_sys_time",false);
     m_rt_wave_min  = DAO::instance().ReadIntParam("rt_wave_min",20);
     m_lang = (Lang)DAO::instance().ReadIntParam("lang",(int)LANG_ZH);

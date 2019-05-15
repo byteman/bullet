@@ -277,11 +277,72 @@ QQueue<SensorData>* Device::GetHistoryData(int chan)
     return &m_channels[chan].values;
 }
 #include "dao.h"
+
+
+bool Device::WriteValuesBuf(MsgSensorData& msg)
+{
+
+    static DeviceDataList ddl;
+    static QTime last;
+
+
+    qint32 time = 0;
+
+    Config& cfg = Config::instance();
+    //qDebug() << "id=" << QThread::currentThreadId();
+    if(cfg.m_use_sys_time){
+        time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
+        if(!checkCanSave(time,Config::instance().m_save_intS)){
+            //系统时钟模式还没有达到保存时间，就返回.
+            //qDebug() << "time not reach!";
+            return true;
+        }
+    }
+
+    for(int i = 0; i <msg.channels.size();i++)
+    {
+        //如果这个设备的这个通道已经禁用了。
+         if(IsPaused(msg.channels[i].addr)){
+             continue;
+         }
+         DeviceData dd;
+         dd.chan = msg.channels[i].addr;
+         dd.value = msg.channels[i].weight;
+         dd.timestamp = msg.channels[i].time;
+         if(Config::instance().m_use_sys_time){
+             dd.timestamp = time;
+             //判断是否可以存储了
+
+         }
+         ddl.push_back(dd);
+    }
+
+    if(ddl.size() < cfg.m_buf_num &&  last.elapsed() < cfg.m_buf_time){
+        //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
+       return true;
+    }
+    //重新开始计时
+    last.restart();
+
+    QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
+
+    //写入后需要清空数据
+    ddl.clear();
+
+    if(err.isValid()){
+        qDebug() << "DeviceDataAdd err=" << err.text();
+        return false;
+    }
+    return true;
+}
 bool Device::WriteValues(MsgSensorData& msg)
 {
+
     DeviceDataList ddl;
+
+
     qint32 time = 0;
-    //static QTime last;
+
 
     //qDebug() << "id=" << QThread::currentThreadId();
     if(Config::instance().m_use_sys_time){
@@ -310,15 +371,9 @@ bool Device::WriteValues(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
-//    if(ddl.size() < 80 &&  last.elapsed() < 3000){
-//        //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
-//       return true;
-//    }
-//    //重新开始计时
-//    last.restart();
+
     QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
-    //写入后需要清空数据
-    //ddl.clear();
+
     if(err.isValid()){
         qDebug() << "DeviceDataAdd err=" << err.text();
         return false;
@@ -338,7 +393,12 @@ bool Device::ProcessWave(int index,QByteArray &data)
         WriteValues(value);
         msd.channels.push_back(value);
     }
-     WriteValues(msd);
+    if(Config::instance().m_enable_buffer){
+         WriteValuesBuf(msd);
+    }else{
+         WriteValues(msd);
+    }
+
     //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit OnSensorData(this,msd);
     return true;

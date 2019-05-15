@@ -21,6 +21,9 @@ struct Config
     bool m_use_sys_time;
     int  m_local_port; //本机监听端口.
     int  m_rt_wave_min; //实时波形时间
+    bool  m_enable_buffer; //运行buff db
+    int  m_buf_num;
+    int  m_buf_time;
     Lang  m_lang; //语言类型.
     int  m_save_intS; //本地保存时间间隔.
     QString m_data_dir;
