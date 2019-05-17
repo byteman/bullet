@@ -60,8 +60,19 @@ QString utils::UTF82GBK(const QString &inStr)
     QTextCodec *gbk = QTextCodec::codecForName("GBK");
     QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
 
-    QString utf2gbk = gbk->toUnicode(inStr.toLocal8Bit());
-    return utf2gbk;
+//    QString utf2gbk = gbk->toUnicode(inStr.toLocal8Bit());
+//    return utf2gbk;
+
+
+
+    QString strUnicode= utf8->toUnicode(inStr.toLocal8Bit());
+    QByteArray ByteGb2312= gbk->fromUnicode(strUnicode);
+
+    //strUtf8= ByteGb2312.data();
+
+    return QString::fromLocal8Bit(ByteGb2312.data());//注意这里要fromLocal8Bit()
+
+
 }
 
 std::string utils::gbk2utf8(const QString &inStr)
@@ -75,6 +86,7 @@ QString utils::utf82gbk(const std::string &inStr)
 
     return UTF82GBK(str);
 }
+
 
 QString utils::Time2String(qint64 xValue)
 {

@@ -1512,7 +1512,8 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 
 void MainWnd::on_opendir_click(QString dir)
 {
-    bool ok = QDesktopServices::openUrl(QUrl(dir));
+    QString dir_gbk = utils::UTF82GBK(dir);
+    bool ok = QDesktopServices::openUrl(QUrl(dir_gbk));
     qDebug() << "open " << dir << " result=" << ok;
 }
 void MainWnd::on_report_click(QString order)

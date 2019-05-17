@@ -29,6 +29,7 @@ public:
     static QString utf82gbk(const std::string &inStr);
     static QString Time2String(qint64 xValue);
     static QString MkMutiDir(const QString path);
+    static QString utf8ToGb2312(QString strUtf8);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

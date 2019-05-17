@@ -330,10 +330,10 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
     QSqlQuery query;
 
     query.exec(sql);
+    //sqlite_sequence 这个表示记录每个表中的自增加id的当前编号，但是我drop表以后，再新建立表格，应该就用新的id了
+   // sql = QString("DELETE FROM  sqlite_sequence WHERE name=tbl_%1_data;").arg(serialNo);
 
-    sql = QString(" DELETE FROM  sqlite_sequence WHERE name=%1;").arg(serialNo);
-
-    query.exec(sql);
+   // query.exec(sql);
 
     return query.lastError();
 
