@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core  gui network
+QT       += core  gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -42,7 +42,10 @@ SOURCES += main.cpp\
     gpsession.cpp \
     mysocket.cpp \
     csvfile.cpp \
-    syncfile.cpp
+    syncfile.cpp \
+    widgetchan.cpp \
+    channelwidget.cpp \
+    dialogchanconfig.cpp
 
 HEADERS  += mainwindow.h \
     tcpserver.h \
@@ -71,16 +74,23 @@ HEADERS  += mainwindow.h \
     gpsession.h \
     mysocket.h \
     csvfile.h \
-    syncfile.h
+    syncfile.h \
+    widgetchan.h \
+    channelwidget.h \
+    dialogchanconfig.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    widgetchan.ui \
+    channelwidget.ui \
+    dialogchanconfig.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd
 LIBS += -lOpengl32 \
                 -lglu32
 RESOURCES += \
-    img.qrc
+    img.qrc \
+    main.qrc
 RC_FILE=icon.rc
 DISTFILES +=
 
