@@ -194,6 +194,16 @@ int DeviceManager::DeviceCount()
     }
     return num;
 }
+
+void DeviceManager::Sync()
+{
+
+    QMapIterator<QString,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+        i.value()->Sync();
+    }
+}
 //添加设备
 //1.数据库中添加一个设备.
 bool DeviceManager::AddDevice(QString dev_id, QString dev_name)

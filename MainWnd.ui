@@ -72,7 +72,7 @@
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>力分析系统  </string>
+         <string>膨胀力分析系统  </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -717,7 +717,7 @@ margin-top:0px;
                    <property name="verticalSpacing">
                     <number>15</number>
                    </property>
-                   <item row="2" column="2">
+                   <item row="1" column="2">
                     <widget class="QSpinBox" name="sbWaveMin">
                      <property name="font">
                       <font>
@@ -729,7 +729,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
+                   <item row="2" column="1">
                     <widget class="QLabel" name="label_4">
                      <property name="font">
                       <font>
@@ -742,7 +742,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="2">
+                   <item row="2" column="2">
                     <widget class="QComboBox" name="cbxLang">
                      <property name="font">
                       <font>
@@ -757,7 +757,7 @@ margin-top:0px;
                      </item>
                     </widget>
                    </item>
-                   <item row="4" column="2">
+                   <item row="3" column="2">
                     <widget class="QLineEdit" name="edtPort">
                      <property name="font">
                       <font>
@@ -767,7 +767,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
+                   <item row="1" column="1">
                     <widget class="QLabel" name="label_3">
                      <property name="font">
                       <font>
@@ -782,7 +782,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="1">
+                   <item row="3" column="1">
                     <widget class="QLabel" name="label">
                      <property name="font">
                       <font>
@@ -802,29 +802,6 @@ margin-top:0px;
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
                       </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QSpinBox" name="sbSaveInt">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QLabel" name="label_9">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>采样间隔(秒)</string>
                      </property>
                     </widget>
                    </item>

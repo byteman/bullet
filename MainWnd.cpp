@@ -24,6 +24,10 @@ void MainWnd::AddLog(QString msg)
     ui->txtLog->append(msg);
 }
 #include "nettools.h"
+void MainWnd::outputVer()
+{
+    AddLog(QString("Ver-%1-%2").arg("1.0.1").arg(__DATE__));
+}
 void MainWnd::StartReceiver()
 {
     srv = new GPServer();
@@ -123,7 +127,7 @@ void initGoLibrary()
 }
 bool MainWnd::Init()
 {
-
+    outputVer();
     //StateManager::instance().parse("state.xlms");
     initGoLibrary();
     //首先初始化数据管理模块.
@@ -144,6 +148,7 @@ bool MainWnd::Init()
     }
     //初始化UI相关.
     this->initUI();
+
     return true;
 }
 
@@ -1068,7 +1073,7 @@ void MainWnd::loadSysConfig()
 {
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
-    ui->sbSaveInt->setValue(Config::instance().m_save_intS);
+    //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     ui->edtHost->setText(Config::instance().m_host_name);
 }
@@ -1203,6 +1208,7 @@ void MainWnd::closeEvent(QCloseEvent *event)
 {
     int result = myHelper::ShowMessageBoxQuesion(QString::fromLocal8Bit("确定离开?"));
        if (result == 1) {
+           this->dvm.Sync();
            event->accept();
        } else {
            event->ignore();

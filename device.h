@@ -54,9 +54,10 @@ public:
     void UpdateState(int chan,bool pause);
     void UpdateChanConfig(int chan, DeviceChnConfig& cfg);
     QQueue<SensorData>* GetHistoryData(int chan);
-
+    void Sync();
     bool WriteValuesBuf(MsgSensorData &msg);
 private:
+    DeviceDataList ddl;
     QMap<int,DeviceChannel> m_channels;
     qint32 m_ad;
     qint64 m_last_save_ts;

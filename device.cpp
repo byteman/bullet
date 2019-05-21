@@ -282,8 +282,14 @@ QQueue<SensorData>* Device::GetHistoryData(int chan)
 bool Device::WriteValuesBuf(MsgSensorData& msg)
 {
 
-    static DeviceDataList ddl;
+
     static QTime last;
+    static bool start = false;
+
+    if(!start){
+        last.start();
+        start = true;
+    }
 
 
     qint32 time = 0;
@@ -305,6 +311,10 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
          if(IsPaused(msg.channels[i].addr)){
              continue;
          }
+         //如果数据是传感器未接入，也不发生保存数据.
+//         if(msg.channels[i].weight == 65535){
+//             continue;
+//         }
          DeviceData dd;
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
@@ -316,7 +326,7 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
-
+    qDebug() << "elapsed" << last.elapsed();
     if(ddl.size() < cfg.m_buf_num &&  last.elapsed() < cfg.m_buf_time){
         //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
        return true;
@@ -360,6 +370,9 @@ bool Device::WriteValues(MsgSensorData& msg)
          if(IsPaused(msg.channels[i].addr)){
              continue;
          }
+//         if(msg.channels[i].weight == 65535){
+//             continue;
+//         }
          DeviceData dd;
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
@@ -390,6 +403,7 @@ bool Device::ProcessWave(int index,QByteArray &data)
     while(data.size() >= sizeof(SensorData)){
         SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
         data.remove(0,sizeof(SensorData));
+
         WriteValues(value);
         msd.channels.push_back(value);
     }
@@ -424,6 +438,16 @@ bool Device::SaveWave(ProtoMessage &msg)
 
     return ProcessWave(sample_start, wvData);
 
+
+}
+
+void Device::Sync()
+{
+    if(ddl.size() == 0 ) return;
+    QSqlError err=DAO::instance().DeviceDataAdd(m_dev_id,ddl);
+    qDebug() <<m_dev_id << " sync count=" << ddl.size();
+    //写入后需要清空数据
+    ddl.clear();
 
 }
 

@@ -90,6 +90,7 @@ private:
      QString buildReportInput(QString order);
      void updateOrderState();
      bool CheckPassWord();
+     void outputVer();
 private slots:
     void chan_click(int chan);
     void buttonClick();

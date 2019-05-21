@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
         return a.exec();
     }else{
-        QMessageBox::critical(NULL,"error","Can not run on this machine!");
+        QMessageBox::critical(NULL,QStringLiteral("错误"),QStringLiteral("此电脑未授权，软件无法启动"));
     }
 
 
