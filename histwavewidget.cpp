@@ -79,7 +79,8 @@ HistWaveWidget::HistWaveWidget(QWidget *parent):
     m_plot->xAxis->setTicker(timeTicker);
     m_plot->yAxis->setRange(-2000, 2000);
 
-    m_plot->yAxis->setScaleRatio(m_plot->yAxis,1.3);
+
+    m_plot->yAxis->scaleRange(1.3);
 
     Init();
     m_plot->clearGraphs();
@@ -149,7 +150,11 @@ void HistWaveWidget::DisplayData(MultiDeviceDataMap &ddl)
         DisplayData(i.key(), ddl[chan]);
     }
     m_plot->rescaleAxes();
+    //在 rescaleAxes后，需要手工来设置scaleRange
+    m_plot->yAxis->scaleRange(1.2);
     m_plot->replot();
+
+
 }
 void HistWaveWidget::DisplayData(int chan,DeviceDataList &ddl)
 {

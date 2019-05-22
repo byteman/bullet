@@ -404,6 +404,14 @@ bool Device::ProcessWave(int index,QByteArray &data)
         SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
         data.remove(0,sizeof(SensorData));
 
+#ifdef CRC_SUPPORT
+        quint16 crc = CRC16BigEndian((quint8*)&value,sizeof(SensorData)-2);
+
+        if(crc != value.crc){
+            qDebug("CRC ERROR %04x != %04x",crc,value.crc);
+            continue;
+        }
+#endif
         WriteValues(value);
         msd.channels.push_back(value);
     }

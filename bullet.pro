@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     asyncexporttask.cpp \
     dialogclearup.cpp \
     nettools.cpp \
-    myping.cpp
+    myping.cpp \
+    crc16.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \

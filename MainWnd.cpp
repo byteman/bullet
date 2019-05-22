@@ -917,6 +917,7 @@ void MainWnd::initDeviceChannels()
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
     devices->SetDeviceNum(1,8);
+    devices->SetUnit("kg");
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
     connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
     connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));

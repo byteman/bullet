@@ -207,11 +207,18 @@ struct ProtoHeader{
     quint32 sesson_id; //会话编号
     quint8  cmd_id; //命令编号
 };
+#include <QDebug>
+#include "crc16.h"
+//#define CRC_SUPPORT 1
 struct SensorData{
     quint8 addr;
     quint8 valid;
     qint32 weight;
     qint32 time;
+#ifdef CRC_SUPPORT
+    quint16 crc;
+#endif
+
 };
 #pragma pack(pop)
 

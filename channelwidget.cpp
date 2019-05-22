@@ -10,6 +10,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     m_addr(addr),
     m_timeout(MAX_TIMEOUT),
     m_zoom(false),
+    m_paused(false),
     m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
@@ -102,7 +103,7 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
 {
     m_min_value = cfg.minValue;
     m_max_value = cfg.maxValue;
-    m_paused    = cfg.paused;
+    m_paused    = cfg.paused?true:false;
     disable(m_paused);
     QString maxStr = QString(QStringLiteral("上超限:%1")).arg(m_max_value);
     QString minStr = QString(QStringLiteral("下超限:%1")).arg(m_min_value);
@@ -196,8 +197,13 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
         double wf = (double)weight;
 
         QString ws = utils::float2string(wf, dot);
-        QString wt = ws;
-        ui->lbl_weight->setText(ws);
+        if(ws.length() >= 6){
+            //qDebug() << "----------0";
+            ui->lbl_weight->setText(QStringLiteral("数据异常"));
+        }else{
+           ui->lbl_weight->setText(ws+m_unit);
+        }
+
         if(m_zoom){
             m_waveWdg->AppendTimeData(m_addr-1,utils::int2float(wf,dot));
             m_waveWdg->DisplayAllChannel(true);
