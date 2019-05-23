@@ -3,7 +3,8 @@
 #include "singletonholder.h"
 #include <QDir>
 #include <QSettings>
-Config::Config()
+Config::Config():
+    m_recv_sensor_off(true)
 {
 
 }
@@ -21,7 +22,7 @@ bool Config::Init()
     m_enable_buffer= config.value("/config/db_buf_en",false).toBool();
     m_buf_num= config.value("/config/db_buf_len",80).toInt();
     m_buf_time= config.value("/config/db_buf_time",3000).toInt();
-
+    m_recv_sensor_off= DAO::instance().ReadBoolParam("recv_sensor_off",true);
     m_use_sys_time = false;//DAO::instance().ReadBoolParam("use_sys_time",false);
     m_rt_wave_min  = DAO::instance().ReadIntParam("rt_wave_min",20);
     m_lang = (Lang)DAO::instance().ReadIntParam("lang",(int)LANG_ZH);
@@ -66,7 +67,12 @@ bool Config::SetDataDir(QString path)
     m_data_dir = path;
     return true;
 }
-
+bool Config::EnableRecvSensorOff(bool en)
+{
+    DAO::instance().WriteBoolParam("recv_sensor_off",en);
+    m_recv_sensor_off = en;
+    return true;
+}
 bool Config::SetHostName(QString host)
 {
     DAO::instance().WriteStringParam("host_name",host);

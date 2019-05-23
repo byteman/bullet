@@ -4,13 +4,15 @@
 #include "appinit.h"
 #include <QTextCodec>
 #include <QFile>
-//#include <QBreakpadHandler.h>
+#include <QBreakpadHandler.h>
 #include <QDebug>
 #include "channelwidget.h"
 #include <machinechecker.h>
 #include "cmddebug.h"
 int main(int argc, char *argv[])
 {
+
+    QBreakpadInstance.setDumpPath(QLatin1String("crashes"));
     QApplication a(argc, argv);
 
     //InitConsoleWindow();

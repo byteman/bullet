@@ -717,84 +717,6 @@ margin-top:0px;
                    <property name="verticalSpacing">
                     <number>15</number>
                    </property>
-                   <item row="1" column="2">
-                    <widget class="QSpinBox" name="sbWaveMin">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QLabel" name="label_4">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>系统语言</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QComboBox" name="cbxLang">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>中文</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                   <item row="3" column="2">
-                    <widget class="QLineEdit" name="edtPort">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QLabel" name="label_3">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>实时波形缓存时间（分钟)</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="1">
-                    <widget class="QLabel" name="label">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>监听端口</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="0" column="2">
                     <widget class="QLineEdit" name="edtHost">
                      <property name="font">
@@ -815,6 +737,110 @@ margin-top:0px;
                      </property>
                      <property name="text">
                       <string>主机名称</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="2">
+                    <widget class="QSpinBox" name="sbWaveMin">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                       <weight>50</weight>
+                       <bold>false</bold>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QLabel" name="label_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>系统语言</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
+                    <widget class="QLabel" name="label_3">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                       <weight>50</weight>
+                       <bold>false</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>实时波形缓存时间（分钟)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="1">
+                    <widget class="QLabel" name="label">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>监听端口</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="2">
+                    <widget class="QComboBox" name="cbxLang">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <item>
+                      <property name="text">
+                       <string>中文</string>
+                      </property>
+                     </item>
+                    </widget>
+                   </item>
+                   <item row="4" column="2">
+                    <widget class="QLineEdit" name="edtPort">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QCheckBox" name="chkSensorOff">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLabel" name="label_2">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>接收传感器空载压力值</string>
                      </property>
                     </widget>
                    </item>

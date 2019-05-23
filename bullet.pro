@@ -180,7 +180,7 @@ INCLUDEPATH += ext/qBreakpad/handler
 LIBS += -Lext/qBreakpad/handler
 
 CONFIG(release, debug|release) {
-        #LIBS+=-lqBreakpad
+        LIBS+=-lqBreakpad
 #支持在release模式下还能够调试
         QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
         QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO

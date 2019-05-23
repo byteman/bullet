@@ -312,9 +312,9 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
              continue;
          }
          //如果数据是传感器未接入，也不发生保存数据.
-//         if(msg.channels[i].weight == 65535){
-//             continue;
-//         }
+         if(msg.channels[i].weight == 65535 && !cfg.m_recv_sensor_off){
+             continue;
+         }
          DeviceData dd;
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
@@ -326,7 +326,7 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
-    qDebug() << "elapsed" << last.elapsed();
+    //qDebug() << "elapsed" << last.elapsed();
     if(ddl.size() < cfg.m_buf_num &&  last.elapsed() < cfg.m_buf_time){
         //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
        return true;
@@ -353,9 +353,9 @@ bool Device::WriteValues(MsgSensorData& msg)
 
     qint32 time = 0;
 
-
+     Config& cfg = Config::instance();
     //qDebug() << "id=" << QThread::currentThreadId();
-    if(Config::instance().m_use_sys_time){
+    if(cfg.m_use_sys_time){
         time = qint32(QDateTime::currentMSecsSinceEpoch() / 1000);
         if(!checkCanSave(time,Config::instance().m_save_intS)){
             //系统时钟模式还没有达到保存时间，就返回.
@@ -370,14 +370,14 @@ bool Device::WriteValues(MsgSensorData& msg)
          if(IsPaused(msg.channels[i].addr)){
              continue;
          }
-//         if(msg.channels[i].weight == 65535){
-//             continue;
-//         }
+         if(msg.channels[i].weight == 65535 && !cfg.m_recv_sensor_off){
+             continue;
+         }
          DeviceData dd;
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
          dd.timestamp = msg.channels[i].time;
-         if(Config::instance().m_use_sys_time){
+         if(cfg.m_use_sys_time){
              dd.timestamp = time;
              //判断是否可以存储了
 

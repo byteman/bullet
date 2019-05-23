@@ -1076,6 +1076,8 @@ void MainWnd::loadSysConfig()
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
     //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
+    ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
+
     ui->edtHost->setText(Config::instance().m_host_name);
 }
 static bool loading = false;
@@ -1711,5 +1713,12 @@ void MainWnd::on_btnPing_clicked()
 
 void MainWnd::on_btnClear_clicked()
 {
+    char* p = NULL;
+    *p = 2;
     ui->txtLog->clear();
+}
+
+void MainWnd::on_chkSensorOff_clicked(bool checked)
+{
+    Config::instance().EnableRecvSensorOff(checked);
 }

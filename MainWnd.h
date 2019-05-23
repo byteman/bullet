@@ -184,6 +184,8 @@ private slots:
 
     void on_btnClear_clicked();
 
+    void on_chkSensorOff_clicked(bool checked);
+
 protected:
     void timerEvent(QTimerEvent *);
 
