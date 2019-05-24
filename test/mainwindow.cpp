@@ -170,7 +170,7 @@ void MainWindow::sendOnePacket(quint16 ss,int index,qint16 value)
 
 
     }
-    sendPacket(MSG_WAVE_DATA,ss,data);
+    sendPacket(MSG_START_REC_WAVE,ss,data);
 
 
 

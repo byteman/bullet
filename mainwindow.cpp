@@ -6,10 +6,23 @@
 #include "ui_mainwindow.h"
 #include "dialogchanconfig.h"
 #include <QThread>
-
+#include "dao.h"
 #define PAGE_SIZE 40
 
+QString MainWindow::GetDevice(int ch)
+{
+    QMapIterator<int, int> i(m_chans);
+    while (i.hasNext()) {
+        i.next();
+        int chan = i.value();
+        qDebug() << "chan=" << chan << "ch=" <<ch;
+        if(ch <= chan){
 
+            return dvm.GetDevice(i.key())->name();
+        }
+    }
+    return "device";
+}
 /**
  * @brief 点击了通道配置按钮
  * @param addr
@@ -24,29 +37,18 @@ void MainWindow::onChannelClick(int addr)
     DialogChanConfig dlg;
     DeviceChnConfig cfg;
 
+    QString name = GetDevice(addr);
+    int chan = addr % 8;
+    DAO::instance().DeviceChannalGet(name,chan,cfg);
 
-
-    dlg.SetChanConfig("m_cur_dev_id",addr,cfg);
+    dlg.SetChanConfig(name,chan,cfg);
     int result = dlg.exec();
     if(result == QDialog::Accepted){
         dlg.GetChanConfig(cfg);
 
+        DAO::instance().DeviceChannalUpdate(name,chan,cfg);
         devices->SetChanSetting(addr,cfg);
-        Device* dev = dvm.GetDevice(m_cur_dev_id);
-        if(cfg.chanName.length() > 0){
-            //已经配置了名字，用新的名字
-            if(dev!=NULL){
-                devices->SetTitle(addr,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
-            }else{
-                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
-            }
-        }else{
-            if(dev!=NULL){
-                devices->SetTitle(addr,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(addr));
-            }else{
-                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(addr));
-            }
-        }
+
     }
 }
 
@@ -77,9 +79,11 @@ void MainWindow::InitDevice(QList<Device*> &devs)
             int ch = j+1;
             QString title = QString("%1:%2").arg(devs[i]->name()).arg(ch);
             devices->SetTitle(addr, title);
-
+            DeviceChnConfig cfg;
+            DAO::instance().DeviceChannalGet(devs[i]->name(),j+1,cfg);
+            devices->SetChanSetting(i*8+j+1,cfg);
         }
-        m_chans[devs[i]->id()] = i*8;
+        m_chans[devs[i]->id()] = (i+1)*8;
     }
     ui->gbDevices->installEventFilter(this);
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
@@ -127,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cur_page = 0;
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
-
+    DAO::instance().Init("bullet.db");
     QSettings config("bullet.ini", QSettings::IniFormat);
     config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
 
@@ -140,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_full =  config.value("/device/full",10000).toInt();
     ui->edtFull->setText(QString("%1").arg(m_full));
     ui->cbxDot->setCurrentIndex(dot);
-     m_dot  =  ui->cbxDot->currentText().toInt();
+    m_dot  =  ui->cbxDot->currentText().toInt();
     stationActions[1] = ui->actionStation1;
     stationActions[2] = ui->actionStation2;
     stationActions[3] = ui->action3;
@@ -572,38 +576,36 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
-   if(data.m_first)
-   {
-       //m_waveWdg->Clear();
-   }
+
    if(m_chans.contains(dev->id())){
        for(int i = 0; i < 8; i++){
-            int start = m_chans[dev->id()];
-            for(int j=0; j<data.channels[i].size(); j++){
-                devices->DisplayWeight(start+i+1, data.channels[i][j],0,0);
-            }
-
+            int start = m_chans[dev->id()]-8;
+            if(data.channels[i].size() == 0) continue;
+            devices->DisplayWeight(start+i+1, data.channels[i][0],0,m_dot);
+//            for(int j=0; j<data.channels[i].size(); j++){
+//                devices->DisplayWeight(start+i+1, data.channels[i][j],0,0);
+//            }
        }
 
    }
-   if(dev->id() != m_cur_dev_id)
-   {
-       return;
-   }
-   m_waveWdg->AppendData(data);
-   static int count = 0;
-   if( (count++ % m_refresh_count) == 0)
-   {
+//   if(dev->id() != m_cur_dev_id)
+//   {
+//       return;
+//   }
+//   m_waveWdg->AppendData(data);
+//   static int count = 0;
+//   if( (count++ % m_refresh_count) == 0)
+//   {
 
-       m_waveWdg->Display();
+//       m_waveWdg->Display();
 
-   }
-   for(int i = 0; i < 8; i++){
-       double min,max;
-       m_waveWdg->GetValueRange(i,min,max);
-       chanels[i]->setText(QString("%1").arg(max));
+//   }
+//   for(int i = 0; i < 8; i++){
+//       double min,max;
+//       m_waveWdg->GetValueRange(i,min,max);
+//       chanels[i]->setText(QString("%1").arg(max));
 
-   }
+//   }
 
 }
 

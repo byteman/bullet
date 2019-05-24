@@ -31,7 +31,7 @@ qint64 GpsSession::send(QByteArray &data)
 qint64 GpsSession::send(QHostAddress host, quint16 port, QByteArray &data)
 {
     QString hoststr = host.toString();
-    std::string hh = "192.168.1.1";//hoststr.toStdString();
+    std::string hh = hoststr.toStdString();
     Poco::Net::IPAddress ipaddr(hh);
     m_host = Poco::Net::SocketAddress(ipaddr,port);
     return m_socket->sendTo( data.data(),data.size(),m_host);

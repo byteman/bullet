@@ -30,7 +30,7 @@ void ChannelWidget::Show()
     if(m_zoom){
        ui->lbl_weight->hide();
     }else{
-       ui->lbl_weight->setStyleSheet("font-size : 40pt");
+       ui->lbl_weight->setStyleSheet("font-size : 12pt");
        ui->lbl_weight->show();
     }
     this->show();
@@ -75,8 +75,8 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
     m_max_value = cfg.maxValue;
     m_paused    = cfg.paused;
     disable(m_paused);
-    QString maxStr = QString(QStringLiteral("上超限:%1")).arg(m_max_value);
-    QString minStr = QString(QStringLiteral("下超限:%1")).arg(m_min_value);
+//    QString maxStr = QString(QStringLiteral("上超限:%1")).arg(m_max_value);
+//    QString minStr = QString(QStringLiteral("下超限:%1")).arg(m_min_value);
 //    ui->lbl_w_max->setText(maxStr);
 //    ui->lbl_w_min->setText(minStr);
 //    ui->tbtPlay->setChecked(m_paused);
@@ -101,18 +101,20 @@ void ChannelWidget::resetTimeout()
 {
     m_timeout = MAX_TIMEOUT;
 }
-void ChannelWidget::AlarmCheck(int weight)
+void ChannelWidget::AlarmCheck(double weight)
 {
-    MinAlarm(weight<m_min_value);
-    MaxAlarm(weight>m_max_value);
+   if((weight >= m_max_value) || (weight <= m_min_value))
+   {
+        //报警
+       ui->lbl_weight->setStyleSheet("background-color: rgb(255, 0, 0); ");
+   }else{
+       ui->lbl_weight->setStyleSheet("background-color: rgb(12, 235, 12); ");
+   }
 }
 
 void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
 {
-    if(m_paused)
-    {
-        return;
-    }
+
     double wf = (double)weight;
 
     QString ws = utils::float2string(wf, dot);
@@ -121,9 +123,9 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
 
     ui->lbl_weight->setText(ws);
 
-    if(!m_paused){
-      AlarmCheck(weight);
-    }
+
+    AlarmCheck(utils::int2float(weight,dot));
+
 
 
 
@@ -163,14 +165,14 @@ void ChannelWidget::MinAlarm(bool alarm)
 void ChannelWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
     //qDebug() <<m_addr <<" double click";
-    m_zoom=!m_zoom;
-    if(m_zoom){
-       ui->lbl_weight->setStyleSheet("font-size : 128px");
-    }else{
-       ui->lbl_weight->setStyleSheet("font-size : 16pt");
+//    m_zoom=!m_zoom;
+//    if(m_zoom){
+//       ui->lbl_weight->setStyleSheet("font-size : 128px");
+//    }else{
+//       ui->lbl_weight->setStyleSheet("font-size : 16pt");
 
-    }
-    emit onDoubleClick(m_addr,m_zoom);
+//    }
+//    emit onDoubleClick(m_addr,m_zoom);
 }
 
 

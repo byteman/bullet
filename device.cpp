@@ -413,7 +413,7 @@ void Device::ProcessWave(int index,QByteArray &data)
 //           quint8 v2 = data[i*8+j*2+0];
 //           qint16 value =  (v1<<8) + v2;
 
-           quint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
+           qint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
            memcpy(&value, data.data() + i*16 + j*2,2);
 
 

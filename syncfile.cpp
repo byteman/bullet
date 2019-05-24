@@ -48,7 +48,7 @@ bool SyncFile::StartSync(Device *dev, QString file,int total)
 void SyncFile::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
-
+    if(m_device==NULL)return;
     WaveDataHead wvh;
     memcpy(&wvh,data.data(),sizeof(WaveDataHead));
 

@@ -14,8 +14,8 @@ debug{
     message("debug");
     OBJECTS_DIR=debug
 }
-INCLUDEPATH+=./ext/
-LIBS+=-L./ext/lib -lPocoNetd -lPocoFoundationd
+INCLUDEPATH+=./ext/ ./ext/
+LIBS+=-L./ext/lib -lPocoNet -lPocoFoundation
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     widgetchan.cpp \
     channelwidget.cpp \
     dialogchanconfig.cpp \
-    mydevices.cpp
+    mydevices.cpp \
+    dao.cpp
 
 HEADERS  += mainwindow.h \
     tcpserver.h \

@@ -72,6 +72,8 @@ private:
     void isAllCheck();
     void setCurrentStation(int index);
     void InitDevice(QList<Device*> &devices);
+
+    QString GetDevice(int ch);
 private slots:
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);

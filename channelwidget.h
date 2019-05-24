@@ -44,7 +44,7 @@ private:
     void resetTimeout();
     void MaxAlarm(bool alarm);
     void MinAlarm(bool alarm);
-    void AlarmCheck(int weight);
+    void AlarmCheck(double weight);
     QString m_name;
     int m_addr; //设备的通道地址.
     int m_timeout;

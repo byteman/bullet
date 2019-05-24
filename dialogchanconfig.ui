@@ -53,8 +53,14 @@
         <string>设备信息</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_3">
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="edtMaxValue">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
           <property name="font">
            <font>
             <family>微软雅黑</family>
@@ -62,7 +68,7 @@
            </font>
           </property>
           <property name="text">
-           <string>最大阀值</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -85,26 +91,7 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QLineEdit" name="edtMaxValue">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>微软雅黑</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
+        <item row="3" column="1">
          <widget class="QLineEdit" name="edtMinValue">
           <property name="minimumSize">
            <size>
@@ -123,8 +110,8 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_3">
           <property name="font">
            <font>
             <family>微软雅黑</family>
@@ -132,20 +119,7 @@
            </font>
           </property>
           <property name="text">
-           <string>设备名称</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="font">
-           <font>
-            <family>微软雅黑</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>最小阀值</string>
+           <string>最大阀值</string>
           </property>
          </widget>
         </item>
@@ -168,6 +142,19 @@
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>最小阀值</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label">
           <property name="font">
@@ -181,25 +168,16 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_5">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
           <property name="font">
            <font>
+            <family>微软雅黑</family>
             <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
-           <string>通道名称</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="edtChanName">
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
+           <string>设备名称</string>
           </property>
          </widget>
         </item>
