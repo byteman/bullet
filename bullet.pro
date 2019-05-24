@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     syncfile.cpp \
     widgetchan.cpp \
     channelwidget.cpp \
-    dialogchanconfig.cpp
+    dialogchanconfig.cpp \
+    mydevices.cpp
 
 HEADERS  += mainwindow.h \
     tcpserver.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     syncfile.h \
     widgetchan.h \
     channelwidget.h \
-    dialogchanconfig.h
+    dialogchanconfig.h \
+    mydevices.h
 
 FORMS    += mainwindow.ui \
     widgetchan.ui \
@@ -88,9 +90,12 @@ FORMS    += mainwindow.ui \
 #LIBS += -L$$BASEDIR\lib -lqwtd
 LIBS += -lOpengl32 \
                 -lglu32
+
+#支持在release模式下还能够调试
+QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
 RESOURCES += \
-    img.qrc \
-    main.qrc
+    img.qrc
 RC_FILE=icon.rc
 DISTFILES +=
 

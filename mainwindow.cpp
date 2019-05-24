@@ -4,31 +4,109 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dialogchanconfig.h"
 #include <QThread>
 
 #define PAGE_SIZE 40
+
+
+/**
+ * @brief 点击了通道配置按钮
+ * @param addr
+ * 1.直接读数据库中通道的参数
+ * 2.显示出来供用户修改
+ * 3.将修改后的参数写入到数据库
+ * 4.更新设备对象中通道的相关参数.
+ */
+void MainWindow::onChannelClick(int addr)
+{
+    qDebug() << m_cur_dev_id << " chan=" << addr;
+    DialogChanConfig dlg;
+    DeviceChnConfig cfg;
+
+
+
+    dlg.SetChanConfig("m_cur_dev_id",addr,cfg);
+    int result = dlg.exec();
+    if(result == QDialog::Accepted){
+        dlg.GetChanConfig(cfg);
+
+        devices->SetChanSetting(addr,cfg);
+        Device* dev = dvm.GetDevice(m_cur_dev_id);
+        if(cfg.chanName.length() > 0){
+            //已经配置了名字，用新的名字
+            if(dev!=NULL){
+                devices->SetTitle(addr,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
+            }else{
+                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
+            }
+        }else{
+            if(dev!=NULL){
+                devices->SetTitle(addr,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(addr));
+            }else{
+                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(addr));
+            }
+        }
+    }
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonDblClick) {
+
+    }else if (event->type() == QEvent::Resize) {
+        if(devices!=NULL)
+            devices->Resize();
+        return true;
+    }
+
+    return QWidget::eventFilter(watched, event);
+}
+void MainWindow::InitDevice(QList<Device*> &devs)
+{
+    devices = new MyDevices(42,ui->gbDevices);
+
+    devices->SetDeviceNum(1,40);
+    devices->SetUnit("kg");
+    m_chans.clear();
+    for(int i = 0; i < devs.size(); i++)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            int addr = i*8+j+1;
+            int ch = j+1;
+            QString title = QString("%1:%2").arg(devs[i]->name()).arg(ch);
+            devices->SetTitle(addr, title);
+
+        }
+        m_chans[devs[i]->id()] = i*8;
+    }
+    ui->gbDevices->installEventFilter(this);
+    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
+
+}
 void MainWindow::loadDeviceUI()
 {
 
     pause = false;
-    QList<Device*> devices;
+    QList<Device*> devs;
     ui->treeWidget->clear();
     ui->treeWidget->setIconSize(QSize(48,48));
-    dvm.ListDevice(devices);
-    for(int i = 0; i < devices.size();i++)
+    dvm.ListDevice(devs);
+    for(int i = 0; i < devs.size();i++)
     {
         QTreeWidgetItem* item = NULL;
-        item = new QTreeWidgetItem(QStringList(devices[i]->name()));
+        item = new QTreeWidgetItem(QStringList(devs[i]->name()));
 
         item->setText(1,"100%");
         ui->treeWidget->addTopLevelItem(item);
 
         item->setIcon(0,icon_device[1]);
 
-        item->setData(0,Qt::UserRole,devices[i]->id());
+        item->setData(0,Qt::UserRole,devs[i]->id());
         if(i == 0){
             ui->treeWidget->setCurrentItem(item);
-            m_cur_dev_id = devices[i]->id();
+            m_cur_dev_id = devs[i]->id();
         }
     }
     chanels[0] = ui->label_12;
@@ -39,7 +117,7 @@ void MainWindow::loadDeviceUI()
     chanels[5] = ui->label_23;
     chanels[6] = ui->label_22;
     chanels[7] = ui->label_21;
-
+    InitDevice(devs);
 }
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -497,6 +575,16 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
    if(data.m_first)
    {
        //m_waveWdg->Clear();
+   }
+   if(m_chans.contains(dev->id())){
+       for(int i = 0; i < 8; i++){
+            int start = m_chans[dev->id()];
+            for(int j=0; j<data.channels[i].size(); j++){
+                devices->DisplayWeight(start+i+1, data.channels[i][j],0,0);
+            }
+
+       }
+
    }
    if(dev->id() != m_cur_dev_id)
    {

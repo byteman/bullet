@@ -1156,18 +1156,9 @@ border-bottom:2px;</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <widget class="QListWidget" name="listWidget_2">
-          <property name="dragEnabled">
-           <bool>false</bool>
-          </property>
-          <property name="movement">
-           <enum>QListView::Static</enum>
-          </property>
-          <property name="viewMode">
-           <enum>QListView::IconMode</enum>
-          </property>
-          <property name="selectionRectVisible">
-           <bool>true</bool>
+         <widget class="QGroupBox" name="gbDevices">
+          <property name="title">
+           <string/>
           </property>
          </widget>
         </item>

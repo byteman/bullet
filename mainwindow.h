@@ -15,7 +15,7 @@
 #include "wavewidget.h"
 #include "protomessage.h"
 #include <QLabel>
-
+#include "mydevices.h"
 namespace Ui {
 class MainWindow;
 }
@@ -36,6 +36,7 @@ public:
     void MyListFiles(int id, int page);
 private:
     Ui::MainWindow *ui;
+    MyDevices *devices;
     QVector<double> xdata;
     QVector<double> ydata;
     QTimer updateTimer;
@@ -70,6 +71,7 @@ private:
     void checkAll(bool checked);
     void isAllCheck();
     void setCurrentStation(int index);
+    void InitDevice(QList<Device*> &devices);
 private slots:
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);
@@ -191,6 +193,7 @@ protected:
     int m_dot;
     int m_full;
     QTimer m_timer;
+    QMap<int,int> m_chans;
     QMap<int,QLabel*>  chanels;
     QMap<int,QAction*> stationActions;
     // QWidget interface
@@ -206,6 +209,11 @@ protected slots:
     void on_btnNext_clicked();
     void on_btnPrev_clicked();
     void on_remove_menu_click(bool);
+
+    // QObject interface
+    void onChannelClick(int addr);
+public:
+    virtual bool eventFilter(QObject *, QEvent *);
 };
 
 #endif // MAINWINDOW_H
