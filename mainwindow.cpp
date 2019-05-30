@@ -80,7 +80,9 @@ void MainWindow::InitDevice(QList<Device*> &devs)
             QString title = QString("%1:%2").arg(devs[i]->name()).arg(ch);
             devices->SetTitle(addr, title);
             DeviceChnConfig cfg;
-            DAO::instance().DeviceChannalGet(devs[i]->name(),j+1,cfg);
+            cfg.maxValue = m_max;
+            cfg.minValue = m_min;
+            //DAO::instance().DeviceChannalGet(devs[i]->name(),j+1,cfg);
             devices->SetChanSetting(i*8+j+1,cfg);
         }
         m_chans[devs[i]->id()] = (i+1)*8;
@@ -140,6 +142,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_cur_station = config.value("/device/station",1).toInt();
     int dot= 3 - config.value("/device/dot",3).toInt();
     if(dot < 0 || dot > 3) dot = 0;
+
+    m_max = config.value("/device/max",10000).toDouble();
+    m_min = config.value("/device/min",-10000).toDouble();
 
     m_full =  config.value("/device/full",10000).toInt();
     ui->edtFull->setText(QString("%1").arg(m_full));
@@ -489,6 +494,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 void MainWindow::setCurrentStation(int index)
 {
     QSettings config("bullet.ini", QSettings::IniFormat);
+    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
+
     config.setValue("/device/station",index);
     dvm.SetStation(QString("工位%1").arg(index));
     QMapIterator<int, QAction*> i(stationActions);

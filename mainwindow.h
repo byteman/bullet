@@ -37,6 +37,7 @@ public:
 private:
     Ui::MainWindow *ui;
     MyDevices *devices;
+    double m_max,m_min;
     QVector<double> xdata;
     QVector<double> ydata;
     QTimer updateTimer;

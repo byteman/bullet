@@ -12,6 +12,7 @@ bool DeviceManager::start()
 
     QSettings config("bullet.ini", QSettings::IniFormat);
 
+    config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
 
     m_dev_num = config.value("/device/num",1).toInt();
     QString str_id= config.value("/device/serial","1").toString();
