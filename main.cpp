@@ -12,9 +12,9 @@
 int main(int argc, char *argv[])
 {
 
-    QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
-    QApplication a(argc, argv);
 
+    QApplication a(argc, argv);
+    QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
     //InitConsoleWindow();
     MachineChecker checker;
     if(checker.CheckMac("08:57:00:F6:08:DC") ||
