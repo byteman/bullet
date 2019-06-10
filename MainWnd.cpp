@@ -45,7 +45,7 @@ void MainWnd::StartReceiver()
     connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
-    connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
+    //connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
 
 
 }
@@ -132,7 +132,7 @@ bool MainWnd::Init()
     initGoLibrary();
     //首先初始化数据管理模块.
 
-    QSqlError err =  DAO::instance().Init(QCoreApplication::applicationDirPath()+"/measure.db");
+    QSqlError err =  DAO::instance().Init(utils::GetWorkDir()+"/measure.db");
     if(err.isValid()){
         //初始化失败
         AddLog(err.text());
@@ -568,7 +568,11 @@ void MainWnd::changeDevice(QString dev_id)
     if(devices==NULL){
         return;
     }
-    devices->ClearDisplay();
+    if(!bFirst)
+        devices->ClearDisplay();
+    else{
+        bFirst = false;
+    }
     for(int i = 1; i <= MAX_CHAN_NR; i++)
     {
         DeviceChnConfig cfg;
@@ -649,6 +653,7 @@ MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MainWnd),
     m_cur_dev_id(""),
+    bFirst(true),
     bQueryOrderState(false),
     watcher(NULL)
 {
@@ -1604,7 +1609,7 @@ QString MainWnd::buildReportInput(QString order)
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
                 .arg(order).arg(order).arg(temp);
-        root["db"] = QCoreApplication::applicationDirPath()+"/measure.db";
+        root["db"] = utils::GetWorkDir()+"/measure.db";
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
@@ -1704,11 +1709,11 @@ void MainWnd::on_btnLocalIP_clicked()
 
 void MainWnd::on_btnPing_clicked()
 {
-    QString target = ui->edtPingIp->text();
-    if(target.length() < 7){
-        return;
-    }
-    ping.ping(target,4);
+//    QString target = ui->edtPingIp->text();
+//    if(target.length() < 7){
+//        return;
+//    }
+//    ping.ping(target,4);
 }
 
 void MainWnd::on_btnClear_clicked()

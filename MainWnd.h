@@ -1,6 +1,6 @@
 ﻿#ifndef MAIN_WND_H
 #define MAIN_WND_H
-#include "myping.h"
+//#include "myping.h"
 #include <QDialog>
 #include "mydevices.h"
 #include <QMainWindow>
@@ -45,8 +45,9 @@ private:
         Ui::MainWnd *ui;
      MyDevices* devices;
     bool bQueryOrderState;
+    bool bFirst;
      MyPlotTrace *m_tracer;
-    MyPing ping;
+    //MyPing ping;
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
      QString m_cur_dev_id;

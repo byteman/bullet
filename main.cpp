@@ -12,7 +12,7 @@
 int main(int argc, char *argv[])
 {
 
-    QBreakpadInstance.setDumpPath(QLatin1String("crashes"));
+    QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
     QApplication a(argc, argv);
 
     //InitConsoleWindow();

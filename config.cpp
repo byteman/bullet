@@ -3,6 +3,7 @@
 #include "singletonholder.h"
 #include <QDir>
 #include <QSettings>
+#include "utils.h"
 Config::Config():
     m_recv_sensor_off(true)
 {
@@ -29,14 +30,12 @@ bool Config::Init()
     m_local_port = DAO::instance().ReadIntParam("port",8881);
     m_save_intS= DAO::instance().ReadIntParam("saveInt",3);
     m_host_name= DAO::instance().ReadStringParam("host_name","24#2");
-    m_data_dir= DAO::instance().ReadStringParam("data_dir",QCoreApplication::applicationDirPath());
+    m_data_dir= DAO::instance().ReadStringParam("data_dir",utils::GetWorkDir());
     return true;
 }
 
 bool Config::SetUseSysTime(bool use)
 {
-//    DAO::instance().WriteIntParam("use_sys_time",use);
-//    m_use_sys_time = use;
     return true;
 }
 

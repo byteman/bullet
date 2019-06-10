@@ -21,6 +21,7 @@ DAO& DAO::instance()
 }
 QSqlError DAO::Init(QString DataBase)
 {
+    qDebug() << "open database " << DataBase;
     QSqlError err = ConnectDB("host",8888,"UserName","PassWord",DataBase);
     if(err.isValid()) return err;
 
