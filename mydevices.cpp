@@ -213,7 +213,8 @@ void MyDevices::ClearDisplay()
 {
     for(int i = 0; i < widgets.size();i++)
     {
-        widgets[i]->ClearDisplay();
+        if(widgets[i]!=NULL)
+            widgets[i]->ClearDisplay();
     }
 }
 void MyDevices::GetNum(int &start, int &num)

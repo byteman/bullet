@@ -11,6 +11,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     m_timeout(MAX_TIMEOUT),
     m_zoom(false),
     m_paused(false),
+    m_waveWdg(NULL),
     m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
@@ -56,7 +57,8 @@ bool ChannelWidget::IsZoom()
 void ChannelWidget::ClearDisplay()
 {
     ui->lbl_weight->setText("");
-    m_waveWdg->Clear();
+    if(m_waveWdg!=NULL)
+        m_waveWdg->Clear();
     MinAlarm(false);
     MaxAlarm(false);
 }

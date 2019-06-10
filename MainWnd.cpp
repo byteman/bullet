@@ -30,22 +30,18 @@ void MainWnd::outputVer()
 }
 void MainWnd::StartReceiver()
 {
-    srv = new GPServer();
+    srv = new UdpServer();
 
     if(!srv->start(Config::instance().m_local_port)){
         AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
     }
-//    QStringList ip = NetTools::get_local_ip();
-//    for(int i = 0; i< ip.size();i++)
-//    {
-//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
-//    }
+
     connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
-    connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
+    //connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
 
 
 }
@@ -128,11 +124,11 @@ void initGoLibrary()
 bool MainWnd::Init()
 {
     outputVer();
-    //StateManager::instance().parse("state.xlms");
+
     initGoLibrary();
     //首先初始化数据管理模块.
 
-    QSqlError err =  DAO::instance().Init(QCoreApplication::applicationDirPath()+"/measure.db");
+    QSqlError err =  DAO::instance().Init(utils::GetWorkDir()+"/measure.db");
     if(err.isValid()){
         //初始化失败
         AddLog(err.text());
@@ -568,7 +564,11 @@ void MainWnd::changeDevice(QString dev_id)
     if(devices==NULL){
         return;
     }
-    devices->ClearDisplay();
+    if(!bFirst)
+        devices->ClearDisplay();
+    else{
+        bFirst = false;
+    }
     for(int i = 1; i <= MAX_CHAN_NR; i++)
     {
         DeviceChnConfig cfg;
@@ -649,6 +649,7 @@ MainWnd::MainWnd(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MainWnd),
     m_cur_dev_id(""),
+    bFirst(true),
     bQueryOrderState(false),
     watcher(NULL)
 {
@@ -996,11 +997,6 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
 
-//    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
-//    menu->addAction(action);
-
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
-
     action = new QAction(QString::fromLocal8Bit("复位设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
@@ -1021,14 +1017,6 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
-//    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
-//    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
-
-
 //GetCount
     action = new QAction(QString::fromLocal8Bit("添加设备"),this);
     menu2->addAction(action);
@@ -1048,11 +1036,12 @@ void MainWnd::initUI()
     connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
 
  //加载设备状态.
-
+#if 1
     initDeviceChannels();
     loadChannels();
     loadSysConfig();
     loadDeviceUI();
+#endif
 }
 void MainWnd::fileChange(const QString &path)
 {
@@ -1604,7 +1593,7 @@ QString MainWnd::buildReportInput(QString order)
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
                 .arg(order).arg(order).arg(temp);
-        root["db"] = QCoreApplication::applicationDirPath()+"/measure.db";
+        root["db"] = utils::GetWorkDir()+"/measure.db";
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
@@ -1704,11 +1693,11 @@ void MainWnd::on_btnLocalIP_clicked()
 
 void MainWnd::on_btnPing_clicked()
 {
-    QString target = ui->edtPingIp->text();
-    if(target.length() < 7){
-        return;
-    }
-    ping.ping(target,4);
+//    QString target = ui->edtPingIp->text();
+//    if(target.length() < 7){
+//        return;
+//    }
+//    ping.ping(target,4);
 }
 
 void MainWnd::on_btnClear_clicked()

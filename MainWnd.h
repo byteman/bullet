@@ -1,6 +1,6 @@
 ﻿#ifndef MAIN_WND_H
 #define MAIN_WND_H
-#include "myping.h"
+//#include "myping.h"
 #include <QDialog>
 #include "mydevices.h"
 #include <QMainWindow>
@@ -12,17 +12,21 @@
 #include <QTcpServer>
 #include <QListWidgetItem>
 #include "tcpserver.h"
-#include "gpserver.h"
+
 #include "sessmessage.h"
 #include "devicemanager.h"
 #include "wavewidget.h"
 #include "protomessage.h"
-#include "gpserver.h"
 #include <QLabel>
 #include "histwavewidget.h"
 #include "myplottrace.h"
 #include <QFileSystemWatcher>
 
+#if 1
+#include "udpserver.h"
+#else
+#include "gpserver.h"
+#endif
 namespace Ui {
 class MainWnd;
 }
@@ -45,8 +49,9 @@ private:
         Ui::MainWnd *ui;
      MyDevices* devices;
     bool bQueryOrderState;
+    bool bFirst;
      MyPlotTrace *m_tracer;
-    MyPing ping;
+    //MyPing ping;
      QFutureWatcher<bool> *watcher;
      HistWaveWidget* wave;
      QString m_cur_dev_id;
@@ -64,7 +69,7 @@ private:
      QTimer m_timer;
      QRubberBand *rubberBand;
      QPoint rubberOrigin;
-     GPServer* srv;
+     UdpServer* srv;
      void loadDeviceUI();
      bool Init();
      QTreeWidgetItem *findItemById(QString id);

@@ -17,7 +17,7 @@ debug{
 }
 INCLUDEPATH+=./qtcsv ./qtcsv/include
 INCLUDEPATH+=./ext/ ./ext/include
-LIBS+=-L./ext/lib -lWS2_32
+LIBS+=-L./ext/lib
 
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
@@ -29,8 +29,6 @@ SOURCES += main.cpp\
     protomessage.cpp \
     protoparser.cpp \
     wavefile.cpp \
-    gpserver.cpp \
-    gpsession.cpp \
     wavewidget.cpp \
     qcustomplot.cpp \
     igraphicchannel.cpp \
@@ -80,8 +78,9 @@ SOURCES += main.cpp\
     asyncexporttask.cpp \
     dialogclearup.cpp \
     nettools.cpp \
-    myping.cpp \
-    crc16.cpp
+    crc16.cpp \
+    udpserver.cpp \
+    udpsession.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -94,8 +93,6 @@ HEADERS  += tcpserver.h \
     protoparser.h \
     parser.h \
     wavefile.h \
-    gpserver.h \
-    gpsession.h \
     wavewidget.h \
     qcustomplot.h \
     igraphicchannel.h \
@@ -143,7 +140,8 @@ HEADERS  += tcpserver.h \
     asyncexporttask.h \
     dialogclearup.h \
     nettools.h \
-    myping.h
+    udpserver.h \
+    udpsession.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -158,9 +156,7 @@ FORMS    += MainWnd.ui \
     chanselect.ui \
     dialogreport.ui \
     dialogclearup.ui
-#BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
-##INCLUDEPATH += $$BASEDIR\include\Qwt
-#LIBS += -L$$BASEDIR\lib -lqwtd
+
 LIBS += -lOpengl32 \
                 -lglu32
 RESOURCES += \
@@ -169,10 +165,10 @@ RESOURCES += \
     main.qrc
 RC_FILE=icon.rc
 DISTFILES +=
-QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
-win32:DEFINES += _TTY_WIN_
-win32:DEFINES += "WINVER=0x0501"
-win32:DEFINES += "_WIN32_WINNT=0x0501"
+#QMAKE_LFLAGS_WINDOWS = /SUBSYSTEM:WINDOWS,5.01
+#win32:DEFINES += _TTY_WIN_
+#win32:DEFINES += "WINVER=0x0501"
+#win32:DEFINES += "_WIN32_WINNT=0x0501"
 
 INCLUDEPATH += ext/include/CuteLogger
 INCLUDEPATH += ext/qBreakpad/handler
@@ -180,7 +176,7 @@ INCLUDEPATH += ext/qBreakpad/handler
 LIBS += -Lext/qBreakpad/handler
 
 CONFIG(release, debug|release) {
-        LIBS+=-lqBreakpad
+        #LIBS+=-lqBreakpad
 #支持在release模式下还能够调试
         QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
         QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO

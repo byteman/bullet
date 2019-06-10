@@ -11,15 +11,16 @@
 #include "cmddebug.h"
 int main(int argc, char *argv[])
 {
-
-    QBreakpadInstance.setDumpPath(QLatin1String("crashes"));
     QApplication a(argc, argv);
+    //QBreakpadInstance.setDumpPath(QLatin1String("crashes"));
+
 
     //InitConsoleWindow();
-    MachineChecker checker;
-    if(checker.CheckMac("08:57:00:F6:08:DC") ||
-            checker.CheckMac("B0:35:9F:87:D9:FE")){
+    //MachineChecker checker;
+    //if(checker.CheckMac("08:57:00:F6:08:DC") ||
+     //       checker.CheckMac("B0:35:9F:87:D9:FE")){
     //if(checker.CheckMac("B0:35:9F:87:D9:FE")){
+    if(1){
         //加载样式表
         QFile file(":/qss/psblack.css");
         if (file.open(QFile::ReadOnly)) {

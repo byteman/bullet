@@ -24,6 +24,18 @@ QString utils::MkMutiDir(const QString path){
         parentPath.mkpath(dirname);
     return parentDir + "/" + dirname;
 }
+#include <QCoreApplication>
+#include <Windows.h>
+QString utils::GetWorkDir()
+{
+ //   qDebug() << "GetWorkDir";
+//    char szFilePath[1024]={0,};
+//    GetModuleFileNameA(NULL, szFilePath, MAX_PATH);
+    QString path = QCoreApplication::applicationDirPath();
+    qDebug() << "GetWorkDir=" << path;
+    return path;
+
+}
 
 TimeStamp::TimeStamp(QString _tag):
     tag(_tag)
