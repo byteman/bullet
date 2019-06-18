@@ -5,18 +5,15 @@
 #include "iconhelper.h"
 #include "myhelper.h"
 #include "dao.h"
-#include "dialogparams.h"
 #include "dialogdevice.h"
-#include "dialogchanconfig.h"
 #include "utils.h"
 #include "config.h"
 #include "main.h"
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
-#include "xlsx/statemanager.h"
 #include "gotypes.h"
-#include "asyncexport.h"
 #include <QInputDialog>
+#include "formgds.h"
 #define MAX_CHAN_NR 8
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -37,15 +34,10 @@ void MainWnd::StartReceiver()
     }else{
         AddLog(QString::fromLocal8Bit("服务启动成功"));
     }
-//    QStringList ip = NetTools::get_local_ip();
-//    for(int i = 0; i< ip.size();i++)
-//    {
-//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
-//    }
+
     connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
-    //connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
 
 
 }
@@ -74,34 +66,7 @@ bool MainWnd::InitDvm()
 
 typedef GoInt (*funcBuildReport)(GoString p0,char** res);
 typedef GoInt (*funcGetOrderState)(GoString p0,char** res);
-#if 0
-void testhttp(funcHttpGet HttpGet){
-    const char* str="http://www.baidu.com";
-    GoString gstr;
-    gstr.p=str;
-    gstr.n = (ptrdiff_t)strlen(str) ;
-    char* res=nullptr;
-    qDebug() << "ready call http";
-    HttpGet(gstr,&res);
-     qDebug() << "return";
-     if(res!=nullptr){
-         qDebug() << "return ok len=" << strlen(res);
-         QString strMsg = QString(res);
-         qDebug() << "------------";
-         //printf("data=%s\n",res);
-          // QByteArray a(res,strlen(res));
-         qDebug() << "msg=" << strMsg.left(10);
-         qDebug() << "=============";
-     }
 
-
-
-
-    //qDebug("%s\n",res);
-    //free(res);
-    res=nullptr;
-}
-#endif
 static  funcBuildReport pFnBuildReport  = NULL;
 static  funcGetOrderState pFnGetOrderState = NULL;
 void initGoLibrary()
@@ -169,77 +134,12 @@ void MainWnd::onNotify(QString msg)
 
     //ui->txtLog->append("send--> "+ msg);
 }
-/**
- * 点击了某个设备通道的播放或者暂停.
- * 1.修改界面的状态
- * 2.写数据库修改通道状态
- * 3.修改设备对象中通道的状态.
-*/
-void MainWnd::onPlayClick(int addr, bool played)
-{
-    qDebug() <<"addr="<<addr<< " onPlayClick played=" << played;
-    dvm.ControlDeviceChan(m_cur_dev_id,addr,played);
-    devices->SetRecState(addr,played);
-}
-/**
- * @brief 点击了通道配置按钮
- * @param addr
- * 1.直接读数据库中通道的参数
- * 2.显示出来供用户修改
- * 3.将修改后的参数写入到数据库
- * 4.更新设备对象中通道的相关参数.
- */
-void MainWnd::onChannelClick(int addr)
-{
-    qDebug() << m_cur_dev_id << " chan=" << addr;
-    DialogChanConfig dlg;
-    DeviceChnConfig cfg;
-    //cfg.chanName = QString(QStringLiteral("通道%1")).arg(addr+1);
 
-    dvm.GetDeviceChan(m_cur_dev_id,addr,cfg);
-    dlg.SetChanConfig(m_cur_dev_id,addr,cfg);
-    int result = dlg.exec();
-    if(result == QDialog::Accepted){
-        dlg.GetChanConfig(cfg);
-        dvm.UpdateDeviceChan(m_cur_dev_id,addr,cfg);
-        devices->SetChanSetting(addr,cfg);
-        Device* dev = dvm.GetDevice(m_cur_dev_id);
-        if(cfg.chanName.length() > 0){
-            //已经配置了名字，用新的名字
-            if(dev!=NULL){
-                devices->SetTitle(addr,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
-            }else{
-                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
-            }
-        }else{
-            if(dev!=NULL){
-                devices->SetTitle(addr,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(addr));
-            }else{
-                devices->SetTitle(addr,QString(QStringLiteral("通道%1")).arg(addr));
-            }
-        }
-    }
-}
-
-//参数配置界面
-void MainWnd::on_menu_click(bool)
-{
-    DialogParams dlg(&dvm,m_cur_dev_id);
-    int reason = dlg.exec();
-
-    qDebug() << reason;
-
-}
 void MainWnd::on_write_menu_click(bool)
 {
 
 }
-void MainWnd::on_get_count_click(bool)
-{
-   int count = dvm.GetDeviceCount(m_cur_dev_id);
-   QMessageBox::information(this,QStringLiteral("信息"),QString("count=%1").arg(count));
 
-}
 void MainWnd::on_reset_count_click(bool)
 {
     dvm.ResetDeviceCount(m_cur_dev_id);
@@ -307,7 +207,7 @@ void MainWnd::on_remove_device_click(bool)
       reloadDeviceList2();
 
 }
-#include "dialogclearup.h"
+
 bool MainWnd::CheckPassWord()
 {
     if("123456" != QInputDialog::getText(this,
@@ -317,19 +217,6 @@ bool MainWnd::CheckPassWord()
         return false;
     }
     return true;
-}
-void MainWnd::on_clearup_menu_click(bool)
-{
-    if(!CheckPassWord() )return;
-    QString id;
-    if(!GetCurrentDeviceId(id))
-    {
-        qDebug()<<"Can not GetCurrentDeviceId";
-        return;
-    }
-    DialogClearUp dlg;
-    dlg.SetSerialNo(id);
-    dlg.exec();
 }
 
 #include "dialogupdate.h"
@@ -458,51 +345,6 @@ void MainWnd::DevOnline(Device *dev)
 }
 //构造命令
 
-//定时查询某台主机上所有订单的状态。
-void MainWnd::updateOrderState()
-{
-    if(pFnGetOrderState!=NULL){
-        QGoString str(ui->cbxHost->currentText());
-        char* res=nullptr;
-        pFnGetOrderState(str.toGoString(),&res);
-        QJsonDocument doc =  QJsonDocument::fromJson(res);
-        QJsonObject o = doc.object();
-        for(int i=0; i < ui->orderList->topLevelItemCount();i++)
-        {
-           QTreeWidgetItem* item =  ui->orderList->topLevelItem(i);
-           if(item==NULL){
-               continue;
-           }
-           QString &order = item->text(0);
-           if(o.contains(order)){
-               //如果包含了订单的状态.
-               QJsonObject o2 = o[order].toObject();
-               int state = o2["state"].toInt();
-               QString msg = "";
-               switch(state)
-               {
-                   case 0:
-                        msg = QStringLiteral("未开始");
-                        break;
-                   case 1:
-                       msg = o2["message"].toString();//QStringLiteral("正在生成报告...");
-                       break;
-                   case 2:
-                       msg = QStringLiteral("生成报告成功");
-                       break;
-                   case 3:
-                       msg = o2["message"].toString();
-                       break;
-               }
-               item->setText(5,msg);
-           }
-
-        }
-
-        qDebug() << "result=" << res;
-
-    }
-}
 //1s 定时监测设备是否在线.
 void MainWnd::timerEvent(QTimerEvent *)
 {
@@ -520,7 +362,7 @@ void MainWnd::timerEvent(QTimerEvent *)
             else
                 item->setIcon(0,icon_device[1]);
             if(find && curId==devices[i]->id()){
-                this->devices->SetOnline(devices[i]->online());
+                //this->devices->SetOnline(devices[i]->online());
             }
 
         }
@@ -536,13 +378,6 @@ void MainWnd::timerEvent(QTimerEvent *)
                 item->setIcon(0,icon_device[1]);
         }
     }
-
-    if(bQueryOrderState){
-
-       updateOrderState();
-
-    }
-    //simData();
 
 }
 //树形设备列表右键菜单.
@@ -565,84 +400,22 @@ void MainWnd::on_treeWidget_customContextMenuRequested(const QPoint &pos)
 //读取通道的录制状态.更新状态
 void MainWnd::changeDevice(QString dev_id)
 {
-    if(devices==NULL){
-        return;
-    }
-    if(!bFirst)
-        devices->ClearDisplay();
-    else{
-        bFirst = false;
-    }
-    for(int i = 1; i <= MAX_CHAN_NR; i++)
-    {
-        DeviceChnConfig cfg;
-        //从数据库中获取参数的状态.
-        //修改显示的配置
-        if(dvm.GetDeviceChan(dev_id,i,cfg)){
-            devices->SetChanSetting(i,cfg);
-            Device* dev = dvm.GetDevice(dev_id);
-            if(cfg.chanName.length() > 0){
-                //已经配置了名字，用新的名字
-                if(dev!=NULL){
-                    devices->SetTitle(i,QString(QStringLiteral("%1:%2")).arg(dev->name()).arg(cfg.chanName));
-                }else{
-                    devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(cfg.chanName));
-                }
-            }else{
-                if(dev!=NULL){
-                    devices->SetTitle(i,QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(i));
-                }else{
-                    devices->SetTitle(i,QString(QStringLiteral("通道%1")).arg(i));
-                }
-            }
 
-
-        }
-        //修改设备对象的配置.
-        dvm.SetChanConfig(dev_id,i,cfg);
-    }
-    ui->treeWidget2->setCurrentItem(findItemById2(dev_id));
-
-
-    int addr = devices->GetZoomWidget();
-    if(addr!=-1){
-        onWaveShow(addr,true);
-    }
 }
 
 
 void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
 {
+
     if(dev->id() != m_cur_dev_id){
         return;
     }
     for(int i = 0; i < data.channels.size(); i++)
     {
-        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
-    }
-    //wave->AppendData(0,get_random_number());
-    //wave->DisplayChannel(0,true);
-}
-void DAOTest()
-{
-    DAO::instance().DeviceAdd("123","hello");
-    DAO::instance().DeviceAdd("456","hello2");
-    DeviceInfoList list;
-    DAO::instance().DeviceList(list);
-    for(int i = 0; i < list.size(); i++)
-    {
-        qDebug() << "serialNo=" << list[i].serialNo << " name=" << list[i].name;
-    }
-    QSqlError err = DAO::instance().DeviceUpdate("123","jjjj");
-    if(err.isValid()){
-        qDebug()<<"update=" << err.text();
-    }
-    err = DAO::instance().DeviceRemove("123");
-    err = DAO::instance().DeviceRemove("456");
-    if(err.isValid()){
-        qDebug()<<"remove="<<err.text();
+       // devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
     }
 }
+
 void MainWnd::Start()
 {
     StartReceiver();
@@ -654,8 +427,7 @@ MainWnd::MainWnd(QWidget *parent) :
     ui(new Ui::MainWnd),
     m_cur_dev_id(""),
     bFirst(true),
-    bQueryOrderState(false),
-    watcher(NULL)
+    bQueryOrderState(false)
 {
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
@@ -721,64 +493,9 @@ void MainWnd::reloadDeviceList()
     }
 }
 #include <QSignalMapper>
-QVector<int> MainWnd::GetSelectChannel()
-{
-    QVector<int> channels;
-    for(int i = 0; i < rbChanList.size(); i++)
-    {
-        if(rbChanList[i]->isChecked()){
-            channels.push_back(i+1);
 
-        }
-    }
 
-    return channels;
-}
-void MainWnd::SelectAll(bool en)
-{
-    for(int i= 0; i< rbChanList.size();i++)
-    {
-        rbChanList[i]->setChecked(en);
-    }
-}
-void MainWnd::loadChannels()
-{
-    ui->rb1->setChecked(true);
-    rbChanList.push_back(ui->rb1);
-    rbChanList.push_back(ui->rb2);
-    rbChanList.push_back(ui->rb3);
-    rbChanList.push_back(ui->rb4);
-    rbChanList.push_back(ui->rb5);
-    rbChanList.push_back(ui->rb6);
-    rbChanList.push_back(ui->rb7);
-    rbChanList.push_back(ui->rb8);
-    QSignalMapper *signalMapper = new QSignalMapper(this);
-    for(int i =0 ;i < rbChanList.size(); i++)
-    {
-        connect(rbChanList[i], SIGNAL(clicked()), signalMapper, SLOT(map()));
-        signalMapper->setMapping(rbChanList[i], i);
 
-    }
-    connect(signalMapper, SIGNAL(mapped(int)),
-                this, SLOT(chan_click(int)));
-
-}
-
-void MainWnd::chan_click(int chan)
-{
-    qDebug() << "chan " << chan << " clicked";
-    //1.更新波形通道的显示
-    //2.更新是否显示跟踪线
-    bool en = rbChanList[chan]->isChecked();
-    wave->ShowChan(chan,en);
-    if(ui->chkMeasure->isChecked()){
-        m_tracer->Show(chan,en);
-    }else{
-        m_tracer->Show(chan,false);
-    }
-
-    ui->plot3->replot();
-}
 //设备相关的UI初始化.
 void MainWnd::loadDeviceUI()
 {
@@ -792,15 +509,6 @@ void MainWnd::loadDeviceUI()
     reloadDeviceList2();
 }
 
-void MainWnd::simData()
-{
-    for(int i = 0; i < 8; i++)
-    {
-        devices->DisplayWeight(i,get_random_number(),0,0);
-        Sleep(i);
-
-    }
-}
 bool MainWnd::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonDblClick) {
@@ -809,125 +517,16 @@ bool MainWnd::eventFilter(QObject *watched, QEvent *event)
             return true;
         }
     }else if (event->type() == QEvent::Resize) {
-        if(devices!=NULL)
-            devices->Resize();
+        if(mydev!=NULL)
+            mydev->Resize();
+
         return true;
     }
 
     return QWidget::eventFilter(watched, event);
 }
-void MainWnd::onWaveShow(int addr, bool zoom)
-{
-    //放大设备波形.
-    //1加载当前设备编号，当前波形历史数据,写入波形控件.
-    if(!zoom){
-        return;
-    }
-    QString id;
-    if(!GetCurrentDeviceId(id)){
-        return;
-    }
-   // devices->clearAll();
-//    QQueue<SensorData>* data = dvm.GetDevice(id)->GetHistoryData(addr);
-//    if(data==NULL)return;
-//    devices->DisplayDataQueue(addr-1,*data);
-}
-void MainWnd::mousePress(QMouseEvent* event)
-{
-   if(event->button() == Qt::LeftButton)
-   {
-       rubberOrigin = event->pos();
-       rubberBand->setGeometry(QRect(rubberOrigin, QSize()));
-       rubberBand->show();
-   }else if(event->button() == Qt::RightButton)
-   {
-        //记录当前的值
-
-   }
-}
-void MainWnd::mouseDoubleClick(QMouseEvent* event)
-{
-    if(event->button() == Qt::LeftButton)
-    {
-        RestoreWave();
-    }
-}
-
-void MainWnd::mouseRelease(QMouseEvent* event)
-{
-    Q_UNUSED(event);
-      if (rubberBand->isVisible())
-      {
-          if(rubberBand->rect().width() < 2)
-          {
-              rubberBand->hide();
-              return;
-          }
-
-          const QRect zoomRect = rubberBand->geometry();
-          int xp1, yp1, xp2, yp2;
-          zoomRect.getCoords(&xp1, &yp1, &xp2, &yp2);
-          double x1 = ui->plot3->xAxis->pixelToCoord(xp1);
-          double x2 = ui->plot3->xAxis->pixelToCoord(xp2);
-          double y1 = ui->plot3->yAxis->pixelToCoord(yp1);
-          double y2 = ui->plot3->yAxis->pixelToCoord(yp2);
-
-          ui->plot3->xAxis->setRange(x1, x2);
-          ui->plot3->yAxis->setRange(y1, y2);
-
-          rubberBand->hide();
-          ui->plot3->replot();
-      }
-
-}
-void MainWnd::RestoreWave()
-{
-    ui->plot3->rescaleAxes();
-    ui->plot3->replot();
-}
-void MainWnd::myMoveEvent(QMouseEvent *event) {
-    int x_pos = event->pos().x();
-    int y_pos = event->pos().y();
-    if(rubberBand->isVisible())
-       rubberBand->setGeometry(QRect(rubberOrigin, event->pos()).normalized());
-    if(!ui->chkMeasure->isChecked()){
-        return;
-    }
-//这里如果是float x_val 和 y_val 会导致精度损失很大，导致显示跳.这个问题找了一整天.
-    double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
-    double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
-    qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
-    m_tracer->UpdatePosition(x_val,y_val);
-    ui->plot3->replot();//曲线重绘
-}
-void MainWnd::initDeviceChannels()
-{
-    wave = new HistWaveWidget(ui->plot3);
-
-    rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot3);
-
-    connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMoveEvent(QMouseEvent*)));
-    connect(ui->plot3, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
-    connect(ui->plot3, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
-    connect(ui->plot3, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
 
 
-    m_tracer = new MyPlotTrace(ui->plot3,8);
-
-    //connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMouseMoveEvent(QMouseEvent*)));
-    ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
-    ui->dteTo->setDateTime(QDateTime::currentDateTime());
-    on_cbxTimeSpan_currentIndexChanged(0);
-    devices = new MyDevices(9,ui->gbDevices);
-    devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
-    devices->SetMaxSampleNum(50);
-    devices->SetDeviceNum(1,8);
-    devices->SetUnit("kg");
-    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
-    connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
-    connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));
-
-}
 void MainWnd::initUI()
 {
     qDebug() << "MainWnd id=" << QThread::currentThreadId();
@@ -935,8 +534,6 @@ void MainWnd::initUI()
     this->setProperty("canMove", true);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
 
-    ui->orderList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->orderList->setColumnWidth(0,300);
     IconHelper::Instance()->setIcon(ui->labIco, QChar(0xf099), 30);
     IconHelper::Instance()->setIcon(ui->btnMenu_Min, QChar(0xf068));
     IconHelper::Instance()->setIcon(ui->btnMenu_Max, QChar(0xf067));
@@ -991,6 +588,7 @@ void MainWnd::initUI()
 
     ui->gbDevices->installEventFilter(this);
 
+
 //上下文菜单初始化
     ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
@@ -1000,11 +598,6 @@ void MainWnd::initUI()
     QAction* action = new QAction(setting,QString::fromLocal8Bit(" 配置参数"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
-
-//    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
-//    menu->addAction(action);
-
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
 
     action = new QAction(QString::fromLocal8Bit("复位设备"),this);
     menu->addAction(action);
@@ -1022,17 +615,6 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("数据清理"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
-
-//    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
-//    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
-
 
 //GetCount
     action = new QAction(QString::fromLocal8Bit("添加设备"),this);
@@ -1042,99 +624,22 @@ void MainWnd::initUI()
     ui->btnMain->click();
     on_btnMenu_Max_clicked();
 
-
-    fileWatcher = new QFileSystemWatcher(this);
-
-    fileWatcher->addPath(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm"));
-
-    connect(fileWatcher,&QFileSystemWatcher::fileChanged,this,&MainWnd::fileChange);
-
-    connect(&AsyncExportManager::instance(),SIGNAL(onProgress(QString,int,int)),this,SLOT(onProgress(QString,int,int)));
-    connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
-
- //加载设备状态.
-
-    initDeviceChannels();
-    loadChannels();
+    //initDeviceChannels();
+    mydev = new MyDevices(ui->gbDevices);
     loadSysConfig();
     loadDeviceUI();
 }
-void MainWnd::fileChange(const QString &path)
-{
-    qDebug() << path << "change";
-    loadStateFile();
-}
 
-void MainWnd::onProgress(QString serialNo, int prog, int err)
-{
-    ui->btnExport->setText(QString(QStringLiteral("已完成%1%")).arg(prog));
-}
-
-void MainWnd::onSucc(QString serialNo, QString err)
-{
-    ui->btnExport->setText(QStringLiteral("导出数据"));
-    ui->btnExport->setEnabled(true);
-}
 void MainWnd::loadSysConfig()
 {
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
-    //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
-    //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
 
     ui->edtHost->setText(Config::instance().m_host_name);
 }
-static bool loading = false;
-//加载状态文件.
-void MainWnd::loadStateFile(bool create)
-{
-    qDebug() << "loadStateFile";
-    loading = true;
-    ui->edtDataDir->setText(Config::instance().m_data_dir);
-    ui->cbxHost->clear();
-    //ui->cbxTestNo->clear();
-    //ui->listFiles->clear();
-    if(!StateManager::instance().parse(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm")))
-    {
-        qDebug() << "loadStateFile failed";
-        QMessageBox::information(this,"info",QStringLiteral("目录下找不到压力测试状态表.xlsm"));
-        this->AddLog("loadStateFile failed");
-        loading = false;
-        return;
-    }
-#if 1
-    CellTestHost& host = StateManager::instance().GetState();
-
-    QMap<QString,CellTestOrderList>::const_iterator i = host.constBegin();
-    while (i != host.constEnd()) {
-        qDebug() << i.key();
-        ui->cbxHost->addItem(i.key());
-        if(create){
-            CellTestOrderList::const_iterator it = i.value().constBegin();
-            while (it != i.value().constEnd()) {
-                QString cell=QString("%1/%2/%3").
-                        arg(Config::instance().
-                            m_data_dir).
-                        arg(i.key()).arg(it.key());
-                utils::MkMutiDir(cell);
-                ++it;
-            }
-
-        }
 
 
-        ++i;
-    }
-
-#endif
-    loading = false;
-     qDebug() << "loadStateFile ok----";
-    ui->cbxHost->setCurrentText(Config::instance().m_host_name);
-    qDebug() << "loadStateFile ok";
-    emit on_cbxHost_currentIndexChanged(Config::instance().m_host_name);
-
-}
 void MainWnd::buttonClick()
 {
     QToolButton *b = (QToolButton *)sender();
@@ -1148,18 +653,13 @@ void MainWnd::buttonClick()
             btn->setChecked(false);
         }
     }
-    bQueryOrderState = false;
     if (name == "btnMain") {
         ui->stackedWidget->setCurrentIndex(0);
     } else if (name == "btnConfig") {
         ui->stackedWidget->setCurrentIndex(1);
     } else if (name == "btnData") {
         ui->stackedWidget->setCurrentIndex(2);
-    } else if (name == "btnReport") {
-        bQueryOrderState = true;
-        ui->stackedWidget->setCurrentIndex(3);
-        loadStateFile();
-    }else if (name == "btnHelp") {
+    } else if (name == "btnHelp") {
         ui->stackedWidget->setCurrentIndex(4);
     } else if (name == "btnExit") {
         this->close();
@@ -1242,12 +742,6 @@ void MainWnd::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
      changeDevice(m_cur_dev_id);
 }
 
-void MainWnd::on_sbWaveMin_valueChanged(int arg1)
-{
-    Config::instance().SetRtWaveMin(arg1);
-    devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
-}
-
 void MainWnd::on_edtPort_textChanged(const QString &arg1)
 {
     bool ok = false;
@@ -1256,61 +750,6 @@ void MainWnd::on_edtPort_textChanged(const QString &arg1)
         return;
     }
     Config::instance().SetLocalPort(port);
-}
-
-void MainWnd::on_cbUseSysTime_stateChanged(int arg1)
-{
-    Config::instance().SetUseSysTime(arg1!=0);
-    qDebug() << arg1;
-}
-
-
-void MainWnd::handleLoadWaveFinished()
-{
-    wave->DisplayData(m_ddl);
-    ui->btnQuery->setEnabled(true);
-    ui->btnQuery->setText(QStringLiteral("查询"));
-}
-//在后台线程进行数据查询
-bool MainWnd::LoadWave(QString id, QVector<int> chan, qint64 from, qint64 to)
-{
-    m_ddl.clear();
-    for(int i = 0; i < chan.size(); i++)
-    {
-        DeviceDataList dll;
-        m_ddl[chan[i]] = dll;
-    }
-    QSqlError err = DAO::instance().DeviceDataQuery(id,from,to, m_ddl);
-    return !err.isValid();
-}
-
-void MainWnd::on_btnQuery_clicked()
-{
-    QString id;
-    if(!GetCurrentDeviceId2(id)){
-        return;
-    }
-    QVector<int> chans = GetSelectChannel();
-    if(chans.size() == 0)
-    {
-        wave->Clear();
-        return;
-    }
-
-    qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
-    qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
-
-    if(watcher==NULL){
-        watcher = new QFutureWatcher<bool>(this);
-        connect(watcher, SIGNAL(finished()), this, SLOT(handleLoadWaveFinished()));
-    }
-
-
-    const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
-    watcher->setFuture(future);
-    ui->btnQuery->setText(QStringLiteral("查询中..."));
-    ui->btnQuery->setEnabled(false);
-
 }
 
 void MainWnd::on_btnShou2_clicked()
@@ -1327,24 +766,6 @@ void MainWnd::on_btnShou2_clicked()
     hide =!hide;
 }
 
-void MainWnd::on_dteFrom_dateChanged(const QDate &date)
-{
-
-}
-static qint64 time_span_list[]={
-        10*60, //10分
-        20*60,
-        1*3600,
-    2*3600,
-    5*3600,
-    10*3600
-        };
-void MainWnd::on_cbxTimeSpan_currentIndexChanged(int index)
-{
-    ui->dteTo->setDateTime(QDateTime::currentDateTime());
-    ui->dteFrom->setDateTime(QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch()-time_span_list[index]*1000));
-    //time_span_list
-}
 
 void MainWnd::on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
@@ -1352,102 +773,6 @@ void MainWnd::on_treeWidget2_currentItemChanged(QTreeWidgetItem *current, QTreeW
     if(!GetCurrentDeviceId2(id)){
       return;
     }
-//    int chan = GetSelectChannel();
-//    Device* dev = dvm.GetDevice(id);
-//    if(dev!=NULL){
-//        wave->SetTitle(QString(QStringLiteral("%1:通道%2")).arg(dev->name()).arg(chan));
-//    }else{
-//        wave->SetTitle(QString(QStringLiteral("通道%1")).arg(chan));
-//    }
-//    wave->Clear();
-
-}
-
-void MainWnd::on_btnRestore_clicked()
-{
-
-}
-
-void MainWnd::on_chkMeasure_clicked(bool checked)
-{
-     qDebug() << checked;
-     if(!checked){
-         m_tracer->ShowAll(false);
-     }else{
-         for(int i = 0 ; i < rbChanList.size();i++)
-         {
-             m_tracer->Show(i,rbChanList[i]->isChecked());
-         }
-     }
-
-     ui->plot3->replot();
-}
-
-void MainWnd::on_sbSaveInt_valueChanged(int arg1)
-{
-    //采样时间变化.
-    Config::instance().SetSaveInt(arg1);
-}
-
-void MainWnd::on_chkSelAll_clicked()
-{
-    SelectAll(ui->chkSelAll->isChecked());
-}
-#include "asyncexport.h"
-#include <QFileDialog>
-void MainWnd::on_btnExport_clicked()
-{
-    QString id,name;
-    if(!GetCurrentDeviceId2Name(name)){
-        return;
-    }
-    if(!GetCurrentDeviceId2(id)){
-        return;
-    }
-    QVector<int> chans = GetSelectChannel();
-    if(chans.size() == 0)
-    {
-        return;
-    }
-
-    qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
-    qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
-
-    QString fileName = QFileDialog::getSaveFileName(this,QStringLiteral("保存文件"),
-                               name+".csv",
-                               tr("csv (*.csv)"));
-    qDebug() << "Filename=" << fileName;
-    if(fileName.length() < 3){
-        return;
-    }
-    AsyncExportManager::instance().AddTask(id,chans,from,to,fileName);
-    ui->btnExport->setText(QStringLiteral("正在导出"));
-    ui->btnExport->setEnabled(false);
-    // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
-}
-#include <dialogmerge.h>
-#include <dialogreport.h>
-void MainWnd::on_btnMerge_clicked()
-{
-    //出现设备选择框
-    QString id;
-    if(!GetCurrentDeviceId2(id)){
-        return;
-    }
-    QVector<int> chans = GetSelectChannel();
-    if(chans.size() == 0)
-    {
-        return;
-    }
-    DialogReport dlg;
-
-//    DialogMerge dlg;
-//    dlg.SetDevice(id,chans);
-    if(QDialog::Rejected == dlg.exec()){
-        //点击了取消
-        return;
-    }
-
 }
 
 void MainWnd::on_btnHelp_clicked()
@@ -1455,250 +780,11 @@ void MainWnd::on_btnHelp_clicked()
 
 }
 
-void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
-{
-    qDebug() << "onchage" << arg1 << loading;
-     if(loading) return;
-    QString x = arg1;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
-   if(orders.size() == 0){
-      return;
-   }
-    QSignalMapper *signalMapper = new QSignalMapper(this);
-    QSignalMapper *signalMapper2 = new QSignalMapper(this);
-   ui->orderList->clear();
-   //ui->cbxTestNo->clear();
-   QMap<QString,QVector<CellState>>::const_iterator i = orders.constBegin();
-
-   while (i != orders.constEnd()) {
-       //cout << i.key() << ": " << i.value() << endl;
-       //ui->cbxTestNo->addItem(i.key());
-      QStringList row;
-      row.push_back(i.key());
-
-      if(i.value().size() > 0){
-          row.push_back(i.value().at(0).Temp);
-      }
-      row.push_back(QString("%1").arg(i.value().size()));
-    QTreeWidgetItem* item = new QTreeWidgetItem(row);
-    QVector<CellState> cells = i.value();
-
-       for(int j = 0 ; j < cells.size(); j++)
-       {
-
-            QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList(cells[j].CellNo));
-            item->addChild(subItem);
-       }
-
-       ui->orderList->addTopLevelItem(item);
-       QPushButton *btnReport = new QPushButton(QStringLiteral("生成报告"));
-        btnReport->setGeometry(0,0,80,40);
-
-        QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
-         btnOpenDir->setGeometry(0,0,80,40);
-
-       connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
-       //QString dir = QString("%1").arg(1);
-        QString dir = QString(QStringLiteral("%1/%2/%3"))
-                       .arg(Config::instance().m_data_dir)
-                       .arg(x)
-                       .arg(i.key());
-
-       signalMapper2->setMapping(btnOpenDir, dir);
-
-       connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
-       signalMapper->setMapping(btnReport, i.key());
-
-
-
-       ui->orderList->setItemWidget(item, 3, btnReport);
-       ui->orderList->setItemWidget(item, 4, btnOpenDir);
-
-
-       ++i;
-   }
-   connect(signalMapper, SIGNAL(mapped(QString)),
-               this, SLOT(on_report_click(QString)));
-   connect(signalMapper2, SIGNAL(mapped(QString)),
-               this, SLOT(on_opendir_click(QString)));
-
-}
-
-void MainWnd::on_opendir_click(QString dir)
-{
-    QString dir_gbk = utils::UTF82GBK(dir);
-    bool ok = QDesktopServices::openUrl(QUrl(dir_gbk));
-    qDebug() << "open " << dir << " result=" << ok;
-}
-void MainWnd::on_report_click(QString order)
-{
-    qDebug() << order << " click";
-    if(pFnBuildReport){
-        QGoString str(buildReportInput(order));
-        char* res=nullptr;
-        int code = pFnBuildReport(str.toGoString(),&res);
-        if(code != 0){
-           QJsonDocument doc =  QJsonDocument::fromJson(res);
-           QJsonObject o = doc.object();
-           myHelper::ShowMessageBoxError(o["message"].toString());
-        }
-
-        qDebug() << "code=" << code << "result=" << res;
-
-    }
-
-}
-void MainWnd::on_cbxTestNo_currentIndexChanged(const QString &arg1)
-{
-    //列出所有的电芯
-
-    if(loading) return;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
-    //ui->listFiles->clear();
-   if(orders.contains(arg1)){
-       for(int i = 0; i < orders[arg1].size(); i++)
-       {
-        //   ui->listFiles->addItem(orders[arg1].at(i).CellNo);
-       }
-
-   }
-
-
-}
-/**
-
-type MergeChanInfo struct{
-
-    DevId string //设备名称
-    DevChan int //通道编号
-
-    CtrlName string //控制柜的名称
-    CtrlChan string //控制柜的通道名  这两个结合起来可以得到控制柜的文件名.
-
-    FileType string  //控制柜文件类型.
-    FileName string //控制柜的文件名称
-    CellNo string //电芯编号
-
-}
-
-func BuildPressReport(
-    channels []MergeChanInfo,
-    testNo string , //测试的单号
-    temp string , //测试的温度
-    )
-
- */
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-
-QString MainWnd::buildReportInput(QString order)
-{
-    CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
-    //QString order = "";//ui->cbxTestNo->currentText();
-    QJsonDocument doc;
-    QJsonObject root;
-    if(orders.contains(order) && orders[order].size() > 0){
-
-        QJsonArray arr;
-
-        QString temp  = orders[order].at(0).Temp;
-        root["order_no"] = order;
-        root["temp"] =temp ;
-        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
-                .arg(Config::instance().m_data_dir)
-                .arg(ui->cbxHost->currentText())
-                .arg(order).arg(order).arg(temp);
-        root["db"] = utils::GetWorkDir()+"/measure.db";
-        root["dir_path"]=Config::instance().m_data_dir;
-        root["host"] = ui->cbxHost->currentText();
-        root["skip_error"] = true;
-        QVector<CellState> &states =  orders[order];
-        for(int i = 0; i <states.size(); i++)
-        {
-             QJsonObject o;
-
-
-             o["dev_chan"] = orders[order].at(i).PressDevChan;
-             o["dev_name"] = orders[order].at(i).PressDevId;
-//             o["file_name"] = QString("%1/%2/%3/%4.xls")
-//                     .arg(Config::instance().m_data_dir)
-//                     .arg(ui->cbxHost->currentText())
-//                     .arg(order)
-//                     .arg(states[i].CellNo);
-             o["cell_no"] =states[i].CellNo;
-
-            arr.push_back(o);
-        }
-        root["chan_array"] = arr;
-
-
-    }
-    doc.setObject(root);
-    return doc.toJson();
-}
-
-
-void MainWnd::on_btnExecReport_clicked()
-{
-    //启动导出，在某个路径下查找电芯文件的路径
-    //默认规则是 电芯文件放到 工单号的目录下.
-    //选择工单后，就到工单目录下去查找该工单的所有文件
-    //然后对每个文件调用保存工具
-    if(pFnBuildReport){
-        QGoString str(buildReportInput("00"));
-        char* res=nullptr;
-        int code = pFnBuildReport(str.toGoString(),&res);
-
-        qDebug() << "code=" << code << "result=" << res;
-    }
-
-}
-
-void MainWnd::on_btnSelFile_clicked()
-{
-
-    QString path  = QFileDialog::getExistingDirectory(this);
-    if(path.length()< 2){
-        return;
-    }
-    ui->edtDataDir->setText(path);
-    Config::instance().SetDataDir(path);
-    fileWatcher->removePaths(fileWatcher->files());
-    fileWatcher->addPath(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm"));
-
-    loadStateFile();
-}
-
-void MainWnd::on_edtHost_textChanged(const QString &arg1)
-{
-    Config::instance().SetHostName(arg1);
-}
-
-void MainWnd::on_chkMeasure_clicked()
-{
-
-}
-
-void MainWnd::on_chkSelAll_clicked(bool checked)
-{
-
-}
-
-void MainWnd::on_btnReload_clicked()
-{
-    //重新加载数据
-    loadStateFile(true);
-}
 
 void MainWnd::on_btnLocalIP_clicked()
 {
-   // QStringList ip = NetTools::get_local_ip();
+
     QStringList mac = NetTools::get_devices();
-//    for(int i = 0; i< ip.size();i++)
-//    {
-//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
-//    }
 
     for(int i = 0; i< mac.size();i++)
     {
@@ -1707,23 +793,3 @@ void MainWnd::on_btnLocalIP_clicked()
 
 }
 
-void MainWnd::on_btnPing_clicked()
-{
-//    QString target = ui->edtPingIp->text();
-//    if(target.length() < 7){
-//        return;
-//    }
-//    ping.ping(target,4);
-}
-
-void MainWnd::on_btnClear_clicked()
-{
-    char* p = NULL;
-    *p = 2;
-    ui->txtLog->clear();
-}
-
-void MainWnd::on_chkSensorOff_clicked(bool checked)
-{
-    Config::instance().EnableRecvSensorOff(checked);
-}
