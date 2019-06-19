@@ -29,6 +29,7 @@ public:
     void DisplayWeight(int weight, quint16 state, quint16 dot);
     void Show();
     void Reset();
+    void ResetAlarm();
     bool IsZoom();
     void ClearDisplay();
     int  Addr();
@@ -49,8 +50,10 @@ private:
     int m_addr; //设备的通道地址.
     int m_timeout;
     bool m_paused;
+    bool m_reset_alarm;
     int m_rt_wave_s;
-    int m_min_value,m_max_value; //最大最小报警值.
+    int m_min_value,m_max_value; //峰值的最大最小报警值.
+    int m_mmax; //峰值
     QString m_unit; //显示的力单位
     bool m_zoom; //是否处于放大状态.
 

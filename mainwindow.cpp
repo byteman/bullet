@@ -791,6 +791,8 @@ void MainWindow::on_btnStart_clicked()
     qDebug() << "on_btnStart_clicked";
     m_waveWdg->Clear();
     dvm.StartAll(true);
+    devices->ResetAlarm();
+
 }
 
 void MainWindow::on_btnStop_2_clicked()

@@ -10,6 +10,9 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     m_addr(addr),
     m_timeout(MAX_TIMEOUT),
     m_zoom(false),
+    m_mmax(0),
+    m_max_value(100),
+    m_min_value(-100),
     m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
@@ -20,7 +23,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     ui->lbl_weight->setText("");
 
     if(addr <=0 )addr=1;
-
+    ResetAlarm();
 
 
 }
@@ -38,6 +41,12 @@ void ChannelWidget::Show()
 void ChannelWidget::Reset()
 {
     m_zoom = false;
+    m_mmax = 0;
+}
+
+void ChannelWidget::ResetAlarm()
+{
+    m_reset_alarm = true;
 }
 
 bool ChannelWidget::IsZoom()
@@ -73,13 +82,10 @@ void ChannelWidget::SetChanSetting(DeviceChnConfig &cfg)
 {
     m_min_value = cfg.minValue;
     m_max_value = cfg.maxValue;
+
     m_paused    = cfg.paused;
     disable(m_paused);
-//    QString maxStr = QString(QStringLiteral("上超限:%1")).arg(m_max_value);
-//    QString minStr = QString(QStringLiteral("下超限:%1")).arg(m_min_value);
-//    ui->lbl_w_max->setText(maxStr);
-//    ui->lbl_w_min->setText(minStr);
-//    ui->tbtPlay->setChecked(m_paused);
+
 
 }
 
@@ -101,15 +107,24 @@ void ChannelWidget::resetTimeout()
 {
     m_timeout = MAX_TIMEOUT;
 }
+//如果峰值在最大最小值区间内就绿色，超过了这个区间就红色.
 void ChannelWidget::AlarmCheck(double weight)
 {
-   if((weight >= m_max_value) || (weight <= m_min_value))
-   {
-        //报警
+    if(m_reset_alarm){
+        m_mmax = weight;
+        m_reset_alarm = false;
+        return;
+    }
+    if(weight > m_mmax){
+       m_mmax = weight;
+    }
+    if((m_mmax >= m_max_value) || (m_mmax <= m_min_value))
+    {
+        //峰值已经超过了报警范围
        ui->lbl_weight->setStyleSheet("background-color: rgb(255, 0, 0); ");
-   }else{
+    }else{
        ui->lbl_weight->setStyleSheet("background-color: rgb(12, 235, 12); ");
-   }
+    }
 }
 
 void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)

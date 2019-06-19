@@ -143,7 +143,14 @@ void MyDevices::SetUnit(QString unit)
         widgets[i]->SetUnit(unit);
     }
 }
+void MyDevices::ResetAlarm()
+{
 
+    for(int i = 0; i < widgets.size();i++)
+    {
+        widgets[i]->ResetAlarm();
+    }
+}
 void MyDevices::SetTitle(int addr, QString title)
 {
     if(addr < widgets.size())
