@@ -30,6 +30,7 @@ public:
     QLabel *lblChan;
     QWidget *widgetContext;
     QVBoxLayout *verticalLayout_2;
+    QLabel *lblMax;
     QLabel *lbl_weight;
 
     void setupUi(QWidget *ChannelWidget)
@@ -74,13 +75,25 @@ public:
         verticalLayout_2->setSpacing(2);
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(2, 2, 2, 2);
-        lbl_weight = new QLabel(widgetContext);
-        lbl_weight->setObjectName(QStringLiteral("lbl_weight"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        lblMax = new QLabel(widgetContext);
+        lblMax->setObjectName(QStringLiteral("lblMax"));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(lbl_weight->sizePolicy().hasHeightForWidth());
-        lbl_weight->setSizePolicy(sizePolicy);
+        sizePolicy.setHeightForWidth(lblMax->sizePolicy().hasHeightForWidth());
+        lblMax->setSizePolicy(sizePolicy);
+        lblMax->setMinimumSize(QSize(0, 30));
+        lblMax->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        verticalLayout_2->addWidget(lblMax);
+
+        lbl_weight = new QLabel(widgetContext);
+        lbl_weight->setObjectName(QStringLiteral("lbl_weight"));
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(lbl_weight->sizePolicy().hasHeightForWidth());
+        lbl_weight->setSizePolicy(sizePolicy1);
         lbl_weight->setMinimumSize(QSize(0, 60));
         QFont font;
         font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
@@ -107,6 +120,7 @@ public:
     {
         ChannelWidget->setWindowTitle(QApplication::translate("ChannelWidget", "Form", 0));
         lblChan->setText(QString());
+        lblMax->setText(QApplication::translate("ChannelWidget", "\345\263\260\345\200\274:123", 0));
         lbl_weight->setText(QApplication::translate("ChannelWidget", "000", 0));
     } // retranslateUi
 

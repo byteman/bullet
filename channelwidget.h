@@ -53,7 +53,7 @@ private:
     bool m_reset_alarm;
     int m_rt_wave_s;
     int m_min_value,m_max_value; //峰值的最大最小报警值.
-    int m_mmax; //峰值
+    float m_mmax; //峰值
     QString m_unit; //显示的力单位
     bool m_zoom; //是否处于放大状态.
 

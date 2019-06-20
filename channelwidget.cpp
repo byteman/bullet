@@ -110,6 +110,7 @@ void ChannelWidget::resetTimeout()
 //如果峰值在最大最小值区间内就绿色，超过了这个区间就红色.
 void ChannelWidget::AlarmCheck(double weight)
 {
+    ui->lblMax->setText(QStringLiteral("峰值")+QString("%1").arg(m_mmax));
     if(m_reset_alarm){
         m_mmax = weight;
         m_reset_alarm = false;
