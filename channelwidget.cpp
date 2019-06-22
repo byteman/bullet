@@ -193,27 +193,23 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
     {
         return;
     }
-    if(weight==65535){
-        ui->lbl_weight->setText(QStringLiteral("未连接"));
-    }else{
-        double wf = (double)weight;
 
-        QString ws = utils::float2string(wf, dot);
-        if(ws.length() >= 6){
-            //qDebug() << "----------0";
-            ui->lbl_weight->setText(QStringLiteral("数据异常"));
-        }else{
-           ui->lbl_weight->setText(ws+m_unit);
-        }
+    double wf = (double)weight;
 
-        if(m_zoom){
-            m_waveWdg->AppendTimeData(m_addr-1,utils::int2float(wf,dot));
-            m_waveWdg->DisplayAllChannel(true);
-        }
-        if(!m_paused){
-          AlarmCheck(weight);
-        }
+    QString ws = utils::float2string(wf, dot);
+
+
+    ui->lbl_weight->setText(ws+m_unit);
+
+
+    if(m_zoom){
+        m_waveWdg->AppendTimeData(m_addr-1,utils::int2float(wf,dot));
+        m_waveWdg->DisplayAllChannel(true);
     }
+    if(!m_paused){
+      AlarmCheck(utils::int2float(wf,dot));
+    }
+
 
     resetTimeout();
 

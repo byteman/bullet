@@ -81,7 +81,8 @@ SOURCES += main.cpp\
     dialogclearup.cpp \
     nettools.cpp \
     myping.cpp \
-    crc16.cpp
+    crc16.cpp \
+    widgetwave.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -143,7 +144,8 @@ HEADERS  += tcpserver.h \
     asyncexporttask.h \
     dialogclearup.h \
     nettools.h \
-    myping.h
+    myping.h \
+    widgetwave.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -157,7 +159,8 @@ FORMS    += MainWnd.ui \
     dialogmerge.ui \
     chanselect.ui \
     dialogreport.ui \
-    dialogclearup.ui
+    dialogclearup.ui \
+    widgetwave.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

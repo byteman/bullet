@@ -87,9 +87,6 @@ private:
 
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
-     void loadStateFile(bool create=false);
-     QString buildReportInput(QString order);
-     void updateOrderState();
      bool CheckPassWord();
      void outputVer();
 private slots:
@@ -162,22 +159,11 @@ private slots:
 
     void on_get_count_click(bool);
     void on_btnHelp_clicked();
-
-    void on_cbxHost_currentIndexChanged(const QString &arg1);
-
-    void on_cbxTestNo_currentIndexChanged(const QString &arg1);
-
-    void on_btnExecReport_clicked();
-
-    void on_btnSelFile_clicked();
-
-    void on_edtHost_textChanged(const QString &arg1);
-
     void on_chkMeasure_clicked();
 
     void on_chkSelAll_clicked(bool checked);
 
-    void on_btnReload_clicked();
+
 
     void on_btnLocalIP_clicked();
 
@@ -198,7 +184,7 @@ protected:
     virtual void closeEvent(QCloseEvent *);
 protected slots:
     void onResetResult(Device *, bool);
-    void on_report_click(QString order);
+
     void fileChange(const QString &path);
     void onProgress(QString serialNo,int prog,int err);
     void onSucc(QString serialNo,QString err);

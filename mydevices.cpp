@@ -7,10 +7,11 @@
 MyDevices::MyDevices(int max,QGroupBox* parent):
     m_container(parent),
     m_max(10),
-    m_row(2),m_col(4),
+    m_row(2),m_col(2),
     m_num(0),m_max_sample(5000),
     m_addr(0),
-    m_zoom(false)
+    m_zoom(false),
+    m_wave_mode(false)
 {
     for(int i = 0; i < max; i++ )
     {
@@ -22,6 +23,8 @@ MyDevices::MyDevices(int max,QGroupBox* parent):
         widgets.push_back(widget);
         widget->hide();
     }
+    wave = new WidgetWave(parent);
+    wave->hide();
 
 }
 void MyDevices::SetSaveInt(int rangeS)
@@ -38,6 +41,19 @@ void MyDevices::SetOnline(bool online)
     for(int i = 0; i < widgets.size();i++)
     {
          widgets[i]->SetOnline(online);
+    }
+}
+//切换波形模式
+void MyDevices::ChangeViewMode(bool isWave)
+{
+    if(isWave == m_wave_mode){
+       return;
+    }
+    m_wave_mode = isWave;
+    if(m_wave_mode){
+        clearAll();
+        wave->show();
+
     }
 }
 void MyDevices::SetTimeRange(int rangeS)
@@ -115,7 +131,7 @@ void MyDevices::Resize()
         int row = i/m_col ; //4
         int col = i%m_col;
         widgets[i+m_start]->Reset();
-        widgets[i+m_start]->SetUnit(m_unit);
+        //widgets[i+m_start]->SetUnit(m_unit);
         widgets[i+m_start]->setGeometry(MAR_L+col*w+col*COL_S,MAR_T+row*h+row*ROW_S,w,h);
         widgets[i+m_start]->Show();
     }
@@ -152,6 +168,23 @@ void MyDevices::SetUnit(QString unit)
     for(int i = 0; i < widgets.size();i++)
     {
         widgets[i]->SetUnit(unit);
+    }
+}
+
+void MyDevices::ShowWidgets(bool en)
+{
+    if(en){
+
+    }else{
+
+    }
+}
+
+void MyDevices::SetUnit(int addr, QString unit)
+{
+    if(addr < widgets.size())
+    {
+      widgets[addr]->SetUnit(unit);
     }
 }
 

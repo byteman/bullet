@@ -8,6 +8,7 @@
 #include <QMap>
 #include "channelwidget.h"
 #include "models.h"
+#include "widgetwave.h"
 class MyDevices:public QObject
 {
     Q_OBJECT
@@ -19,6 +20,8 @@ public:
     void SetCenterAddr(int addr);
     void Timeout(int addr);
     void SetUnit(QString unit);
+    void ShowWidgets(bool en);
+    void SetUnit(int addr, QString unit);
     void SetTitle(int addr, QString title);
     void SetChanSetting(int addr,DeviceChnConfig& cfg);
     void SetRecState(int addr, bool paused);
@@ -34,6 +37,7 @@ public:
     int  GetZoomWidget();
     void SetSaveInt(int rangeS);
     void SetOnline(bool online);
+    void ChangeViewMode(bool isWave);
 public slots:
     void onDoubleClick(int addr,bool zoom);
     void onChannelConfigEvent(int addr);
@@ -53,7 +57,9 @@ private:
     QGroupBox* m_container;
     QGridLayout* qlayout;
     QMap<int,QByteArray > m_values;
+    WidgetWave* wave;
     bool m_zoom;
+    bool m_wave_mode;
     int  m_addr;
     //CSVFile m_csv;
     int m_num;

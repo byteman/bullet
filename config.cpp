@@ -23,6 +23,11 @@ bool Config::Init()
     m_enable_buffer= config.value("/config/db_buf_en",false).toBool();
     m_buf_num= config.value("/config/db_buf_len",80).toInt();
     m_buf_time= config.value("/config/db_buf_time",3000).toInt();
+    m_ftp_user= config.value("/config/ftp_user","root").toString();
+    m_ftp_password= config.value("/config/ftp_password","12345678").toString();
+
+
+
     m_recv_sensor_off= DAO::instance().ReadBoolParam("recv_sensor_off",true);
     m_use_sys_time = false;//DAO::instance().ReadBoolParam("use_sys_time",false);
     m_rt_wave_min  = DAO::instance().ReadIntParam("rt_wave_min",20);

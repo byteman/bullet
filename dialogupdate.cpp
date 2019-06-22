@@ -2,6 +2,7 @@
 #include "ui_dialogupdate.h"
 #include <QDebug>
 #include <QMessageBox>
+#include "config.h"
 DialogUpdate::DialogUpdate(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogUpdate)
@@ -82,8 +83,9 @@ void DialogUpdate::on_btnStartUpdate_clicked()
        accessManager->setNetworkAccessible(QNetworkAccessManager::Accessible);
        QUrl url(QString("ftp://%1/fridge/fridge").arg(m_addr));
        url.setPort(21);
-       url.setUserName("root");
-       url.setPassword("admin");
+
+       url.setUserName(Config::instance().m_ftp_user);
+       url.setPassword(Config::instance().m_ftp_password);
         qDebug() << "url===>" << url.toString();
        QNetworkRequest request(url);
        reply = accessManager->put(request, byte_file);

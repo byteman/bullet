@@ -458,51 +458,6 @@ void MainWnd::DevOnline(Device *dev)
 }
 //构造命令
 
-//定时查询某台主机上所有订单的状态。
-void MainWnd::updateOrderState()
-{
-    if(pFnGetOrderState!=NULL){
-        QGoString str(ui->cbxHost->currentText());
-        char* res=nullptr;
-        pFnGetOrderState(str.toGoString(),&res);
-        QJsonDocument doc =  QJsonDocument::fromJson(res);
-        QJsonObject o = doc.object();
-        for(int i=0; i < ui->orderList->topLevelItemCount();i++)
-        {
-           QTreeWidgetItem* item =  ui->orderList->topLevelItem(i);
-           if(item==NULL){
-               continue;
-           }
-           QString &order = item->text(0);
-           if(o.contains(order)){
-               //如果包含了订单的状态.
-               QJsonObject o2 = o[order].toObject();
-               int state = o2["state"].toInt();
-               QString msg = "";
-               switch(state)
-               {
-                   case 0:
-                        msg = QStringLiteral("未开始");
-                        break;
-                   case 1:
-                       msg = o2["message"].toString();//QStringLiteral("正在生成报告...");
-                       break;
-                   case 2:
-                       msg = QStringLiteral("生成报告成功");
-                       break;
-                   case 3:
-                       msg = o2["message"].toString();
-                       break;
-               }
-               item->setText(5,msg);
-           }
-
-        }
-
-        qDebug() << "result=" << res;
-
-    }
-}
 //1s 定时监测设备是否在线.
 void MainWnd::timerEvent(QTimerEvent *)
 {
@@ -537,11 +492,6 @@ void MainWnd::timerEvent(QTimerEvent *)
         }
     }
 
-    if(bQueryOrderState){
-
-       updateOrderState();
-
-    }
     //simData();
 
 }
@@ -618,7 +568,12 @@ void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
     }
     for(int i = 0; i < data.channels.size(); i++)
     {
-        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
+        int dot = 0;
+        //压强是1个小数点
+        if(data.channels[i].addr != 4){
+            dot = 1;
+        }
+        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,dot);
     }
     //wave->AppendData(0,get_random_number());
     //wave->DisplayChannel(0,true);
@@ -921,8 +876,9 @@ void MainWnd::initDeviceChannels()
     devices = new MyDevices(9,ui->gbDevices);
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
-    devices->SetDeviceNum(1,8);
-    devices->SetUnit("kg");
+    devices->SetDeviceNum(1,4);
+    devices->SetUnit("kpa");
+    devices->SetUnit(4,"mm");
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
     connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
     connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));
@@ -935,9 +891,8 @@ void MainWnd::initUI()
     this->setProperty("canMove", true);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
 
-    ui->orderList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->orderList->setColumnWidth(0,300);
-    IconHelper::Instance()->setIcon(ui->labIco, QChar(0xf099), 30);
+
+  //  IconHelper::Instance()->setIcon(ui->labIco, QChar(0xf099), 30);
     IconHelper::Instance()->setIcon(ui->btnMenu_Min, QChar(0xf068));
     IconHelper::Instance()->setIcon(ui->btnMenu_Max, QChar(0xf067));
     IconHelper::Instance()->setIcon(ui->btnMenu_Close, QChar(0xf00d));
@@ -1062,7 +1017,7 @@ void MainWnd::initUI()
 void MainWnd::fileChange(const QString &path)
 {
     qDebug() << path << "change";
-    loadStateFile();
+
 }
 
 void MainWnd::onProgress(QString serialNo, int prog, int err)
@@ -1083,58 +1038,8 @@ void MainWnd::loadSysConfig()
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
 
-    ui->edtHost->setText(Config::instance().m_host_name);
 }
-static bool loading = false;
-//加载状态文件.
-void MainWnd::loadStateFile(bool create)
-{
-    qDebug() << "loadStateFile";
-    loading = true;
-    ui->edtDataDir->setText(Config::instance().m_data_dir);
-    ui->cbxHost->clear();
-    //ui->cbxTestNo->clear();
-    //ui->listFiles->clear();
-    if(!StateManager::instance().parse(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm")))
-    {
-        qDebug() << "loadStateFile failed";
-        QMessageBox::information(this,"info",QStringLiteral("目录下找不到压力测试状态表.xlsm"));
-        this->AddLog("loadStateFile failed");
-        loading = false;
-        return;
-    }
-#if 1
-    CellTestHost& host = StateManager::instance().GetState();
 
-    QMap<QString,CellTestOrderList>::const_iterator i = host.constBegin();
-    while (i != host.constEnd()) {
-        qDebug() << i.key();
-        ui->cbxHost->addItem(i.key());
-        if(create){
-            CellTestOrderList::const_iterator it = i.value().constBegin();
-            while (it != i.value().constEnd()) {
-                QString cell=QString("%1/%2/%3").
-                        arg(Config::instance().
-                            m_data_dir).
-                        arg(i.key()).arg(it.key());
-                utils::MkMutiDir(cell);
-                ++it;
-            }
-
-        }
-
-
-        ++i;
-    }
-
-#endif
-    loading = false;
-     qDebug() << "loadStateFile ok----";
-    ui->cbxHost->setCurrentText(Config::instance().m_host_name);
-    qDebug() << "loadStateFile ok";
-    emit on_cbxHost_currentIndexChanged(Config::instance().m_host_name);
-
-}
 void MainWnd::buttonClick()
 {
     QToolButton *b = (QToolButton *)sender();
@@ -1158,7 +1063,7 @@ void MainWnd::buttonClick()
     } else if (name == "btnReport") {
         bQueryOrderState = true;
         ui->stackedWidget->setCurrentIndex(3);
-        loadStateFile();
+
     }else if (name == "btnHelp") {
         ui->stackedWidget->setCurrentIndex(4);
     } else if (name == "btnExit") {
@@ -1455,74 +1360,6 @@ void MainWnd::on_btnHelp_clicked()
 
 }
 
-void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
-{
-    qDebug() << "onchage" << arg1 << loading;
-     if(loading) return;
-    QString x = arg1;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
-   if(orders.size() == 0){
-      return;
-   }
-    QSignalMapper *signalMapper = new QSignalMapper(this);
-    QSignalMapper *signalMapper2 = new QSignalMapper(this);
-   ui->orderList->clear();
-   //ui->cbxTestNo->clear();
-   QMap<QString,QVector<CellState>>::const_iterator i = orders.constBegin();
-
-   while (i != orders.constEnd()) {
-       //cout << i.key() << ": " << i.value() << endl;
-       //ui->cbxTestNo->addItem(i.key());
-      QStringList row;
-      row.push_back(i.key());
-
-      if(i.value().size() > 0){
-          row.push_back(i.value().at(0).Temp);
-      }
-      row.push_back(QString("%1").arg(i.value().size()));
-    QTreeWidgetItem* item = new QTreeWidgetItem(row);
-    QVector<CellState> cells = i.value();
-
-       for(int j = 0 ; j < cells.size(); j++)
-       {
-
-            QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList(cells[j].CellNo));
-            item->addChild(subItem);
-       }
-
-       ui->orderList->addTopLevelItem(item);
-       QPushButton *btnReport = new QPushButton(QStringLiteral("生成报告"));
-        btnReport->setGeometry(0,0,80,40);
-
-        QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
-         btnOpenDir->setGeometry(0,0,80,40);
-
-       connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
-       //QString dir = QString("%1").arg(1);
-        QString dir = QString(QStringLiteral("%1/%2/%3"))
-                       .arg(Config::instance().m_data_dir)
-                       .arg(x)
-                       .arg(i.key());
-
-       signalMapper2->setMapping(btnOpenDir, dir);
-
-       connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
-       signalMapper->setMapping(btnReport, i.key());
-
-
-
-       ui->orderList->setItemWidget(item, 3, btnReport);
-       ui->orderList->setItemWidget(item, 4, btnOpenDir);
-
-
-       ++i;
-   }
-   connect(signalMapper, SIGNAL(mapped(QString)),
-               this, SLOT(on_report_click(QString)));
-   connect(signalMapper2, SIGNAL(mapped(QString)),
-               this, SLOT(on_opendir_click(QString)));
-
-}
 
 void MainWnd::on_opendir_click(QString dir)
 {
@@ -1530,150 +1367,9 @@ void MainWnd::on_opendir_click(QString dir)
     bool ok = QDesktopServices::openUrl(QUrl(dir_gbk));
     qDebug() << "open " << dir << " result=" << ok;
 }
-void MainWnd::on_report_click(QString order)
-{
-    qDebug() << order << " click";
-    if(pFnBuildReport){
-        QGoString str(buildReportInput(order));
-        char* res=nullptr;
-        int code = pFnBuildReport(str.toGoString(),&res);
-        if(code != 0){
-           QJsonDocument doc =  QJsonDocument::fromJson(res);
-           QJsonObject o = doc.object();
-           myHelper::ShowMessageBoxError(o["message"].toString());
-        }
-
-        qDebug() << "code=" << code << "result=" << res;
-
-    }
-
-}
-void MainWnd::on_cbxTestNo_currentIndexChanged(const QString &arg1)
-{
-    //列出所有的电芯
-
-    if(loading) return;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
-    //ui->listFiles->clear();
-   if(orders.contains(arg1)){
-       for(int i = 0; i < orders[arg1].size(); i++)
-       {
-        //   ui->listFiles->addItem(orders[arg1].at(i).CellNo);
-       }
-
-   }
 
 
-}
-/**
 
-type MergeChanInfo struct{
-
-    DevId string //设备名称
-    DevChan int //通道编号
-
-    CtrlName string //控制柜的名称
-    CtrlChan string //控制柜的通道名  这两个结合起来可以得到控制柜的文件名.
-
-    FileType string  //控制柜文件类型.
-    FileName string //控制柜的文件名称
-    CellNo string //电芯编号
-
-}
-
-func BuildPressReport(
-    channels []MergeChanInfo,
-    testNo string , //测试的单号
-    temp string , //测试的温度
-    )
-
- */
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-
-QString MainWnd::buildReportInput(QString order)
-{
-    CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
-    //QString order = "";//ui->cbxTestNo->currentText();
-    QJsonDocument doc;
-    QJsonObject root;
-    if(orders.contains(order) && orders[order].size() > 0){
-
-        QJsonArray arr;
-
-        QString temp  = orders[order].at(0).Temp;
-        root["order_no"] = order;
-        root["temp"] =temp ;
-        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
-                .arg(Config::instance().m_data_dir)
-                .arg(ui->cbxHost->currentText())
-                .arg(order).arg(order).arg(temp);
-        root["db"] = utils::GetWorkDir()+"/measure.db";
-        root["dir_path"]=Config::instance().m_data_dir;
-        root["host"] = ui->cbxHost->currentText();
-        root["skip_error"] = true;
-        QVector<CellState> &states =  orders[order];
-        for(int i = 0; i <states.size(); i++)
-        {
-             QJsonObject o;
-
-
-             o["dev_chan"] = orders[order].at(i).PressDevChan;
-             o["dev_name"] = orders[order].at(i).PressDevId;
-//             o["file_name"] = QString("%1/%2/%3/%4.xls")
-//                     .arg(Config::instance().m_data_dir)
-//                     .arg(ui->cbxHost->currentText())
-//                     .arg(order)
-//                     .arg(states[i].CellNo);
-             o["cell_no"] =states[i].CellNo;
-
-            arr.push_back(o);
-        }
-        root["chan_array"] = arr;
-
-
-    }
-    doc.setObject(root);
-    return doc.toJson();
-}
-
-
-void MainWnd::on_btnExecReport_clicked()
-{
-    //启动导出，在某个路径下查找电芯文件的路径
-    //默认规则是 电芯文件放到 工单号的目录下.
-    //选择工单后，就到工单目录下去查找该工单的所有文件
-    //然后对每个文件调用保存工具
-    if(pFnBuildReport){
-        QGoString str(buildReportInput("00"));
-        char* res=nullptr;
-        int code = pFnBuildReport(str.toGoString(),&res);
-
-        qDebug() << "code=" << code << "result=" << res;
-    }
-
-}
-
-void MainWnd::on_btnSelFile_clicked()
-{
-
-    QString path  = QFileDialog::getExistingDirectory(this);
-    if(path.length()< 2){
-        return;
-    }
-    ui->edtDataDir->setText(path);
-    Config::instance().SetDataDir(path);
-    fileWatcher->removePaths(fileWatcher->files());
-    fileWatcher->addPath(Config::instance().m_data_dir+QStringLiteral("/压力测试状态表.xlsm"));
-
-    loadStateFile();
-}
-
-void MainWnd::on_edtHost_textChanged(const QString &arg1)
-{
-    Config::instance().SetHostName(arg1);
-}
 
 void MainWnd::on_chkMeasure_clicked()
 {
@@ -1685,11 +1381,7 @@ void MainWnd::on_chkSelAll_clicked(bool checked)
 
 }
 
-void MainWnd::on_btnReload_clicked()
-{
-    //重新加载数据
-    loadStateFile(true);
-}
+
 
 void MainWnd::on_btnLocalIP_clicked()
 {

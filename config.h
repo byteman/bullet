@@ -29,6 +29,9 @@ struct Config
     int  m_save_intS; //本地保存时间间隔.
     QString m_data_dir;
     QString m_host_name; //主机名称.
+    QString m_ftp_user;
+    QString m_ftp_password;
+
 
 public:
     bool EnableRecvSensorOff(bool en);
