@@ -18,7 +18,7 @@ public:
     void DisplayChannel(int chan=0,bool bshow=false);
     void DisplayAllChannel(bool show);
     void Display();
-    void SetChannel(int num);
+    void SetChannelName(int chan,QString name);
     void CloseAll();
     void Clear();
 

@@ -18,11 +18,14 @@ public:
     bool SaveFile(QString name);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     qint64 write(QByteArray &data);
+    bool Write(MsgWaveData& data);
     void close();
     void update();
+    void WriteHeader(QString header);
 private:
     int m_index; //存储序号.
     QFile *m_file;
+    bool m_writeHeader;
     QString CreateDir();
     QString GetFileName();
     QStringList m_values;
@@ -30,7 +33,6 @@ private:
     QByteArray  m_header;
     QMap<int,QString >    m_csv_values;
 
-    bool writeHeader(QString name);
 };
 
 #endif // CSVFILE_H

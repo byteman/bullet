@@ -17,6 +17,7 @@ Device::Device():
     m_serial_id(0),
     m_sess(NULL),
     m_file(NULL),
+    m_stop_save(true),
     m_start_send(true)
 {
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
@@ -112,23 +113,7 @@ void Device::ReadRt()
     return;
 }
 
-//qint64 Device::SendStartWave(quint16 sess_id,bool start)
-//{
-//    ProtoMessage msg;
-//    msg.head.cmd_id = MSG_START_WAVE;
-//    msg.head.device_id = m_dev_id;
-//    msg.head.serial_id = m_serial_id++;
-//    msg.head.sesson_id = sess_id;
-//    msg.is_ack = false;
-//    QByteArray data;
-//    msg.toByteArray(data);
-//    if(start)
-//        OpenFile();
-//    else
-//        CloseFile();
-//    return SendData(data);
 
-//}
 qint64 Device::SendData(QByteArray& data)
 {
     if(m_sess)
@@ -154,51 +139,6 @@ void Device::timeout()
 
     }
 }
-void Device::OpenFile()
-{
-    if(m_file==NULL){
-        QString fname = GetFileName();
-        qDebug() << "create file " << fname;
-        m_file = new CSVFile(fname);
-    }
-}
-void Device::CloseFile()
-{
-    if(m_file!=NULL)
-    {
-        m_file->close();
-        delete m_file;
-        m_file = NULL;
-    }
-}
-//qint64 Device::StartRecWave(quint16 sess_id,bool start)
-//{
-//    ProtoMessage msg;
-//    if(start)
-//    {
-//        msg.head.cmd_id = MSG_START_REC_WAVE;
-
-//        OpenFile();
-//        m_packet_count = 3;
-//        timer.start(1000);
-//    }
-//    else
-//    {
-//        msg.head.cmd_id = MSG_STOP_REC_WAVE;
-//        CloseFile();
-//        timer.stop();
-
-//    }
-//    m_start_send = start;
-//    msg.head.device_id = m_dev_id;
-//    msg.head.serial_id = m_serial_id++;
-//    msg.head.sesson_id = sess_id;
-//    msg.is_ack = false;
-//    QByteArray data;
-//    msg.toByteArray(data);
-//    return SendData(data);
-
-//}
 
 void Device::checkOnline()
 {
@@ -236,46 +176,48 @@ void Device::DevNotify(QString msg)
     emit Notify(msg);
     qDebug() << msg;
 }
+void Device::OpenFile()
+{
+    if(m_file==NULL){
+        QString fname = GetFileName();
+        qDebug() << "create file " << fname;
+        m_file = new CSVFile(fname);
+        QString headers = QStringLiteral("正压压强") + ","+QStringLiteral("正压压强") ;
+//        headers << QStringLiteral("正压压强");
+//        headers << QStringLiteral("围压压强");
+//        headers << QStringLiteral("反压压力");
+//        headers << QStringLiteral("位移");
+//        headers << QStringLiteral("压力");
+//        headers << QStringLiteral("压强");
+
+        m_file->WriteHeader(headers);
+    }
+    m_stop_save  = false;
+}
+
+void Device::CloseFile()
+{
+    if(m_file!=NULL)
+    {
+        m_file->close();
+        delete m_file;
+        m_file = NULL;
+    }
+     m_stop_save  = true;
+}
+
 bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 {
     m_timeout = MAX_TIMEOUT;
     m_online = true;
-    //启动波形回应.
-    if(req.head.cmd_id == MSG_START_WAVE)
-    {
-        quint16 total = 0;
-        req.getBuffer(&total,2);
-        QString name = req.data.mid(2);
-        //ack
-        DevNotify("start wave");
-        if(total == 0){
-            DevNotify("packet==0");
-            return true;
-        }
-        m_sync.StartSync(this,BuildFileName(name),total);
 
-    }
-    //设备回应删除成功
-    else if(req.head.cmd_id == MSG_REMOVE_FILE)
-    {
-        emit CommResult(this,req.head.cmd_id,0);
-    }
-    //读取某个波形文件的历史数据.
-    else if(req.head.cmd_id == MSG_WAVE_DATA)
-    {
-        //
-        m_sync.onMessage(req,resp);
-    }
     //实时波形数据文件.
-    else if(req.head.cmd_id == MSG_START_REC_WAVE)
+    if(req.head.cmd_id == MSG_START_REC_WAVE)
     {
-        //req
-        if(!m_start_send)
-        {
-            StartRecWave(req.head.sesson_id,m_start_send);
-        }
+
         m_packet_count++;
-        SaveWave(req);
+        if(!m_stop_save)
+            SaveWave(req);
     }
     //注册和心跳包的回应
     else if(req.head.cmd_id == MSG_HEART)
@@ -322,47 +264,7 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             emit RealTimeResult(this,rst);
         }
     }
-    //枚举文件的回应
-    else if(req.head.cmd_id == MSG_ENUM_FILES)
-    {
-        QByteArray &data = req.data;
 
-        ENUM_FILE_RESP resp;
-        resp.total_page  = (data[1]<<8) + data[0];
-        resp.cur_page = (data[3]<<8) + data[2];
-        int num = (data[5]<<8) + data[4];
-        int off = 6;
-        QByteArray attr = data.mid(off,num);
-        int length = data.size() - off - num;
-        if(length > 0)
-        {
-            QString files = data.right(length);
-            qDebug() << "files=" << files;
-            QStringList filelist = files.split(",");
-            if( filelist.size()!=num)
-            {
-                emit Notify("file num error");
-                return true;
-            }
-
-            for(int i = 0; i < num; i++)
-            {
-                MsgFileInfo finfo;
-
-                if(filelist[i].contains("xls")){
-                    continue;
-                }
-                finfo.attr = attr[i];
-                finfo.name = filelist[i];
-                resp.files.push_back(finfo);
-            }
-            emit EnumFiles(this,resp);
-
-        }
-
-
-
-    }
     return true;
 }
 QString Device::id() const
@@ -378,7 +280,7 @@ void Device::setId(const QString &id)
 QString Device::CreateDir()
 {
 
-    QString target_dir=QString("%1/wave/%2/%3").arg(QDir::currentPath()).arg(m_station).arg(m_dev_id);
+    QString target_dir=QString("%1/csv/").arg(QDir::currentPath());
     QDir dir(target_dir);
     if(!dir.exists())
     {
@@ -404,39 +306,86 @@ void Device::sendProgress(int sample_start, int sample_total)
 {
     emit Progress(this,QString("%1").arg(sample_start*100/sample_total)+"%");
 }
+#include "utils.h"
 void Device::ProcessWave(int index,QByteArray &data)
 {
-
-    //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
-    int sample_nr = data.size() / (8*2);
-
-    ChannelData cda;
+    MsgSensorData msd;
     MsgWaveData wvd;
+    ChannelData cda;
     wvd.channels.reserve(8);
     wvd.channels.fill(cda,8);
-    if(index == 0)
-    {
-        wvd.m_first = true;
-    }
-    for(int i = 0 ; i < sample_nr; i++)
-    {
-        for(int j = 0; j < 8; j++)
-        {
-//           quint8 v1 = (data[i*8+j*2+1]<<8);
-//           quint8 v2 = data[i*8+j*2+0];
-//           qint16 value =  (v1<<8) + v2;
+    //msd.m_dev_serial = this->id();
+    //qDebug() <<" sensor" << sizeof(SensorData);
+    int j = 0;
+    while(data.size() >= sizeof(SensorData) && j < 8){
+        SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
+        data.remove(0,sizeof(SensorData));
 
-           qint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
-           memcpy(&value, data.data() + i*16 + j*2,2);
+#ifdef CRC_SUPPORT
+        quint16 crc = CRC16BigEndian((quint8*)&value,sizeof(SensorData)-2);
 
-
-           wvd.channels[j].push_back( value );
-            //cda[j]
+        if(crc != value.crc){
+            qDebug("CRC ERROR %04x != %04x",crc,value.crc);
+            continue;
         }
+#endif
+        qDebug() << "addr=" << value.addr << " value=" << value.weight;
+        //WriteValues(value);
+
+        if(value.addr == 4){
+            //wvd.channels[j++].push_back( value.weight );
+            msd.channels.push_back(value);
+        }else{
+
+            wvd.channels[j++].push_back( utils::int2float(value.weight,1) );
+            //msd.channels.push_back(value);
+        }
+
+
     }
+    //没有停止才录制波形
+
+    if(m_file!=NULL)
+    {
+        m_file->Write(wvd);
+    }
+
+
+
+    //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit showWave(this,wvd);
 
 }
+//void Device::ProcessWave(int index,QByteArray &data)
+//{
+
+//    //总长度 / 1个样本的长度(8通道*每个通道2字节) = 样本数
+//    int sample_nr = data.size() / (8*2);
+
+//    ChannelData cda;
+//    MsgWaveData wvd;
+//    wvd.channels.reserve(8);
+//    wvd.channels.fill(cda,8);
+//    if(index == 0)
+//    {
+//        wvd.m_first = true;
+//    }
+//    for(int i = 0 ; i < sample_nr; i++)
+//    {
+//        for(int j = 0; j < 8; j++)
+//        {
+
+//           qint16 value = 0;//(data[i*8+j*2+1]<<8) + data[i*8+j*2+0];
+//           memcpy(&value, data.data() + i*16 + j*2,2);
+
+
+//           wvd.channels[j].push_back( value );
+
+//        }
+//    }
+//    emit showWave(this,wvd);
+
+//}
 void Device::SaveWave(ProtoMessage &msg)
 {
     QByteArray &data  = msg.data;
@@ -455,10 +404,7 @@ void Device::SaveWave(ProtoMessage &msg)
     //qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
     QByteArray wvData = msg.data.mid(12, nsize);
 
-    if(m_file!=NULL)
-    {
-        m_file->write(wvData);
-    }
+
 
     //sendProgress(sample_start, sample_total);
 
@@ -543,6 +489,9 @@ void Device::setHostPort(QHostAddress host, quint16 port)
 
 qint64 Device::StartRecWave(quint16 sess_id, bool start)
 {
+    if(start)
+        OpenFile();
+    else CloseFile();
     return 0;
 }
 

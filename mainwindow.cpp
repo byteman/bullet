@@ -33,23 +33,7 @@ QString MainWindow::GetDevice(int ch)
  */
 void MainWindow::onChannelClick(int addr)
 {
-    qDebug() << m_cur_dev_id << " chan=" << addr;
-    DialogChanConfig dlg;
-    DeviceChnConfig cfg;
 
-    QString name = GetDevice(addr);
-    int chan = addr % 8;
-    DAO::instance().DeviceChannalGet(name,chan,cfg);
-
-    dlg.SetChanConfig(name,chan,cfg);
-    int result = dlg.exec();
-    if(result == QDialog::Accepted){
-        dlg.GetChanConfig(cfg);
-
-        DAO::instance().DeviceChannalUpdate(name,chan,cfg);
-        devices->SetChanSetting(addr,cfg);
-
-    }
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
@@ -57,8 +41,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     if (event->type() == QEvent::MouseButtonDblClick) {
 
     }else if (event->type() == QEvent::Resize) {
-        if(devices!=NULL)
-            devices->Resize();
+
         return true;
     }
 
@@ -66,29 +49,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 }
 void MainWindow::InitDevice(QList<Device*> &devs)
 {
-    devices = new MyDevices(42,ui->gbDevices);
 
-    devices->SetDeviceNum(1,40);
-    devices->SetUnit("kg");
     m_chans.clear();
-    for(int i = 0; i < devs.size(); i++)
-    {
-        for(int j = 0; j < 8; j++)
-        {
-            int addr = i*8+j+1;
-            int ch = j+1;
-            QString title = QString("%1:%2").arg(devs[i]->name()).arg(ch);
-            devices->SetTitle(addr, title);
-            DeviceChnConfig cfg;
-            cfg.maxValue = m_max;
-            cfg.minValue = m_min;
-            //DAO::instance().DeviceChannalGet(devs[i]->name(),j+1,cfg);
-            devices->SetChanSetting(i*8+j+1,cfg);
-        }
-        m_chans[devs[i]->id()] = (i+1)*8;
-    }
-    ui->gbDevices->installEventFilter(this);
-    connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
+
 
 }
 void MainWindow::loadDeviceUI()
@@ -98,6 +61,7 @@ void MainWindow::loadDeviceUI()
     QList<Device*> devs;
     ui->treeWidget->clear();
     ui->treeWidget->setIconSize(QSize(48,48));
+
     dvm.ListDevice(devs);
     for(int i = 0; i < devs.size();i++)
     {
@@ -121,8 +85,8 @@ void MainWindow::loadDeviceUI()
     chanels[3] = ui->label_11;
     chanels[4] = ui->label_24;
     chanels[5] = ui->label_23;
-    chanels[6] = ui->label_22;
-    chanels[7] = ui->label_21;
+    //chanels[6] = ui->label_22;
+    //chanels[7] = ui->label_21;
     InitDevice(devs);
 }
 MainWindow::MainWindow(QWidget *parent) :
@@ -136,9 +100,11 @@ MainWindow::MainWindow(QWidget *parent) :
     DAO::instance().Init("bullet.db");
     QSettings config("bullet.ini", QSettings::IniFormat);
     config.setIniCodec("UTF-8");//添上这句就不会出现乱码了);
+    ui->btnStop_2->setDisabled(true);
+
 
     m_debug_bytes = config.value("/device/debug",20).toInt();
-    m_refresh_count = config.value("/device/refresh",20).toInt();
+    m_refresh_count = config.value("/device/refresh",1).toInt();
     m_cur_station = config.value("/device/station",1).toInt();
     int dot= 3 - config.value("/device/dot",3).toInt();
     if(dot < 0 || dot > 3) dot = 0;
@@ -147,9 +113,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_min = config.value("/device/min",-10000).toDouble();
 
     m_full =  config.value("/device/full",10000).toInt();
-    ui->edtFull->setText(QString("%1").arg(m_full));
-    ui->cbxDot->setCurrentIndex(dot);
-    m_dot  =  ui->cbxDot->currentText().toInt();
+
     stationActions[1] = ui->actionStation1;
     stationActions[2] = ui->actionStation2;
     stationActions[3] = ui->action3;
@@ -168,7 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
     icon_dir.addFile(":image/dir.png");
     icon_file.addFile(":image/channel.png");
 
-    ui->btnStop->setEnabled(false);
+    //ui->btnStop->setEnabled(false);
 
 
     checkAll(true);
@@ -235,10 +199,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //dvm.SetStation("工位1");
     loadDeviceUI();
 
-    m_waveWdg = new WaveWidget(ui->plot,8);
-
+    m_waveWdg = new WaveWidget(ui->plot,6);
+    m_waveWdg->SetChannelName(0,"正压-压强");
+    m_waveWdg->SetChannelName(1,"围压-压强");
+    m_waveWdg->SetChannelName(2,"反压-压强");
+    m_waveWdg->SetChannelName(3,"位移");
+    m_waveWdg->SetChannelName(4,"压力");
+    m_waveWdg->SetChannelName(5,"压强");
     this->startTimer(1000);
+    if(srv->start(8881)){
 
+    }
     qDebug() <<"MainWindow thread id=" << thread();
 }
 
@@ -263,23 +234,7 @@ void MainWindow::Message(SessMessage s)
 
 void MainWindow::onEnumFiles(Device *dev, ENUM_FILE_RESP resp)
 {
-    ui->listFile->clear();
-    ui->cbxCurPage->clear();
-    for(int j = 0; j < resp.total_page;j++)
-    {
-        ui->cbxCurPage->addItem(QString("%1").arg(j+1));
-    }
-    ui->cbxCurPage->setCurrentIndex(resp.cur_page);
-    m_cur_page = resp.cur_page;
-    for(int i =0; i < resp.files.size();i++)
-    {
-        QListWidgetItem* item = NULL;
-        if(resp.files[i].attr == 1)
-            item = new QListWidgetItem(icon_file,resp.files[i].name);
-        else
-            item = new QListWidgetItem(icon_dir,resp.files[i].name);
-        ui->listFile->addItem(item);
-    }
+
 }
 QString  MainWindow::formatIpaddr(sIP_ADDR& ipaddr)
 {
@@ -288,22 +243,6 @@ QString  MainWindow::formatIpaddr(sIP_ADDR& ipaddr)
 
 void MainWindow::onReadPara(Device *dev, MsgDevicePara para)
 {
-    ui->edtDevId->setText(QString("%1").arg(m_cur_dev_id));
-    ui->edtPassword->setText((const char*)para.mWifiPass);
-    ui->edtSSID->setText((const char*)para.mWifiSSID);
-    ui->edtWetDown->setText(QString("%1").arg(para.mWetDown));
-    ui->edtWetUp->setText(QString("%1").arg(para.mWetUp));
-
-    ui->cbxMode->setCurrentIndex(para.mWorkMode>1?0:para.mWorkMode);
-
-    ui->edtDevIp->setText(formatIpaddr(para.Local_IP.ipaddr));
-    ui->edtNetmask->setText(formatIpaddr(para.Local_IP.SubnetMask));
-    ui->edtGateway->setText(formatIpaddr(para.Local_IP.GateWay));
-
-    ui->edtTime->setText(para.mDateTime.toString());
-    ui->edtServerIp->setText(formatIpaddr(para.Server_ip.ipaddr));
-    ui->edtServerPort->setText(QString("%1").arg(para.Server_ip.port));
-
 
 }
 //设置
@@ -325,8 +264,8 @@ void MainWindow::onWaveProgress(Device *dev, QString progress)
 void MainWindow::on_btnStop_clicked()
 {
     if(srv->stop()){
-        ui->btnWaveStart->setEnabled(true);
-        ui->btnStop->setEnabled(false);
+        //ui->btnWaveStart->setEnabled(true);
+        //ui->btnStop->setEnabled(false);
     }
 }
 //发送读取波形命令
@@ -440,11 +379,11 @@ void MainWindow::on_btnSaveWave_clicked()
 
 void MainWindow::on_btnWaveStart_clicked()
 {
-    if(srv->start(8888))
+    if(srv->start(8881))
     {
-        ui->btnWaveStart->setEnabled(false);
-        ui->btnStop->setEnabled(true);
-        QString str = QString("listen%1").arg(8888);
+        //ui->btnWaveStart->setEnabled(false);
+        //ui->btnStop->setEnabled(true);
+        QString str = QString("listen%1").arg(8881);
         ui->statusBar->showMessage(str);
     }
 }
@@ -459,18 +398,7 @@ void MainWindow::listFiles(QString dev_id)
 }
 void MainWindow::readParam(quint32 dev_id)
 {
-    ui->edtDevId->clear();
-    ui->edtDevIp->clear();
-    ui->edtGateway->clear();
-    ui->edtNetmask->clear();
-    ui->edtPassword->clear();
-    ui->edtSSID->clear();
-    ui->edtTime->clear();
-    ui->edtWetDown->clear();
-    ui->edtWetUp->clear();
-    ui->edtServerIp->clear();
-    ui->edtServerPort->clear();
-    //dvm.ReadParam(dev_id);
+
 }
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
@@ -513,12 +441,12 @@ void MainWindow::ShowDeviceChannel(QString dev_id, QString file,int chan)
     dvm.LoadWaveFile(dev_id, file,wvd);
     m_waveWdg->SetData(wvd);
 
-    for(int i = 0; i < 8; i++){
-        double min,max;
-        m_waveWdg->GetValueRange(i,min,max);
-        chanels[i]->setText(QString("%1").arg(max));
+//    for(int i = 0; i < 8; i++){
+//        double min,max;
+//        m_waveWdg->GetValueRange(i,min,max);
+//        //chanels[i]->setText(QString("%1").arg(max));
 
-    }
+//    }
     m_waveWdg->DisplayAllChannel(true);
 
 
@@ -574,29 +502,19 @@ void MainWindow::toInt32U(QString str, quint32 &dest)
 void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 {
 
-   if(m_chans.contains(dev->id())){
-       for(int i = 0; i < 8; i++){
-            int start = m_chans[dev->id()]-8;
-            if(data.channels[i].size() == 0) continue;
-            devices->DisplayWeight(start+i+1, data.channels[i][0],0,m_dot);
-//            for(int j=0; j<data.channels[i].size(); j++){
-//                devices->DisplayWeight(start+i+1, data.channels[i][j],0,0);
-//            }
-       }
+
+   if(dev->id() != m_cur_dev_id)
+   {
+       return;
+   }
+   m_waveWdg->AppendData(data);
+   static int count = 0;
+   if( (count++ % m_refresh_count) == 0)
+   {
+
+       m_waveWdg->Display();
 
    }
-//   if(dev->id() != m_cur_dev_id)
-//   {
-//       return;
-//   }
-//   m_waveWdg->AppendData(data);
-//   static int count = 0;
-//   if( (count++ % m_refresh_count) == 0)
-//   {
-
-//       m_waveWdg->Display();
-
-//   }
 //   for(int i = 0; i < 8; i++){
 //       double min,max;
 //       m_waveWdg->GetValueRange(i,min,max);
@@ -609,28 +527,7 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
 //保存参数.
 void MainWindow::on_btnSavePara_clicked()
 {
-    MsgDevicePara para;
-    toIpAddr(ui->edtGateway->text(), para.Local_IP.GateWay);
-    toIpAddr(ui->edtNetmask->text(), para.Local_IP.SubnetMask);
-    toIpAddr(ui->edtDevIp->text(),   para.Local_IP.ipaddr);
-    toIpAddr(ui->edtServerIp->text(), para.Server_ip.ipaddr);
 
-    toString(ui->edtPassword->text(),para.mWifiPass,sizeof(para.mWifiPass));
-    toString(ui->edtSSID->text(),para.mWifiSSID,sizeof(para.mWifiSSID));
-
-    toInt16U(ui->edtWetUp->text(),para.mWetUp);
-    toInt16U(ui->edtWetDown->text(),para.mWetDown);
-    para.mWorkMode = ui->cbxMode->currentIndex();
-
-    toInt32U(ui->edtServerPort->text(),para.Server_ip.port);
-    QSettings config("bullet.ini", QSettings::IniFormat);
-    config.setIniCodec("UTF-8");
-
-    int dot = ui->cbxDot->currentText().toInt();
-    config.setValue("/device/dot",dot);
-    config.setValue("/device/full",ui->edtFull->text());
-    m_dot = dot;
-    dvm.WriteParam(m_cur_dev_id,para);
 }
 
 
@@ -671,8 +568,8 @@ void MainWindow::checkAll(bool checked)
     ui->rb4->setChecked(checked);
     ui->rb5->setChecked(checked);
     ui->rb6->setChecked(checked);
-    ui->rb7->setChecked(checked);
-    ui->rb8->setChecked(checked);
+    //ui->rb7->setChecked(checked);
+    //ui->rb8->setChecked(checked);
 }
 void MainWindow::on_rball_clicked(bool checked)
 {
@@ -730,9 +627,9 @@ void MainWindow::isAllCheck()
             ui->rb3->isChecked()&
             ui->rb4->isChecked()&
             ui->rb5->isChecked()&
-            ui->rb6->isChecked()&
-            ui->rb7->isChecked()&
-            ui->rb8->isChecked();
+            ui->rb6->isChecked();
+            //ui->rb7->isChecked()&
+            //ui->rb8->isChecked();
     ui->rball->setChecked(isAll);
 }
 
@@ -768,11 +665,6 @@ static QString float2string(float wf, int dot)
 
 void MainWindow::onRealTimeResult(Device *dev, RT_AD_RESULT result)
 {
-    int index = ui->cbxChan->currentIndex();
-    if(index == -1) return;
-    ui->edtRtAd->setText(QString("%1").arg(result.chan[index].ad));
-    ui->edtrtWgt->setText(QString("%1").arg(float2string(result.chan[index].weight,m_dot)));
-    //ui->edtCalibWet->setText(QString("%1").arg(result.chan[index].weight));
 
 }
 
@@ -781,21 +673,19 @@ void MainWindow::on_btnStart_clicked()
     qDebug() << "on_btnStart_clicked";
     m_waveWdg->Clear();
     dvm.StartAll(true);
-    devices->ResetAlarm();
+    ui->btnStart->setDisabled(true);
+    ui->btnStop_2->setDisabled(false);
+
 
 }
 
 void MainWindow::on_btnStop_2_clicked()
 {
     dvm.StartAll(false);
-    QTreeWidgetItem* item = ui->treeWidget->currentItem();
-    if(item!=NULL)
-    {
-
-        QString dev_id = item->data(0,Qt::UserRole).toString();
-        listFiles(dev_id);
-    }
-
+    ui->btnStart->setDisabled(false);
+    ui->btnStop_2->setDisabled(true);
+    if(m_cur_dev_id.length() > 0)
+     listFiles(m_cur_dev_id);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -844,16 +734,11 @@ void MainWindow::on_btnPause_clicked()
 
 void MainWindow::on_btnCalibZero_clicked()
 {
-    dvm.calib(m_cur_dev_id, ui->cbxChan->currentIndex(),0,0);
+    //dvm.calib(m_cur_dev_id, ui->cbxChan->currentIndex(),0,0);
 }
 
 void MainWindow::on_btnCalibWet_clicked()
 {
-    bool ok = false;
-    int weight  = ui->edtCalibWet->text().toInt(&ok);
-    if(ok){
-        dvm.calib(m_cur_dev_id,ui->cbxChan->currentIndex(),1,weight);
-    }
 
 }
 
@@ -891,10 +776,7 @@ void MainWindow::on_cbxCurPage_currentIndexChanged(int index)
 
 void MainWindow::on_btnGo_clicked()
 {
-    int idx = ui->cbxCurPage->currentIndex();
-    if(idx >= 0){
-        dvm.ListFiles(m_cur_dev_id,idx,PAGE_SIZE);
-    }
+
 }
 
 void MainWindow::removeFiles()

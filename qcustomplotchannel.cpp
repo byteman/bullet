@@ -1,5 +1,5 @@
 #include "qcustomplotchannel.h"
-static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
+static QColor colors[8] = {Qt::darkCyan,Qt::yellow,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
     m_graph(graph)
@@ -73,7 +73,10 @@ void QCustomPlotChannel::AddDataArray(QVector<double> &samples)
     m_graph->addData(keys,values);
 
 }
-
+void QCustomPlotChannel::SetName(QString &name)
+{
+    m_graph->setName(name);
+}
 void QCustomPlotChannel::Clear()
 {
 

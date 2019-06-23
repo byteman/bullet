@@ -36,32 +36,26 @@ CSVFile::CSVFile(QString file):
 CSVFile::CSVFile():
     m_index(0)
 {
-//    QFile file(":/csv.txt");
-//    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-//    {
-//        qDebug() << "open failed!";
-//    }
-//    m_header = file.readAll();
-//    m_header+="\r\n";
 
-//    for(int i=0; i < 8; i++)
-//    {
-//        m_values.push_back("");
-//    }
 
 }
-bool CSVFile::writeHeader(QString name)
-{
-    m_file->setFileName(name);
-    m_file->open(QIODevice::WriteOnly|QIODevice::Append);
-    m_file->write(m_header);
-    m_file->flush();
-    return true;
-}
+
 void CSVFile::update()
 {
     m_file->write(m_output);
     m_output.clear();
+}
+
+void CSVFile::WriteHeader(QString header)
+{
+    //QString out = header.join(',');
+    //m_output.append(out);
+    //m_output.append("\r\n");
+    QFile f("csv.txt");
+    f.open(QIODevice::ReadOnly);
+
+    m_file->write(f.readAll());
+
 }
 qint64 CSVFile::write(QByteArray &data)
 {
@@ -88,6 +82,19 @@ qint64 CSVFile::write(QByteArray &data)
         update();
     }
     return 0;
+}
+
+bool CSVFile::Write(MsgWaveData &data)
+{
+    for(int i = 0 ; i < 6; i++)
+    {
+        m_values[i] = QString("%1").arg(data.channels[i][0]);
+    }
+    QString out = m_values.join(',');
+    m_output.append(out);
+    m_output.append("\r\n");
+    update();
+    return true;
 }
 
 void CSVFile::close()
@@ -126,9 +133,9 @@ bool CSVFile::LoadWaveFile(QString file, MsgWaveData &wvd)
         for(int j = 0; j < 8; j++)
         {
 
-            bool ok = false;
+           bool ok = false;
            //QString item = line[j];
-           int value = line[j].toInt(&ok);
+           double value = line[j].toDouble(&ok);
            if(!ok){
                continue;
            }

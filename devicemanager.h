@@ -21,7 +21,8 @@ public:
     bool SendAllWave(bool start);
     bool SendWave(QString dev_id,bool start);
     bool StartAll(bool start);
-
+    void OpenFile(QString dev_id);
+    void CloseFile(QString dev_id);
     bool SyncFile(QString dev_id,QString file);
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(QString dev_id,quint8 delay_s);

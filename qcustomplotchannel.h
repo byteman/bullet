@@ -14,6 +14,7 @@ public:
     virtual void Clear();
     virtual int  Size();
     virtual void SetPen(QPen& pen);
+    virtual void SetName(QString &name);
     virtual void GetValueRange(double& min,double &max);
     virtual void GetKeyRange(double& min,double &max);
 private:

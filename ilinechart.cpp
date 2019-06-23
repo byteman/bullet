@@ -104,6 +104,14 @@ void ILineChart::Clear()
     }
 }
 
+void ILineChart::SetChannelName(int chan, QString name)
+{
+    int index = (chan >= channels.size())?0:chan;
+
+
+    channels[index]->SetName(name);
+}
+
 void ILineChart::GetValueRange(int chan, double &min, double &max)
 {
     int index = (chan >= channels.size())?0:chan;

@@ -95,6 +95,20 @@ bool DeviceManager::StartAll(bool start)
     return ok;
 }
 
+void DeviceManager::OpenFile(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->OpenFile();
+}
+
+void DeviceManager::CloseFile(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->CloseFile();
+}
+
 bool DeviceManager::SyncFile(QString dev_id, QString file)
 {
     return true;

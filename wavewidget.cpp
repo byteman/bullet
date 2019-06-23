@@ -48,6 +48,11 @@ void WaveWidget::Display()
     m_chart->Display();
 }
 
+void WaveWidget::SetChannelName(int chan, QString name)
+{
+    m_chart->SetChannelName(chan,name);
+}
+
 void WaveWidget::DisplayChannel(int chan,bool bshow)
 {
     m_chart->DisplayChannel(chan,bshow);

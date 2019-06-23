@@ -34,7 +34,7 @@ public:
     void MyListFiles(int id, int page);
 private:
     Ui::MainWindow *ui;
-    MyDevices *devices;
+
     double m_max,m_min;
     QVector<double> xdata;
     QVector<double> ydata;
@@ -191,9 +191,11 @@ protected:
     int m_cur_station;
     WaveWidget *m_waveWdg;
     bool pause ;
+    bool m_stop_save;
     int m_dot;
     int m_full;
     QTimer m_timer;
+
     QMap<QString,int> m_chans;
     QMap<int,QLabel*>  chanels;
     QMap<int,QAction*> stationActions;

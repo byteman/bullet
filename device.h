@@ -58,6 +58,8 @@ public:
     void setWeight(const qint32 &weight);
     void sendProgress(int sample_start, int sample_total);
     void SendSyncFile(QString file);
+    void OpenFile();
+    void CloseFile();
 private:
     SyncFile m_sync;
     qint32 m_ad;
@@ -70,6 +72,7 @@ private:
     QHostAddress m_host;
     quint16 m_port;
     bool m_start_send;
+    bool m_stop_save;
     bool m_online; //设备是否在线
     int  m_timeout; //在线超时定时器.
     int  m_packet_count; //接收包计数器。
@@ -84,8 +87,7 @@ private:
     void ProcessWave(int index, QByteArray &data);
 
     QTimer timer;
-    void OpenFile();
-    void CloseFile();
+
     QString BuildFileName(QString name);
 signals:
     void CommResult(Device* dev,int cmd, int result);
