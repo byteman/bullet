@@ -25,7 +25,7 @@ bool DeviceManager::start()
     id_name_map.clear();
     for(int i = 0; i < ids.size();i++)
     {
-        id_name_map[ids[i].toInt()] = names[i];
+        id_name_map[ids[i]] = names[i];
         Device* dev = new Device();
         connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
         connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
@@ -39,9 +39,9 @@ bool DeviceManager::start()
 
         connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
 
-        dev->setId(ids[i].toInt());
+        dev->setId(ids[i]);
         dev->setName(names[i]);
-        dev_map[ids[i].toInt()] = dev;
+        dev_map[ids[i]] = dev;
     }
     //this->startTimer(1000);
     return true;
@@ -51,36 +51,37 @@ void DeviceManager::stop()
 {
     for(int i = 0; i < ids.size();i++)
     {
-        disconnect(dev_map[ids[i].toInt()],SIGNAL(Notify(QString)),0,0);
+        disconnect(dev_map[ids[i]],SIGNAL(Notify(QString)),0,0);
     }
 }
 
 bool DeviceManager::SendAllWave(bool start)
 {
     bool ok = false;
-    QMapIterator<quint32,Device*> i(dev_map);
-    while (i.hasNext()) {
-        i.next();
+//    QMapIterator<quint32,Device*> i(dev_map);
+//    while (i.hasNext()) {
+//        i.next();
 
-        if(i.value()->SendStartWave(m_session_id++,start) == 0)
-        {
-            ok = false;
-        }
+//        if(i.value()->SendStartWave(m_session_id++,start) == 0)
+//        {
+//            ok = false;
+//        }
 
-    }
+//    }
 
     return ok;
 }
 
-bool DeviceManager::SendWave(quint8 dev_id,bool start)
+bool DeviceManager::SendWave(QString dev_id, bool start)
 {
-    return dev_map[dev_id]->SendStartWave(m_session_id++,start)!=0;
+    //return dev_map[dev_id]->SendStartWave(m_session_id++,start)!=0;
+    return true;
 }
 
 bool DeviceManager::StartAll(bool start)
 {
     bool ok = false;
-    QMapIterator<quint32,Device*> i(dev_map);
+    QMapIterator<QString,Device*> i(dev_map);
     while (i.hasNext()) {
         i.next();
 
@@ -94,85 +95,54 @@ bool DeviceManager::StartAll(bool start)
     return ok;
 }
 
-bool DeviceManager::SyncFile(quint8 dev_id, QString file)
+bool DeviceManager::SyncFile(QString dev_id, QString file)
 {
-    if(!dev_map.contains(dev_id))
-        return false;
-    dev_map[dev_id]->SendSyncFile(file);
     return true;
 }
 
-bool DeviceManager::RemoveFile(quint8 dev_id,QString file)
-{
-    if(!dev_map.contains(dev_id))
-        return false;
-    dev_map[dev_id]->RemoveFile(file);
-    return true;
-}
 
-bool DeviceManager::ResetAllDevice(quint8 delay_s)
-{
-    bool ok = true;
-    QMapIterator<quint32,Device*> i(dev_map);
-    while (i.hasNext()) {
-        i.next();
 
-        if(i.value()->Reset(delay_s) == false)
-        {
-            ok = false;
-        }
 
-    }
-
-    return ok;
-}
-
-bool DeviceManager::ResetDevice(quint32 dev_id,quint8 delay_s)
+bool DeviceManager::ResetDevice(QString dev_id,quint8 delay_s)
 {
     if(!dev_map.contains(dev_id))
         return false;
     return dev_map[dev_id]->Reset(delay_s);
 }
 
-bool DeviceManager::ListFiles(quint32 dev_id,int page, int size)
+bool DeviceManager::ListFiles(QString dev_id, int page, int size)
 {
-    if(!dev_map.contains(dev_id))
-        return false;
-    return dev_map[dev_id]->ListFiles(page,size);
+    return true;
 }
 
-void DeviceManager::calib(quint32 dev_id,quint8 chan,quint8 index, int weight)
+void DeviceManager::calib(QString dev_id, quint8 chan, quint8 index, int weight)
 {
-    if(!dev_map.contains(dev_id))
-        return ;
-    dev_map[dev_id]->calib(chan,index,weight);
+
 }
 
-void DeviceManager::ReadParam(quint32 dev_id)
+void DeviceManager::ReadParam(QString dev_id)
 {
-    if(!dev_map.contains(dev_id))
-        return ;
-    return dev_map[dev_id]->ReadParam();
+
 }
 
-void DeviceManager::ReadRt(quint32 dev_id)
+bool DeviceManager::RemoveDevice(QString dev_id)
 {
-    if(!dev_map.contains(dev_id))
-        return ;
-    return dev_map[dev_id]->ReadRt();
+    return true;
 }
 
-void DeviceManager::WriteParam(quint32 dev_id, MsgDevicePara &para)
+void DeviceManager::WriteParam(QString dev_id, MsgDevicePara &para)
 {
-    if(!dev_map.contains(dev_id))
-        return ;
-    return dev_map[dev_id]->WriteParam(para);
+
 }
+
+
+
+
 
 void DeviceManager::SetStation(QString station)
 {
 
-    QMapIterator<quint32,Device*> i(dev_map);
+    QMapIterator<QString,Device*> i(dev_map);
     while (i.hasNext()) {
         i.next();
             i.value()->setStation(station);
@@ -181,7 +151,7 @@ void DeviceManager::SetStation(QString station)
 
 void DeviceManager::ListDevice(QList<Device *> &devices)
 {
-    QMapIterator<quint32,Device*> i(dev_map);
+    QMapIterator<QString,Device*> i(dev_map);
     while (i.hasNext()) {
         i.next();
 
@@ -190,14 +160,14 @@ void DeviceManager::ListDevice(QList<Device *> &devices)
     }
 }
 
-Device *DeviceManager::GetDevice(quint32 dev_id)
+Device *DeviceManager::GetDevice(QString dev_id)
 {
     if(!dev_map.contains(dev_id))
         return NULL;
     return dev_map[dev_id];
 }
 
-void DeviceManager::GetDeviceWaveFiles(quint32 dev_id, QStringList &files)
+void DeviceManager::GetDeviceWaveFiles(QString dev_id, QStringList &files)
 {
     if(!dev_map.contains(dev_id))
         return;
@@ -206,11 +176,16 @@ void DeviceManager::GetDeviceWaveFiles(quint32 dev_id, QStringList &files)
 
 
 
-bool DeviceManager::LoadWaveFile(quint32 dev_id, QString file, MsgWaveData &wvd)
+bool DeviceManager::LoadWaveFile(QString dev_id, QString file, MsgWaveData &wvd)
 {
     if(!dev_map.contains(dev_id))
         return false;
     return dev_map[dev_id]->LoadWaveFile(file,wvd);
+}
+
+bool DeviceManager::RemoveFile(QString dev_id, QString file)
+{
+    return true;
 }
 
 void DeviceManager::onCommResult(Device *dev, int cmd, int result)
@@ -249,10 +224,17 @@ void DeviceManager::Message(SessMessage msg)
     ProtoMessage temp_msg;
     ProtoMessage output_msg;
     parser.pushData(msg.getData());
+//    QTime time;
 
+//    time.start();
     if(parser.parseData(msg.getData(),temp_msg))
     {
-        quint32 dev_id = temp_msg.head.device_id;
+        //Q dev_id = temp_msg.head.device_id;
+        //memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
+
+        char buf[13]={0,};
+        memcpy(buf,temp_msg.head.device_id,12);
+        QString dev_id = buf;
         if(dev_map.contains(dev_id))
         {
             //dev_map[dev_id]->setSess(msg.getSession());
@@ -261,14 +243,17 @@ void DeviceManager::Message(SessMessage msg)
     }
     while(parser.parseData(input_msg))
     {
-        quint32 dev_id = input_msg.head.device_id;
+        char buffer[13]={0,};
+        memcpy(buffer,input_msg.head.device_id,12);
+        QString dev_id = QString(buffer);
         if(dev_map.contains(dev_id))
         {
             dev_map[dev_id]->setSess(msg.getSession());
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
-            dev_map[dev_id]->onMessage(input_msg,output_msg);
-
-            if(!input_msg.is_ack )
+            //qDebug() << "get message cmd=" << input_msg.head.cmd_id;
+            bool succ = dev_map[dev_id]->onMessage(input_msg,output_msg);
+            //是否需要回应，并且成功处理数据，才进行回应.
+            if(!input_msg.is_ack && succ)
             {
                 QByteArray arr;
                 output_msg.head = input_msg.head;
@@ -282,7 +267,7 @@ void DeviceManager::Message(SessMessage msg)
         input_msg.clear();
 
     }
-
+    //qDebug()<<time.elapsed()<<"ms";
 }
 
 void DeviceManager::onNotify(QString msg)
@@ -314,7 +299,7 @@ void DeviceManager::onRealTimeResult(Device *dev, RT_AD_RESULT result)
 //定时调用.
 void DeviceManager::timerEvent(QTimerEvent *)
 {
-    QMapIterator<quint32,Device*> i(dev_map);
+    QMapIterator<QString,Device*> i(dev_map);
     while (i.hasNext()) {
         i.next();
         bool online = i.value()->online();

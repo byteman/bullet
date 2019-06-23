@@ -30,8 +30,6 @@ public:
     ~MainWindow();
     void setupRealtimeDataDemo(QCustomPlot *qwtplot);
 
-
-    void ShowDeviceChannel(quint32 dev_id, QString file, int chan);
     void removeFiles();
     void MyListFiles(int id, int page);
 private:
@@ -56,7 +54,7 @@ private:
 
     QString FormatHex(QByteArray &data);
     void loadDeviceUI();
-    QTreeWidgetItem *findItemById(quint32 id);
+    QTreeWidgetItem *findItemById(QString id);
     void paintWave(MsgWaveData &wvd, int chan);
     void ShowDeviceChannel(quint32 dev_id, int chan);
 
@@ -189,14 +187,14 @@ private slots:
 protected:
     void timerEvent(QTimerEvent *);
     quint32 m_cur_page;
-    quint32 m_cur_dev_id;
+    QString m_cur_dev_id;
     int m_cur_station;
     WaveWidget *m_waveWdg;
     bool pause ;
     int m_dot;
     int m_full;
     QTimer m_timer;
-    QMap<int,int> m_chans;
+    QMap<QString,int> m_chans;
     QMap<int,QLabel*>  chanels;
     QMap<int,QAction*> stationActions;
     // QWidget interface
@@ -217,6 +215,8 @@ protected slots:
     void onChannelClick(int addr);
 public:
     virtual bool eventFilter(QObject *, QEvent *);
+    void listFiles(QString dev_id);
+    void ShowDeviceChannel(QString dev_id, QString file, int chan);
 };
 
 #endif // MAINWINDOW_H

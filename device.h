@@ -9,6 +9,13 @@
 #include <QTimer>
 #include <QJsonDocument>
 #include "syncfile.h"
+#include "models.h"
+#include <QQueue>
+struct DeviceChannel{
+    QQueue<SensorData> values;
+    DeviceChnConfig config;
+
+};
 class Device:public QObject
 {
     Q_OBJECT
@@ -19,11 +26,12 @@ public:
 
     //检查设备是否在线.
     void checkOnline();
+    bool checkCanSave(qint64 time,int saveInt);
     QString name() const;
     void setName(const QString &name);
-    void onMessage(ProtoMessage &reqest, ProtoMessage &response);
-    quint32 id() const;
-    void setId(const quint32 &id);
+    bool onMessage(ProtoMessage &reqest, ProtoMessage &response);
+    QString id() const;
+    void setId(const QString &id);
     void SaveWave(ProtoMessage &msg);
     QString station() const;
     void setStation(const QString &station);
@@ -32,17 +40,18 @@ public:
     ISession *sess() const;
     void setSess(ISession *sess);
     void setHostPort(QHostAddress host,quint16 port);
-    qint64 SendStartWave(quint16 sess_id,bool start);
+    bool GetHostAddr(QString &ip);
     qint64 StartRecWave(quint16 sess_id,bool start);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     void ReadParam();
     void WriteParam(MsgDevicePara &para);
     void ReadRt();
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
-    bool ListFiles(int page,int size);
+    void ResetCount();
+    int  GetCount();
     bool Reset(quint8 delay_s);
     bool calib(quint8 chan,  int point,int weigh);
-    qint32 ad() const;
+    quint32 ad() const;
     void setAd(const qint32 &ad);
     qint64 SendData(QByteArray &data);
     qint32 weight() const;
@@ -53,7 +62,7 @@ private:
     SyncFile m_sync;
     qint32 m_ad;
     qint32 m_weight;
-    quint32 m_dev_id;
+    QString m_dev_id;
     quint16 m_serial_id;
     QString m_name;
     QString m_station;

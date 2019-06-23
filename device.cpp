@@ -34,8 +34,9 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
 {
     ProtoMessage msg;
     msg.head.cmd_id = cmd;
-    msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
+    memcpy(msg.head.device_id , m_dev_id.toLocal8Bit().data(),12);
+    //msg.head.device_id = m_dev_id;
+    //msg.head.serial_id = m_serial_id++;
     msg.head.sesson_id = m_sess_id++;
     msg.is_ack = false;
     msg.data.push_back(buf);
@@ -43,6 +44,15 @@ qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
     msg.toByteArray(data);
     return SendData(data);
 
+}
+void Device::ResetCount()
+{
+    m_packet_count = 0;
+}
+
+int Device::GetCount()
+{
+    return m_packet_count;
 }
 bool Device::calib(quint8 chan, int point,int weight)
 {
@@ -55,7 +65,7 @@ bool Device::calib(quint8 chan, int point,int weight)
     WriteCmd(MSG_CALIB,data);
     return true;
 }
-qint32 Device::ad() const
+quint32 Device::ad() const
 {
     return m_ad;
 }
@@ -75,14 +85,6 @@ void Device::setWeight(const qint32 &weight)
 }
 
 
-bool Device::ListFiles(int page, int size)
-{
-    ENUM_FILES_REQ data;
-    data.page = page;
-    data.size = size;
-    WriteCmd(MSG_ENUM_FILES,data.toBuffer());
-    return true;
-}
 void Device::ReadParam()
 {
     QByteArray data;
@@ -110,23 +112,23 @@ void Device::ReadRt()
     return;
 }
 
-qint64 Device::SendStartWave(quint16 sess_id,bool start)
-{
-    ProtoMessage msg;
-    msg.head.cmd_id = MSG_START_WAVE;
-    msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = sess_id;
-    msg.is_ack = false;
-    QByteArray data;
-    msg.toByteArray(data);
-    if(start)
-        OpenFile();
-    else
-        CloseFile();
-    return SendData(data);
+//qint64 Device::SendStartWave(quint16 sess_id,bool start)
+//{
+//    ProtoMessage msg;
+//    msg.head.cmd_id = MSG_START_WAVE;
+//    msg.head.device_id = m_dev_id;
+//    msg.head.serial_id = m_serial_id++;
+//    msg.head.sesson_id = sess_id;
+//    msg.is_ack = false;
+//    QByteArray data;
+//    msg.toByteArray(data);
+//    if(start)
+//        OpenFile();
+//    else
+//        CloseFile();
+//    return SendData(data);
 
-}
+//}
 qint64 Device::SendData(QByteArray& data)
 {
     if(m_sess)
@@ -146,7 +148,7 @@ void Device::timeout()
         {
             m_packet_count--;
             if(m_packet_count<= 0){
-                StartRecWave(m_serial_id++,true);
+                //StartRecWave(m_serial_id++,true);
             }
         }
 
@@ -169,34 +171,34 @@ void Device::CloseFile()
         m_file = NULL;
     }
 }
-qint64 Device::StartRecWave(quint16 sess_id,bool start)
-{
-    ProtoMessage msg;
-    if(start)
-    {
-        msg.head.cmd_id = MSG_START_REC_WAVE;
+//qint64 Device::StartRecWave(quint16 sess_id,bool start)
+//{
+//    ProtoMessage msg;
+//    if(start)
+//    {
+//        msg.head.cmd_id = MSG_START_REC_WAVE;
 
-        OpenFile();
-        m_packet_count = 3;
-        timer.start(1000);
-    }
-    else
-    {
-        msg.head.cmd_id = MSG_STOP_REC_WAVE;
-        CloseFile();
-        timer.stop();
+//        OpenFile();
+//        m_packet_count = 3;
+//        timer.start(1000);
+//    }
+//    else
+//    {
+//        msg.head.cmd_id = MSG_STOP_REC_WAVE;
+//        CloseFile();
+//        timer.stop();
 
-    }
-    m_start_send = start;
-    msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = sess_id;
-    msg.is_ack = false;
-    QByteArray data;
-    msg.toByteArray(data);
-    return SendData(data);
+//    }
+//    m_start_send = start;
+//    msg.head.device_id = m_dev_id;
+//    msg.head.serial_id = m_serial_id++;
+//    msg.head.sesson_id = sess_id;
+//    msg.is_ack = false;
+//    QByteArray data;
+//    msg.toByteArray(data);
+//    return SendData(data);
 
-}
+//}
 
 void Device::checkOnline()
 {
@@ -209,6 +211,16 @@ void Device::checkOnline()
         m_online = false;
     }
 }
+//bool Device::checkCanSave(qint64 time,int saveInt)
+//{
+//    if(time - m_last_save_ts > saveInt){
+//        m_last_save_ts = time;
+//        return true;
+//    }
+//    //时间往后走了
+//    if(time < m_last_save_ts){m_last_save_ts = time;return true;}
+//    return false;
+//}
 QString Device::name() const
 {
     return m_name;
@@ -224,7 +236,7 @@ void Device::DevNotify(QString msg)
     emit Notify(msg);
     qDebug() << msg;
 }
-void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
+bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 {
     m_timeout = MAX_TIMEOUT;
     m_online = true;
@@ -238,7 +250,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         DevNotify("start wave");
         if(total == 0){
             DevNotify("packet==0");
-            return;
+            return true;
         }
         m_sync.StartSync(this,BuildFileName(name),total);
 
@@ -330,7 +342,7 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
             if( filelist.size()!=num)
             {
                 emit Notify("file num error");
-                return;
+                return true;
             }
 
             for(int i = 0; i < num; i++)
@@ -351,13 +363,14 @@ void Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 
 
     }
+    return true;
 }
-quint32 Device::id() const
+QString Device::id() const
 {
     return m_dev_id;
 }
 
-void Device::setId(const quint32 &id)
+void Device::setId(const QString &id)
 {
     m_dev_id = id;
 }
@@ -510,20 +523,7 @@ void Device::RemoveFile(QString file)
     QByteArray data;
     WriteCmd(MSG_REMOVE_FILE,data);
 }
-void Device::SendSyncFile(QString file)
-{
-    ProtoMessage msg;
-    msg.head.cmd_id = MSG_START_WAVE;
-    msg.head.device_id = m_dev_id;
-    msg.head.serial_id = m_serial_id++;
-    msg.head.sesson_id = m_sess_id++;
-    msg.is_ack = false;
-    msg.data.append(file);
-    QByteArray data;
-    msg.toByteArray(data);
 
-    SendData(data);
-}
 ISession *Device::sess() const
 {
     return m_sess;
@@ -539,6 +539,11 @@ void Device::setHostPort(QHostAddress host, quint16 port)
     //qDebug() << m_dev_id << " host:" << host.toString() << " port="<<port;
     m_host = host;
     m_port = port;
+}
+
+qint64 Device::StartRecWave(quint16 sess_id, bool start)
+{
+    return 0;
 }
 
 

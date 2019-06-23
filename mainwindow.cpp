@@ -11,7 +11,7 @@
 
 QString MainWindow::GetDevice(int ch)
 {
-    QMapIterator<int, int> i(m_chans);
+    QMapIterator<QString, int> i(m_chans);
     while (i.hasNext()) {
         i.next();
         int chan = i.value();
@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    m_cur_dev_id = 0;
+    m_cur_dev_id = "";
     m_cur_page = 0;
     qRegisterMetaType<SessMessage>("SessMessage");
     ui->setupUi(this);
@@ -317,9 +317,7 @@ void MainWindow::onWaveProgress(Device *dev, QString progress)
     QTreeWidgetItem* item = findItemById(dev->id());
     if(item!=NULL)
     {
-        if(progress=="100%"){
-            listFiles(dev->id());
-        }
+
         item->setText(1,progress);
     }
 }
@@ -336,14 +334,14 @@ void MainWindow::on_btnReadWave_clicked()
 {
     dvm.SendAllWave(true);
 }
-QTreeWidgetItem* MainWindow::findItemById(quint32 id)
+QTreeWidgetItem* MainWindow::findItemById(QString id)
 {
     QTreeWidgetItemIterator it(ui->treeWidget);
     while (*it) {
         QTreeWidgetItem* item = *it;
         QVariant v = item->data(0,Qt::UserRole);
 
-        quint32 d = v.value<quint32>();
+        QString d = v.value<QString>();
 
           if (d == id)
           {
@@ -364,8 +362,6 @@ void MainWindow::onNotify(QString msg)
 void MainWindow::on_menu_click(bool)
 {
 
-    if(m_cur_dev_id!=0)
-        readParam(m_cur_dev_id);
 }
 void MainWindow::on_write_menu_click(bool)
 {
@@ -373,25 +369,19 @@ void MainWindow::on_write_menu_click(bool)
 }
 void MainWindow::on_reset_menu_click(bool)
 {
-    if(m_cur_dev_id!=0)
-        dvm.ResetDevice(m_cur_dev_id,1);
+
 }
 void MainWindow::MyListFiles(int id,int page)
 {
-    if(m_cur_dev_id!=0)
-    {
-        dvm.ListFiles(id,page,PAGE_SIZE);
-        ui->listFile->clear();
-    }
+
 }
 void MainWindow::on_list_files_menu_click(bool)
 {
-   MyListFiles(m_cur_dev_id,m_cur_page);
+
 }
 void MainWindow::on_download_wave(bool)
 {
-    if(m_cur_dev_id!=0)
-        dvm.SendWave(m_cur_dev_id,true);
+
 }
 void MainWindow::DevOffline(Device *dev)
 {
@@ -458,7 +448,7 @@ void MainWindow::on_btnWaveStart_clicked()
         ui->statusBar->showMessage(str);
     }
 }
-void MainWindow::listFiles(quint32 dev_id)
+void MainWindow::listFiles(QString dev_id)
 {
 
     QStringList wvFiles;
@@ -480,14 +470,14 @@ void MainWindow::readParam(quint32 dev_id)
     ui->edtWetUp->clear();
     ui->edtServerIp->clear();
     ui->edtServerPort->clear();
-    dvm.ReadParam(dev_id);
+    //dvm.ReadParam(dev_id);
 }
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
-    quint32 dev_id = item->data(0,Qt::UserRole).toInt();
+    QString dev_id = item->data(0,Qt::UserRole).toString();
     listFiles(dev_id);
-    readParam(dev_id);
-    MyListFiles(dev_id,m_cur_page);
+    //readParam(dev_id);
+    //MyListFiles(dev_id,m_cur_page);
 
     m_waveWdg->Clear();
 }
@@ -517,7 +507,7 @@ void MainWindow::on_actionStation2_triggered()
     setCurrentStation(2);
 }
 
-void MainWindow::ShowDeviceChannel(quint32 dev_id, QString file,int chan)
+void MainWindow::ShowDeviceChannel(QString dev_id, QString file,int chan)
 {
     MsgWaveData wvd;
     dvm.LoadWaveFile(dev_id, file,wvd);
@@ -660,7 +650,7 @@ void MainWindow::onCommResult(Device *dev, int cmd, int result)
 void MainWindow::on_mytime_out()
 {
     //qDebug() << "mytimeout";
-    dvm.ReadRt(m_cur_dev_id);
+    //dvm.ReadRt(m_cur_dev_id);
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -802,7 +792,7 @@ void MainWindow::on_btnStop_2_clicked()
     if(item!=NULL)
     {
 
-        quint32 dev_id = item->data(0,Qt::UserRole).toInt();
+        QString dev_id = item->data(0,Qt::UserRole).toString();
         listFiles(dev_id);
     }
 
@@ -879,7 +869,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::on_btnNext_clicked()
 {
 //下一页
-    MyListFiles(m_cur_dev_id,m_cur_page+1);
+    //MyListFiles(m_cur_dev_id,m_cur_page+1);
 
 }
 
@@ -887,7 +877,7 @@ void MainWindow::on_btnPrev_clicked()
 {
     if(m_cur_page>0)
     {
-        MyListFiles(m_cur_dev_id,m_cur_page-1);
+        //MyListFiles(m_cur_dev_id,m_cur_page-1);
     }
 //上一页
     //dvm.ListFiles()
@@ -912,7 +902,7 @@ void MainWindow::removeFiles()
     if(QMessageBox::Yes==QMessageBox::question(this,"提示","确定删除文件"))
     {
         dvm.RemoveFile(m_cur_dev_id,"");
-        MyListFiles(m_cur_dev_id,m_cur_page);
+        //MyListFiles(m_cur_dev_id,m_cur_page);
     }
 
 }

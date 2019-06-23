@@ -206,10 +206,23 @@ struct WaveDataHead{
 struct ProtoHeader{
     quint16 magic; // 0xFE 0x7F
     quint16 length;// 整条数据包的总长度
-    quint32 device_id; //设备编号
-    quint16 serial_id; //序号
-    quint16 sesson_id; //会话编号
+    qint8   device_id[12]; //设备编号 001122334455 mac地址是12字节
+    //quint32 serial_id; //序号
+    quint32 sesson_id; //会话编号
     quint8  cmd_id; //命令编号
+};
+#include <QDebug>
+#include "crc16.h"
+//#define CRC_SUPPORT 1
+struct SensorData{
+    quint8 addr;
+    quint8 valid;
+    qint32 weight;
+    qint32 time;
+#ifdef CRC_SUPPORT
+    quint16 crc;
+#endif
+
 };
 #pragma pack(pop)
 
@@ -270,9 +283,9 @@ public:
         output.append(0x7F);
         head.length = sizeof(ProtoHeader) + 1+ data.size();
         output.append((const char*)&head.length,sizeof(quint16));
-        output.append((const char*)&head.device_id,sizeof(quint32));
-        output.append((const char*)&head.serial_id,sizeof(quint16));
-        output.append((const char*)&head.sesson_id,sizeof(quint16));
+        output.append((const char*)head.device_id,12);
+        //output.append((const char*)&head.serial_id,sizeof(quint16));
+        output.append((const char*)&head.sesson_id,sizeof(quint32));
         output.append((const char*)&head.cmd_id,sizeof(quint8));
 
         output.append(data);
@@ -286,8 +299,8 @@ public:
         head.length = sizeof(ProtoHeader) + 1+ data.size();
         output.append((const char*)&head.length,sizeof(quint16));
         output.append((const char*)&head.device_id,sizeof(quint32));
-        output.append((const char*)&head.serial_id,sizeof(quint16));
-        output.append((const char*)&head.sesson_id,sizeof(quint16));
+        //output.append((const char*)&head.serial_id,sizeof(quint16));
+        output.append((const char*)&head.sesson_id,sizeof(quint32));
         output.append((const char*)&head.cmd_id,sizeof(quint8));
 
         output.append(data);
@@ -321,6 +334,15 @@ typedef struct{
 //一个通道的数据总和.
 typedef QVector<double> ChannelData;
 
+struct MsgSensorData:public ProtoMessage{
+    QVector<SensorData> channels; //一个设备包含n个通道的数据.
+    QString m_dev_serial;//设备唯一序列号
+    bool m_first; //是否是某次采集数据的首包数据.
+    MsgSensorData()
+    {
+        m_first = false;
+    }
+};
 struct MsgWaveData:public ProtoMessage{
   QVector<ChannelData> channels; //一个设备包含n个通道的数据.
   QString m_dev_serial;//设备唯一序列号
