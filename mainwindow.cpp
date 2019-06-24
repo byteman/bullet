@@ -202,7 +202,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_waveWdg = new WaveWidget(ui->plot,6);
     m_waveWdg->SetChannelName(0,"正压-压强");
     m_waveWdg->SetChannelName(1,"围压-压强");
-    m_waveWdg->SetChannelName(2,"反压-压强");
+    m_waveWdg->SetChannelName(2,"反压-压力");
     m_waveWdg->SetChannelName(3,"位移");
     m_waveWdg->SetChannelName(4,"压力");
     m_waveWdg->SetChannelName(5,"压强");

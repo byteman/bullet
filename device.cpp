@@ -333,12 +333,10 @@ void Device::ProcessWave(int index,QByteArray &data)
         //WriteValues(value);
 
         if(value.addr == 4){
-            //wvd.channels[j++].push_back( value.weight );
-            msd.channels.push_back(value);
+            wvd.channels[j++].push_back( value.weight );
         }else{
-
             wvd.channels[j++].push_back( utils::int2float(value.weight,1) );
-            //msd.channels.push_back(value);
+
         }
 
 
