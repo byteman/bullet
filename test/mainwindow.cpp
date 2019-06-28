@@ -190,8 +190,8 @@ void MainWindow::sendPacket(quint8 cmd,quint16 sess,QByteArray& data)
 {
     ProtoMessage msg;
     msg.head.cmd_id = cmd;
-    msg.head.device_id = ui->edtDevID->text().toInt();
-    msg.head.serial_id = serial_id++;
+    //msg.head.device_id = ui->edtDevID->text().toInt();
+    //msg.head.serial_id = serial_id++;
     msg.head.sesson_id = sess;
     msg.data.append(data);
     QByteArray buf;

@@ -154,7 +154,7 @@
 border-bottom:2px;</string>
              </property>
              <property name="text">
-              <string>正压-压强</string>
+              <string>反压</string>
              </property>
             </widget>
            </item>
@@ -168,7 +168,7 @@ border-bottom:2px;</string>
            <item>
             <widget class="QCheckBox" name="rb2">
              <property name="text">
-              <string>围压-压强</string>
+              <string>围压</string>
              </property>
             </widget>
            </item>
@@ -182,7 +182,7 @@ border-bottom:2px;</string>
            <item>
             <widget class="QCheckBox" name="rb3">
              <property name="text">
-              <string>反压-压力</string>
+              <string>输出力</string>
              </property>
             </widget>
            </item>
@@ -196,7 +196,7 @@ border-bottom:2px;</string>
            <item>
             <widget class="QCheckBox" name="rb4">
              <property name="text">
-              <string>位移</string>
+              <string>轴向位移</string>
              </property>
             </widget>
            </item>
@@ -210,7 +210,7 @@ border-bottom:2px;</string>
            <item>
             <widget class="QCheckBox" name="rb5">
              <property name="text">
-              <string>压力</string>
+              <string>轴力</string>
              </property>
             </widget>
            </item>
@@ -224,7 +224,7 @@ border-bottom:2px;</string>
            <item>
             <widget class="QCheckBox" name="rb6">
              <property name="text">
-              <string>压强</string>
+              <string>孔压</string>
              </property>
             </widget>
            </item>
@@ -324,7 +324,7 @@ border-bottom:2px;</string>
      <x>0</x>
      <y>0</y>
      <width>1330</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_station">

@@ -9,7 +9,7 @@ WaveWidget::WaveWidget(QWidget *parent, int num,int shift)
     //m_chart = new QChartLineChart(parent,num);
 
     m_chart = new QCustomChart((QCustomPlot*)parent,num);
-    m_chart->SetFilter(new ShiftFilter(shift));
+    //m_chart->SetFilter(new ShiftFilter(shift));
 
 }
 //WaveWidget::WaveWidget(QCustomPlot* parent,int num)

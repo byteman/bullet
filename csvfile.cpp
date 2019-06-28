@@ -125,12 +125,12 @@ bool CSVFile::LoadWaveFile(QString file, MsgWaveData &wvd)
     while (!stream.atEnd())
     {
         QStringList line = stream.readLine().split(",");
-        if(line.size() != 8)
+        if(line.size() < 6)
         {
             continue;
         }
 
-        for(int j = 0; j < 8; j++)
+        for(int j = 0; j < 6; j++)
         {
 
            bool ok = false;

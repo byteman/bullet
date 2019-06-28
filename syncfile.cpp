@@ -122,7 +122,9 @@ void SyncFile::readPacket(int index,int count)
     msg.index = index;
     m_timeout = 0;
     qDebug() << "read " << index << " count=" << count;
-    m_device->WriteCmd(MSG_WAVE_DATA, msg.toBuffer());
+	QByteArray buf = msg.toBuffer();
+
+    m_device->WriteCmd(MSG_WAVE_DATA,buf);
 }
 //1秒超时，重发当前波形.
 void SyncFile::timeout()

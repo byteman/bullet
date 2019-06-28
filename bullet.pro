@@ -40,7 +40,6 @@ SOURCES += main.cpp\
     utils.cpp \
     gpserver.cpp \
     gpsession.cpp \
-    mysocket.cpp \
     csvfile.cpp \
     syncfile.cpp \
     widgetchan.cpp \
@@ -74,7 +73,6 @@ HEADERS  += mainwindow.h \
     utils.h \
     gpserver.h \
     gpsession.h \
-    mysocket.h \
     csvfile.h \
     syncfile.h \
     widgetchan.h \

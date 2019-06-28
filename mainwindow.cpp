@@ -1,5 +1,4 @@
-#include "gpserver.h"
-
+﻿
 #include "qcustomplot.h"
 
 #include "mainwindow.h"
@@ -142,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(&srv,SIGNAL(Message(SessMessage)),&dvm
 //            ,SLOT(Message(SessMessage)));
 
-    srv = new GPServer();
+    srv = new UdpServer();
     connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
@@ -200,12 +199,12 @@ MainWindow::MainWindow(QWidget *parent) :
     loadDeviceUI();
 
     m_waveWdg = new WaveWidget(ui->plot,6);
-    m_waveWdg->SetChannelName(0,"正压-压强");
-    m_waveWdg->SetChannelName(1,"围压-压强");
-    m_waveWdg->SetChannelName(2,"反压-压力");
-    m_waveWdg->SetChannelName(3,"位移");
-    m_waveWdg->SetChannelName(4,"压力");
-    m_waveWdg->SetChannelName(5,"压强");
+    m_waveWdg->SetChannelName(0,QStringLiteral("反压 "));
+    m_waveWdg->SetChannelName(1,QStringLiteral("围压"));
+    m_waveWdg->SetChannelName(2,QStringLiteral("输出力"));
+    m_waveWdg->SetChannelName(3,QStringLiteral("轴向位移"));
+    m_waveWdg->SetChannelName(4,QStringLiteral("轴力"));
+    m_waveWdg->SetChannelName(5,QStringLiteral("孔压"));
     this->startTimer(1000);
     if(srv->start(8881)){
 

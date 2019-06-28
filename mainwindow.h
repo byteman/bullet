@@ -19,7 +19,7 @@
 namespace Ui {
 class MainWindow;
 }
-class GPServer;
+//class GPServer;
 class QCustomPlot;
 class MainWindow : public QMainWindow
 {
@@ -41,7 +41,7 @@ private:
     QTimer updateTimer;
     QString demoName;
     //UdpServer srv;
-    GPServer *srv;
+    UdpServer *srv;
     DeviceManager dvm;
     QIcon icon_device[2];
     QIcon icon_channel;

@@ -6,6 +6,7 @@ QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
 {
 //    m_max = -10000;
 //    m_min = 10000;
+    m_filter = NULL;
     m_graph->setName(QString("通道%1").arg(index+1));
     QPen pen(colors[index]);
     pen.setWidth(2);
