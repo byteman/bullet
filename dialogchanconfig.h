@@ -12,7 +12,7 @@ class DialogChanConfig : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogChanConfig(QWidget *parent = nullptr);
+    explicit DialogChanConfig(QWidget *parent = NULL);
     ~DialogChanConfig();
     void SetChanConfig(QString serialNo,int chan,DeviceChnConfig& cfg);
     bool GetChanConfig(DeviceChnConfig& cfg);

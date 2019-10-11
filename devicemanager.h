@@ -9,6 +9,7 @@
 #include "syncfile.h"
 #include "models.h"
 #include <QMap>
+#include <QMutex>
 #include <QList>
 class DeviceManager:public QObject
 {

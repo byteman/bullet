@@ -22,7 +22,7 @@
 #include "histwavewidget.h"
 #include "myplottrace.h"
 #include <QFileSystemWatcher>
-
+#include "ftpupload.h"
 namespace Ui {
 class MainWnd;
 }
@@ -46,6 +46,7 @@ private:
      MyDevices* devices;
     bool bQueryOrderState;
     bool bFirst;
+    FtpUploadManger m_ftp;
      MyPlotTrace *m_tracer;
     //MyPing ping;
      QFutureWatcher<bool> *watcher;
@@ -92,6 +93,9 @@ private:
      void updateOrderState();
      bool CheckPassWord();
      void outputVer();
+     void updateTimes();
+     QVector<int> GetMainSelectChannel();
+     void updateTime();
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -187,6 +191,18 @@ private slots:
 
     void on_chkSensorOff_clicked(bool checked);
 
+    void on_rb6_clicked();
+
+    void on_edtFtpHost_textChanged(const QString &arg1);
+
+    void on_edtFtpName_textChanged(const QString &arg1);
+
+    void on_edtFtpPwd_textChanged(const QString &arg1);
+
+    void on_edtFtpBase_textChanged(const QString &arg1);
+
+    void on_rb1_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -205,6 +221,8 @@ protected slots:
     void on_clearup_menu_click(bool);
     void onReply(QString msg);
     void on_opendir_click(QString order);
+    void on_stop_menu_click(bool);
+    void on_start_menu_click(bool);
 };
 
 #endif // UIDEMO01_H

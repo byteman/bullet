@@ -20,7 +20,7 @@ public:
         YAxisStaticLineUp, //Y轴绝对线.
         YAxisStaticLineDown, //Y轴绝对线.
 	};
-	explicit MyTracer(QCustomPlot *_plot, TracerType _type, QObject *parent = nullptr);
+    explicit MyTracer(QCustomPlot *_plot, TracerType _type, QObject *parent = NULL);
 	~MyTracer();
 	void setPen(const QPen &pen);
 	void setBrush(const QBrush &brush);

@@ -7,7 +7,7 @@
 MyDevices::MyDevices(int max,QGroupBox* parent):
     m_container(parent),
     m_max(10),
-    m_row(2),m_col(4),
+    m_row(3),m_col(4),
     m_num(0),m_max_sample(5000),
     m_addr(0),
     m_zoom(false)
@@ -39,6 +39,18 @@ void MyDevices::SetOnline(bool online)
     {
          widgets[i]->SetOnline(online);
     }
+}
+
+void MyDevices::SetSelectRecState(bool paused)
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+        if(widgets[i]->IsSelected()){
+            widgets[i]->SetRecState(paused);
+        }
+    }
+
+
 }
 void MyDevices::SetTimeRange(int rangeS)
 {

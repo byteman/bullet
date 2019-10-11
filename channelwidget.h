@@ -32,6 +32,7 @@ public:
     bool IsZoom();
     void ClearDisplay();
     int  Addr();
+    bool IsSelected();
     QQueue<SensorData>& GetHistoryData();
     void DisplayDataQueue(QQueue<SensorData> &dataQueue);
     virtual void mouseDoubleClickEvent(QMouseEvent *);

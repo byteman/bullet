@@ -17,7 +17,7 @@
 #include "gotypes.h"
 #include "asyncexport.h"
 #include <QInputDialog>
-#define MAX_CHAN_NR 8
+#define MAX_CHAN_NR 12
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
 {
@@ -318,6 +318,30 @@ bool MainWnd::CheckPassWord()
     }
     return true;
 }
+void MainWnd::on_start_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    if(devices!=NULL)
+        devices->SetSelectRecState(false);
+
+}
+void MainWnd::on_stop_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    if(devices!=NULL)
+        devices->SetSelectRecState(true);
+
+}
 void MainWnd::on_clearup_menu_click(bool)
 {
     if(!CheckPassWord() )return;
@@ -463,7 +487,7 @@ void MainWnd::updateOrderState()
 {
     if(pFnGetOrderState!=NULL){
         QGoString str(ui->cbxHost->currentText());
-        char* res=nullptr;
+        char* res=NULL;
         pFnGetOrderState(str.toGoString(),&res);
         QJsonDocument doc =  QJsonDocument::fromJson(res);
         QJsonObject o = doc.object();
@@ -473,7 +497,7 @@ void MainWnd::updateOrderState()
            if(item==NULL){
                continue;
            }
-           QString &order = item->text(0);
+           QString order = item->text(0);
            if(o.contains(order)){
                //如果包含了订单的状态.
                QJsonObject o2 = o[order].toObject();
@@ -658,13 +682,16 @@ MainWnd::MainWnd(QWidget *parent) :
     watcher(NULL)
 {
     qRegisterMetaType<SessMessage>("SessMessage");
+        qDebug() << "111111111";
     ui->setupUi(this);
-
+    qDebug() << "after setup ui";
     if(this->Init())
     {
+         qDebug() << "222222";
         this->Start();
     }
 
+     qDebug() << "333333";
 
 
 }
@@ -734,16 +761,20 @@ QVector<int> MainWnd::GetSelectChannel()
 
     return channels;
 }
+
 void MainWnd::SelectAll(bool en)
 {
     for(int i= 0; i< rbChanList.size();i++)
     {
         rbChanList[i]->setChecked(en);
     }
+    if(en){
+        updateTime();
+    }
 }
 void MainWnd::loadChannels()
 {
-    ui->rb1->setChecked(true);
+    //ui->rb1->setChecked(true);
     rbChanList.push_back(ui->rb1);
     rbChanList.push_back(ui->rb2);
     rbChanList.push_back(ui->rb3);
@@ -752,6 +783,11 @@ void MainWnd::loadChannels()
     rbChanList.push_back(ui->rb6);
     rbChanList.push_back(ui->rb7);
     rbChanList.push_back(ui->rb8);
+    rbChanList.push_back(ui->rb9);
+    rbChanList.push_back(ui->rb10);
+    rbChanList.push_back(ui->rb11);
+    rbChanList.push_back(ui->rb12);
+
     QSignalMapper *signalMapper = new QSignalMapper(this);
     for(int i =0 ;i < rbChanList.size(); i++)
     {
@@ -763,7 +799,48 @@ void MainWnd::loadChannels()
                 this, SLOT(chan_click(int)));
 
 }
+void MainWnd::updateTime()
+{
+   QString id;
+   if(!GetCurrentDeviceId2(id)){
+        return;
+   }
 
+   QVector<int> chans =  GetSelectChannel();
+   if(chans.size() == 0){
+       ui->dteTo->setDateTime(QDateTime::currentDateTime());
+       ui->dteFrom->setDateTime(QDateTime::currentDateTime());
+       return;
+   }
+   qint64 start = QDateTime::currentDateTime().toMSecsSinceEpoch()/1000;
+
+   qint64 stop = 0;
+   for(int i = 0; i < chans.size(); i++)
+   {
+        DeviceChnConfig cfg;
+        DAO::instance().DeviceChannalGet(id,chans[i],cfg);
+        qDebug() << "chan" << chans[i] << "start:"<<cfg.startTime <<"end:" << cfg.endTime;
+
+        if(cfg.startTime < start && cfg.startTime > 0){
+            start = cfg.startTime;
+        }
+        if(cfg.endTime > stop && cfg.endTime > 0){
+            stop = cfg.endTime;
+        }
+        qDebug() <<"start:"<<start <<"end:"<<stop;
+   }
+   if(start==stop)return;
+   if(start > stop) return;
+   if(start == 0) start = QDateTime::currentDateTime().toMSecsSinceEpoch()/1000;
+   if(stop == 0) stop = QDateTime::currentDateTime().toMSecsSinceEpoch()/1000;
+    qDebug() <<"start:"<<start <<"end:"<<stop;
+
+   ui->dteTo->setDateTime(QDateTime::fromMSecsSinceEpoch(stop*1000));
+   ui->dteFrom->setDateTime(QDateTime::fromMSecsSinceEpoch(start*1000));
+
+
+
+}
 void MainWnd::chan_click(int chan)
 {
     qDebug() << "chan " << chan << " clicked";
@@ -776,7 +853,7 @@ void MainWnd::chan_click(int chan)
     }else{
         m_tracer->Show(chan,false);
     }
-
+    updateTime();
     ui->plot3->replot();
 }
 //设备相关的UI初始化.
@@ -912,16 +989,18 @@ void MainWnd::initDeviceChannels()
     connect(ui->plot3, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
 
 
-    m_tracer = new MyPlotTrace(ui->plot3,8);
+    m_tracer = new MyPlotTrace(ui->plot3,MAX_CHAN_NR);
 
     //connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMouseMoveEvent(QMouseEvent*)));
     ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
     ui->dteTo->setDateTime(QDateTime::currentDateTime());
-    on_cbxTimeSpan_currentIndexChanged(0);
-    devices = new MyDevices(9,ui->gbDevices);
+    //on_cbxTimeSpan_currentIndexChanged(0);
+    ui->cbxTimeSpan->setVisible(false);
+    ui->label_8->setVisible(false);
+    devices = new MyDevices(MAX_CHAN_NR+1,ui->gbDevices);
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
-    devices->SetDeviceNum(1,8);
+    devices->SetDeviceNum(1,MAX_CHAN_NR);
     devices->SetUnit("kg");
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
     connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
@@ -934,7 +1013,10 @@ void MainWnd::initUI()
     this->setProperty("form", true);
     this->setProperty("canMove", true);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
-
+    ui->btnLocalIP->setVisible(false);
+    ui->btnPing->setVisible(false);
+    ui->edtPingIp->setVisible(false);
+    ui->btnPause->setVisible(false);
     ui->orderList->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->orderList->setColumnWidth(0,300);
     IconHelper::Instance()->setIcon(ui->labIco, QChar(0xf099), 30);
@@ -992,7 +1074,7 @@ void MainWnd::initUI()
     ui->gbDevices->installEventFilter(this);
 
 //上下文菜单初始化
-    ui->treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     menu=new QMenu(this);
     menu2=new QMenu(this);
@@ -1025,6 +1107,15 @@ void MainWnd::initUI()
     action = new QAction(QString::fromLocal8Bit("数据清理"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("启动选择通道"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_start_menu_click(bool)));
+
+    action = new QAction(QString::fromLocal8Bit("停止选择通道"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
+
 
 //    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
 //    menu->addAction(action);
@@ -1082,8 +1173,11 @@ void MainWnd::loadSysConfig()
     //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
-
-    ui->edtHost->setText(Config::instance().m_host_name);
+    ui->edtFtpHost->setText(Config::instance().m_ftp_host);
+    ui->edtFtpName->setText(Config::instance().m_ftp_user);
+    ui->edtFtpPwd->setText(Config::instance().m_ftp_pwd);
+    ui->edtFtpBase->setText(Config::instance().m_ftp_base);
+    //ui->edtHost->setText(Config::instance().m_host_name);
 }
 static bool loading = false;
 //加载状态文件.
@@ -1341,8 +1435,8 @@ static qint64 time_span_list[]={
         };
 void MainWnd::on_cbxTimeSpan_currentIndexChanged(int index)
 {
-    ui->dteTo->setDateTime(QDateTime::currentDateTime());
-    ui->dteFrom->setDateTime(QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch()-time_span_list[index]*1000));
+    //ui->dteTo->setDateTime(QDateTime::currentDateTime());
+    //ui->dteFrom->setDateTime(QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch()-time_span_list[index]*1000));
     //time_span_list
 }
 
@@ -1468,7 +1562,7 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
     QSignalMapper *signalMapper2 = new QSignalMapper(this);
    ui->orderList->clear();
    //ui->cbxTestNo->clear();
-   QMap<QString,QVector<CellState>>::const_iterator i = orders.constBegin();
+   QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
 
    while (i != orders.constEnd()) {
        //cout << i.key() << ": " << i.value() << endl;
@@ -1535,7 +1629,7 @@ void MainWnd::on_report_click(QString order)
     qDebug() << order << " click";
     if(pFnBuildReport){
         QGoString str(buildReportInput(order));
-        char* res=nullptr;
+        char* res=NULL;
         int code = pFnBuildReport(str.toGoString(),&res);
         if(code != 0){
            QJsonDocument doc =  QJsonDocument::fromJson(res);
@@ -1553,7 +1647,8 @@ void MainWnd::on_cbxTestNo_currentIndexChanged(const QString &arg1)
     //列出所有的电芯
 
     if(loading) return;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
+    QString order = ui->cbxHost->currentText();
+   CellTestOrderList& orders =  StateManager::instance().GetOrderList(order);
     //ui->listFiles->clear();
    if(orders.contains(arg1)){
        for(int i = 0; i < orders[arg1].size(); i++)
@@ -1594,7 +1689,8 @@ func BuildPressReport(
 
 QString MainWnd::buildReportInput(QString order)
 {
-    CellTestOrderList& orders =  StateManager::instance().GetOrderList(ui->cbxHost->currentText());
+    QString name = ui->cbxHost->currentText();
+    CellTestOrderList& orders =  StateManager::instance().GetOrderList(name);
     //QString order = "";//ui->cbxTestNo->currentText();
     QJsonDocument doc;
     QJsonObject root;
@@ -1613,6 +1709,19 @@ QString MainWnd::buildReportInput(QString order)
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
+//        FtpEnable bool `json:"ftp_enable"` //是否允许ftp上传
+//            FtpUser string `json:"ftp_user"` //ftp用户名
+//            FtpPwd string `json:"ftp_pwd"`	//ftp密码
+//            FtpUrl string `json:"ftp_url"` //ftp服务器的地址 ，不能加ftp:// 直接是域名或者ip地址.
+//            FtpPort int `json:"ftp_port"` //ftp端口
+//            FtpDir string `json:"ftp_dir"` //ftp下的目录
+        root["ftp_enable"] = Config::instance().m_ftp_enable;
+        root["ftp_dir"] = Config::instance().m_ftp_base;
+        root["ftp_pwd"] = Config::instance().m_ftp_pwd;
+        root["ftp_url"] = Config::instance().m_ftp_host;
+        root["ftp_port"] = Config::instance().m_ftp_port;
+        root["ftp_user"] = Config::instance().m_ftp_user;
+
         QVector<CellState> &states =  orders[order];
         for(int i = 0; i <states.size(); i++)
         {
@@ -1647,7 +1756,7 @@ void MainWnd::on_btnExecReport_clicked()
     //然后对每个文件调用保存工具
     if(pFnBuildReport){
         QGoString str(buildReportInput("00"));
-        char* res=nullptr;
+        char* res=NULL;
         int code = pFnBuildReport(str.toGoString(),&res);
 
         qDebug() << "code=" << code << "result=" << res;
@@ -1690,9 +1799,14 @@ void MainWnd::on_btnReload_clicked()
     //重新加载数据
     loadStateFile(true);
 }
-
+#include "websetclient.h"
+static  WebSetClient* client=NULL ;
 void MainWnd::on_btnLocalIP_clicked()
 {
+    if(client==NULL){
+        client = new WebSetClient(NULL);
+    }
+     client->show();
    // QStringList ip = NetTools::get_local_ip();
     QStringList mac = NetTools::get_devices();
 //    for(int i = 0; i< ip.size();i++)
@@ -1718,12 +1832,48 @@ void MainWnd::on_btnPing_clicked()
 
 void MainWnd::on_btnClear_clicked()
 {
-    char* p = NULL;
-    *p = 2;
     ui->txtLog->clear();
+//    m_ftp.Auth(21,"byteman","wangcheng");
+//    m_ftp.AddTask("c:/work/fridge","ftp://127.0.0.1/fridge");
+//    m_ftp.AddTask("c:/work/zImage","ftp://127.0.0.1/zImage");
+
 }
 
 void MainWnd::on_chkSensorOff_clicked(bool checked)
 {
     Config::instance().EnableRecvSensorOff(checked);
+}
+
+void MainWnd::on_rb6_clicked()
+{
+
+}
+
+void MainWnd::on_edtFtpHost_textChanged(const QString &arg1)
+{
+    Config::instance().SetFtpHost(arg1);
+}
+
+void MainWnd::on_edtFtpName_textChanged(const QString &arg1)
+{
+    Config::instance().SetFtpUser(arg1);
+}
+
+void MainWnd::on_edtFtpPwd_textChanged(const QString &arg1)
+{
+    Config::instance().SetFtpPwd(arg1);
+}
+
+void MainWnd::on_edtFtpBase_textChanged(const QString &arg1)
+{
+    Config::instance().SetFtpBase(arg1);
+}
+
+void MainWnd::updateTimes()
+{
+
+}
+void MainWnd::on_rb1_clicked()
+{
+
 }

@@ -53,6 +53,8 @@ void DeviceManager::removeOneDevice(Device* dev)
     if(dev==NULL){
         return;
     }
+    disconnect(dev,0,this,0);
+    /*
     connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
     connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
     connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
@@ -61,6 +63,7 @@ void DeviceManager::removeOneDevice(Device* dev)
     connect(dev,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
     connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
     connect(dev,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCommResult(Device*,int,int)));
+    */
     dev_map.remove(dev->id());
     delete dev;
 }

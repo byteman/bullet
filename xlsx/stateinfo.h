@@ -1,4 +1,4 @@
-#ifndef STATEINFO_H
+﻿#ifndef STATEINFO_H
 #define STATEINFO_H
 
 #include <QObject>
@@ -21,7 +21,7 @@ struct CellState
     QString TestState; //测试状态 下柜 在柜
 };
 //订单对应电芯
-typedef QMap<QString,QVector<CellState>> CellTestOrderList;
+typedef QMap<QString,QVector<CellState> > CellTestOrderList;
 
 
 typedef QMap<QString,CellTestOrderList> CellTestHost;

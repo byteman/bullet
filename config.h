@@ -18,6 +18,14 @@ struct Config
     bool SetSaveInt(int timeS);
     bool SetDataDir(QString path);
     bool SetHostName(QString host);
+
+    bool SetFtpHost(QString host);
+    bool SetFtpUser(QString user);
+    bool SetFtpPwd(QString pwd);
+    bool SetFtpPort(int port);
+    bool SetFtpBase(QString base);
+
+
     bool m_use_sys_time;
     bool m_recv_sensor_off; //是否接收传感器脱落后的重量值.
     int  m_local_port; //本机监听端口.
@@ -29,6 +37,13 @@ struct Config
     int  m_save_intS; //本地保存时间间隔.
     QString m_data_dir;
     QString m_host_name; //主机名称.
+    QString m_ftp_host;
+    QString m_ftp_user;
+    QString m_ftp_pwd;
+    QString m_ftp_base;
+    int     m_ftp_port;
+    bool    m_ftp_enable;
+
 
 public:
     bool EnableRecvSensorOff(bool en);

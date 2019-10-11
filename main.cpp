@@ -9,16 +9,41 @@
 #include "channelwidget.h"
 #include <machinechecker.h>
 #include "cmddebug.h"
+#include <Windows.h>
+
+bool checkOne()
+{
+    //  创建互斥量
+    HANDLE m_hMutex  =  CreateMutex(NULL, FALSE,  L"battery_measure" );
+    //  检查错误代码
+    if  (GetLastError()  ==  ERROR_ALREADY_EXISTS)  {
+        //  如果已有互斥量存在则释放句柄并复位互斥量
+        CloseHandle(m_hMutex);
+        m_hMutex  =  NULL;
+        //  程序退出
+        return  false;
+    }
+    else
+        return true;
+}
+
 int main(int argc, char *argv[])
 {
 
 
     QApplication a(argc, argv);
+    if(!checkOne()) {
+        QMessageBox::information(NULL,QStringLiteral("错误"),QStringLiteral("已经启动了一个程序了"));
+
+       return 0;
+    }
+
     QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
     //InitConsoleWindow();
     MachineChecker checker;
-    if(checker.CheckMac("08:57:00:F6:08:DC") ||
-            checker.CheckMac("B0:35:9F:87:D9:FE")){
+    if(1){
+    //if(checker.CheckMac("08:57:00:F6:08:DC") ||
+    //        checker.CheckMac("B0:35:9F:87:D9:FE")){
     //if(checker.CheckMac("B0:35:9F:87:D9:FE")){
         //加载样式表
         QFile file(":/qss/psblack.css");

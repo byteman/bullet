@@ -1,5 +1,5 @@
 ﻿#include "histwavewidget.h"
-#define MAX_CHAN 8
+#define MAX_CHAN 12
 void HistWaveWidget::Init()
 {
    QColor TextColor(255,255,255);
@@ -128,7 +128,12 @@ void HistWaveWidget::AddChannel(int index)
                                       Qt::green,
                                       Qt::darkGreen,
                                       Qt::blue,
-                                      Qt::cyan
+                                      Qt::cyan,
+        Qt::darkYellow,
+        Qt::darkBlue,
+        Qt::darkRed,
+        Qt::lightGray
+
                                      };
 
 

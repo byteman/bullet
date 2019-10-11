@@ -1,4 +1,4 @@
-/**
+﻿/**
  ****************************************************************************************
  *
  * @file crc16.c
@@ -135,7 +135,7 @@ unsigned short CRC16BigEndian(uint8_t *data, int size)  {
     crc16 = 0xffff;
     for(int i = 0; i < size; i++){
 
-        uint8_t n = uint8_t(unsigned short (data[i])^crc16);
+        uint8_t n = uint8_t((unsigned short) (data[i])^crc16);
         crc16 >>= 8;
         crc16 ^= MbTable[n];
     }

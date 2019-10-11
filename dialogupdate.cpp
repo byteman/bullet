@@ -1,4 +1,4 @@
-#include "dialogupdate.h"
+﻿#include "dialogupdate.h"
 #include "ui_dialogupdate.h"
 #include <QDebug>
 #include <QMessageBox>
@@ -111,7 +111,7 @@ void DialogUpdate::on_btnSelectFile_clicked()
 void DialogUpdate::onResetFinished(AjaxResponse resp)
 {
     QMessageBox::information(this,
-                             QString(QStringLiteral("title")),
+                             QString(QStringLiteral("升级提示")),
                              QString(QStringLiteral("Successful")));
 }
 

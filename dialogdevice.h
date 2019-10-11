@@ -12,7 +12,7 @@ class DialogDevice : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogDevice(QWidget *parent = nullptr);
+    explicit DialogDevice(QWidget *parent = NULL);
     void UpdateDeviceInfo(QString serialNo,QString name);
     bool GetDeviceInfo(QString &serialNo,QString &name);
     ~DialogDevice();

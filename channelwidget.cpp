@@ -15,7 +15,7 @@ ChannelWidget::ChannelWidget(int addr, QWidget *parent) :
     m_rt_wave_s(20*60)
 {
     ui->setupUi(this);
-    ui->tbtAlarm->hide();
+    //ui->tbtAlarm->hide();
     //ui->lblChan->setText(tr("Address") + ":" + QString("%1").arg(addr));
 
     SetOnline(true);
@@ -66,6 +66,11 @@ void ChannelWidget::ClearDisplay()
 int ChannelWidget::Addr()
 {
     return m_addr;
+}
+
+bool ChannelWidget::IsSelected()
+{
+    return ui->chkCheck->isChecked();
 }
 
 QQueue<SensorData> &ChannelWidget::GetHistoryData()

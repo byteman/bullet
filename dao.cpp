@@ -158,7 +158,7 @@ QSqlError DAO::DeviceList(DeviceInfoList &devices)
 //为某个设备添加参数.
 QSqlError DAO::DeviceChannalAdd(QString serialNo, int chan,DeviceChnConfig& cfg)
 {
-    QString sql = QString("insert into %1(serialNo,chanNr,chanName,maxValue,minValue,paused) values(?,?,?,?,?,?);").arg(DEV_DEVICE_CHAN_CFG_TABLE);
+    QString sql = QString("insert into %1(serialNo,chanNr,chanName,maxValue,minValue,paused,startTime,endTime) values(?,?,?,?,?,?,?,?);").arg(DEV_DEVICE_CHAN_CFG_TABLE);
     QSqlQuery query;
 
     query.prepare(sql);
@@ -170,6 +170,8 @@ QSqlError DAO::DeviceChannalAdd(QString serialNo, int chan,DeviceChnConfig& cfg)
     query.addBindValue(cfg.maxValue);
     query.addBindValue(cfg.minValue);
     query.addBindValue(cfg.paused);
+    query.addBindValue(cfg.startTime);
+    query.addBindValue(cfg.endTime);
     query.exec();
     return query.lastError();
 }
@@ -216,7 +218,7 @@ QSqlError DAO::DeviceChannalUpdate(QString serialNo, int chan, DeviceChnConfig &
         qDebug() << "not exist ";
         return DeviceChannalAdd(serialNo,chan,cfg);
     }
-    QString sql = QString("update %1 set chanName=:chanName,maxValue=:maxValue,minValue=:minValue,paused=:paused where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
+    QString sql = QString("update %1 set chanName=:chanName,maxValue=:maxValue,minValue=:minValue,paused=:paused,startTime=:startTime,endTime=:endTime where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
     QSqlQuery query;
     query.prepare(sql);
     qDebug() << "update sql" << sql;
@@ -226,6 +228,9 @@ QSqlError DAO::DeviceChannalUpdate(QString serialNo, int chan, DeviceChnConfig &
     query.bindValue(":maxValue", cfg.maxValue);
     query.bindValue(":minValue", cfg.minValue);
     query.bindValue(":paused", cfg.paused);
+    query.bindValue(":startTime", cfg.startTime);
+    query.bindValue(":endTime", cfg.endTime);
+
     if(!query.exec())
     {
        //qDebug()<<query.lastError();
@@ -255,6 +260,8 @@ QSqlError DAO::DeviceChannalGet(QString serialNo, int chan, DeviceChnConfig &cfg
         cfg.maxValue = query.value("maxValue").toInt();
         cfg.minValue = query.value("minValue").toInt();
         cfg.paused = query.value("paused").toInt();
+        cfg.startTime = query.value("startTime").toInt();
+        cfg.endTime = query.value("endTime").toInt();
     }
 
     return query.lastError();
@@ -268,7 +275,14 @@ QSqlError DAO::DeviceChannalUpdateState(QString serialNo, int chan, bool paused)
         cfg.paused = paused;
         return DeviceChannalAdd(serialNo,chan,cfg);
     }
-    QString sql = QString("update %1 set paused=:paused where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
+    QString sql = "";
+    if(paused){
+        sql = QString("update %1 set paused=:paused,endTime=%2 where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE).arg(QDateTime::currentMSecsSinceEpoch()/1000);
+
+    }else{
+        sql = QString("update %1 set paused=:paused,startTime=%2 where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE).arg(QDateTime::currentMSecsSinceEpoch()/1000);
+    }
+
     QSqlQuery query;
     query.prepare(sql);
     qDebug() << "DeviceChannalUpdateState sql=" << sql;
@@ -545,7 +559,7 @@ QSqlError DAO::CreateDeviceTable()
 
 QSqlError DAO::CreateDeviceChannelConfigTable()
 {
-    QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_device_chan_config` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `serialNo` TEXT NOT NULL, `chanNr` INTEGER NOT NULL, `chanName` TEXT NOT NULL, `maxValue` INTEGER, `minValue` INTEGER,`paused` INTEGER NOT NULL )";
+    QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_device_chan_config` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `serialNo` TEXT NOT NULL, `chanNr` INTEGER NOT NULL, `chanName` TEXT NOT NULL, `maxValue` INTEGER, `minValue` INTEGER,`paused` INTEGER NOT NULL,`startTime`	INTEGER,`endTime`	INTEGER )";
 
     QSqlQuery query;
     query.exec(sql_create);

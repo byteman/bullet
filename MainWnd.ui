@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1254</width>
-    <height>765</height>
+    <width>1253</width>
+    <height>919</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -559,7 +559,7 @@ QToolButton#btnShou:hover{
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>578</height>
+           <height>700</height>
           </size>
          </property>
          <property name="widgetResizable">
@@ -573,8 +573,8 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1224</width>
-            <height>576</height>
+            <width>1223</width>
+            <height>698</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -670,8 +670,8 @@ border-right-color: rgb(80, 170, 255);</string>
                  <widget class="QGroupBox" name="groupBox">
                   <property name="minimumSize">
                    <size>
-                    <width>500</width>
-                    <height>250</height>
+                    <width>600</width>
+                    <height>600</height>
                    </size>
                   </property>
                   <property name="font">
@@ -702,32 +702,7 @@ margin-top:0px;
                    <bool>false</bool>
                   </property>
                   <layout class="QGridLayout" name="gridLayout">
-                   <property name="leftMargin">
-                    <number>20</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>20</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>20</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>20</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>15</number>
-                   </property>
-                   <item row="0" column="2">
-                    <widget class="QLineEdit" name="edtHost">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
+                   <item row="0" column="0">
                     <widget class="QLabel" name="label_12">
                      <property name="font">
                       <font>
@@ -740,20 +715,18 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="2">
-                    <widget class="QSpinBox" name="sbWaveMin">
+                   <item row="0" column="1">
+                    <widget class="QLineEdit" name="edtHost">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
                       </font>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
-                    <widget class="QLabel" name="label_4">
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_2">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -761,11 +734,24 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>系统语言</string>
+                      <string>接收传感器空载压力值</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
+                   <item row="1" column="1">
+                    <widget class="QCheckBox" name="chkSensorOff">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
                     <widget class="QLabel" name="label_3">
                      <property name="font">
                       <font>
@@ -780,8 +766,20 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="1">
-                    <widget class="QLabel" name="label">
+                   <item row="2" column="1">
+                    <widget class="QSpinBox" name="sbWaveMin">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                       <weight>50</weight>
+                       <bold>false</bold>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_4">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -789,11 +787,11 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>监听端口</string>
+                      <string>系统语言</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="2">
+                   <item row="3" column="1">
                     <widget class="QComboBox" name="cbxLang">
                      <property name="font">
                       <font>
@@ -808,7 +806,20 @@ margin-top:0px;
                      </item>
                     </widget>
                    </item>
-                   <item row="4" column="2">
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>监听端口</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="1">
                     <widget class="QLineEdit" name="edtPort">
                      <property name="font">
                       <font>
@@ -818,8 +829,44 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
-                    <widget class="QCheckBox" name="chkSensorOff">
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="lblFtpAddr">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Ftp地址</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="1">
+                    <widget class="QLineEdit" name="edtFtpHost">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="6" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_2">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Ftp用户名</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="6" column="1">
+                    <widget class="QLineEdit" name="edtFtpName">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -831,8 +878,8 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="1">
-                    <widget class="QLabel" name="label_2">
+                   <item row="7" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_3">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -840,7 +887,46 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>接收传感器空载压力值</string>
+                      <string>Ftp密码</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="7" column="1">
+                    <widget class="QLineEdit" name="edtFtpPwd">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="8" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Ftp路径</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="8" column="1">
+                    <widget class="QLineEdit" name="edtFtpBase">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1084,15 +1170,6 @@ QToolButton#btnShou:hover{
 }</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_9">
-               <property name="spacing">
-                <number>10</number>
-               </property>
-               <property name="topMargin">
-                <number>10</number>
-               </property>
-               <property name="bottomMargin">
-                <number>50</number>
-               </property>
                <item>
                 <widget class="QCheckBox" name="chkSelAll">
                  <property name="font">
@@ -1207,6 +1284,58 @@ QToolButton#btnShou:hover{
                  </property>
                  <property name="text">
                   <string>通道8</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="rb9">
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>通道9</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="rb10">
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>通道10</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="rb11">
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>通道11</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="rb12">
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>通道12</string>
                  </property>
                 </widget>
                </item>
@@ -1747,8 +1876,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

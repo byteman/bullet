@@ -39,7 +39,7 @@ border-radius:3px;
     <number>0</number>
    </property>
    <item>
-    <widget class="QWidget" name="widget" native="true">
+    <widget class="QWidget" name="chkSelect" native="true">
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -54,7 +54,7 @@ border-radius:3px;
        <number>3</number>
       </property>
       <property name="leftMargin">
-       <number>1</number>
+       <number>3</number>
       </property>
       <property name="topMargin">
        <number>2</number>
@@ -66,6 +66,31 @@ border-radius:3px;
        <number>2</number>
       </property>
       <item>
+       <widget class="QCheckBox" name="chkCheck">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QCheckBox::indicator {width: 36px;height: 36px;}//改变大小
+QCheckBox{
+border:none;
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="lblChan">
         <property name="styleSheet">
          <string notr="true">border:0px solid #242424;
@@ -74,23 +99,6 @@ background-color: rgb(255, 85, 127);</string>
         </property>
         <property name="text">
          <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="tbtAlarm">
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="img.qrc">
-          <normaloff>:/image/alarm.png</normaloff>:/image/alarm.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
         </property>
        </widget>
       </item>

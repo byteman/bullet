@@ -12,7 +12,7 @@ void ILineChart::DisplayAllChannel(bool show)
 }
 
 
-void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
+void ILineChart::AppendDataArray(QVector<QVector<double> > &samples)
 {
     for(int i = 0; i < channels.size();i++)
     {
@@ -50,7 +50,7 @@ void ILineChart::SetDataArray(QVector<QVector<double>> &samples)
 
 }
 #else
-void ILineChart::SetDataArray(QVector<QVector<double>> &samples)
+void ILineChart::SetDataArray(QVector<QVector<double> > &samples)
 {
     for(int i = 0; i < channels.size();i++)
     {

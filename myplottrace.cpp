@@ -1,4 +1,4 @@
-#include "myplottrace.h"
+﻿#include "myplottrace.h"
 #include <QDebug>
 void MyPlotTrace::AddTrace(QCustomPlot *plot,int ch)
 {

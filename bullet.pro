@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core  gui network
-
+CONFIG += C++11
 #CONFIG += console
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets sql printsupport
 
@@ -18,7 +18,7 @@ debug{
 INCLUDEPATH+=./qtcsv ./qtcsv/include
 INCLUDEPATH+=./ext/ ./ext/include
 LIBS+=-L./ext/lib -lWS2_32
-
+win32:LIBS += -lIphlpapi
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
     tcpserver.cpp \
@@ -81,7 +81,9 @@ SOURCES += main.cpp\
     dialogclearup.cpp \
     nettools.cpp \
     myping.cpp \
-    crc16.cpp
+    crc16.cpp \
+    websetclient.cpp \
+    ftpupload.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -143,7 +145,9 @@ HEADERS  += tcpserver.h \
     asyncexporttask.h \
     dialogclearup.h \
     nettools.h \
-    myping.h
+    myping.h \
+    websetclient.h \
+    ftpupload.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

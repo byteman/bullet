@@ -34,6 +34,7 @@ public:
     int  GetZoomWidget();
     void SetSaveInt(int rangeS);
     void SetOnline(bool online);
+    void SetSelectRecState( bool paused);
 public slots:
     void onDoubleClick(int addr,bool zoom);
     void onChannelConfigEvent(int addr);

@@ -412,8 +412,11 @@ bool Device::ProcessWave(int index,QByteArray &data)
             continue;
         }
 #endif
-        WriteValues(value);
-        msd.channels.push_back(value);
+        //if(value.weight < 65535){
+            WriteValues(value);
+            msd.channels.push_back(value);
+       // }
+
     }
     if(Config::instance().m_enable_buffer){
          WriteValuesBuf(msd);

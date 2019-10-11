@@ -1,4 +1,4 @@
-#include "statemanager.h"
+﻿#include "statemanager.h"
 #include <QDebug>
 #include "singletonholder.h"
 StateManager::StateManager()
@@ -118,8 +118,10 @@ CellTestHost &StateManager::GetState()
 
 CellTestOrderList &StateManager::GetOrderList(QString &host)
 {
+    static CellTestOrderList list;
     if(!hosts.contains(host)){
-        return CellTestOrderList();
+        list.clear();
+        return list;
     }
     return hosts[host];
 }
