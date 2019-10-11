@@ -320,12 +320,18 @@ void DeviceManager::WriteValues(Device* dev,MsgSensorData& msg)
     for(int i = 0; i <msg.channels.size();i++)
     {
         //如果这个设备的这个通道已经禁用了。
-         if(dev->IsPaused(msg.channels[i].addr)){
-             continue;
-         }
+//         if(dev->IsPaused(msg.channels[i].addr)){
+
+//             continue;
+//         }
          DeviceData dd;
          dd.chan = msg.channels[i].addr;
          dd.value = msg.channels[i].weight;
+         if(dev->IsPaused(msg.channels[i].addr)){
+
+             //即使禁用了，也需要写入0，以保障时间查询同步.
+             dd.value = 0;
+         }
          dd.timestamp = msg.channels[i].time;
          if(Config::instance().m_use_sys_time){
              dd.timestamp = time;

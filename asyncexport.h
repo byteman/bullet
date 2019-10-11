@@ -1,4 +1,4 @@
-#ifndef ASYNCEXPORT_H
+﻿#ifndef ASYNCEXPORT_H
 #define ASYNCEXPORT_H
 #include <QObject>
 #include <QFuture>
@@ -17,6 +17,7 @@ public:
     static AsyncExportManager& instance();
     //把某个序号设备下的某些通道的数据导出.
     bool AddTask(QString serialNo,
+                 QString name,
                  QVector<int> chans,
                  qint64 from,
                  qint64 to,

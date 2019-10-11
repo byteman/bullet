@@ -52,6 +52,18 @@ void MyDevices::SetSelectRecState(bool paused)
 
 
 }
+
+QVector<int> MyDevices::GetSelectChan()
+{
+    QVector<int> chans;
+    for(int i = 0; i < widgets.size();i++)
+    {
+        if(widgets[i]->IsSelected()){
+           chans.push_back(i);
+        }
+    }
+    return chans;
+}
 void MyDevices::SetTimeRange(int rangeS)
 {
     for(int i = 0; i < widgets.size();i++)
@@ -67,7 +79,7 @@ void MyDevices::zoomDevice(int addr)
     int h = m_container->height();
 
     widgets[addr]->SetUnit(m_unit);
-    widgets[addr]->setGeometry(0,0,w,h);
+    widgets[addr]->setGeometry(0,0,w,h-30);
     widgets[addr]->Show();
 
 }
@@ -106,7 +118,7 @@ void MyDevices::clearAll()
 #define ROW_S 20
 
 #define MAR_L 5
-#define MAR_T 50
+#define MAR_T 70
 #define MAR_R 5
 #define MAR_B 20
 

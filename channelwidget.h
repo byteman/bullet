@@ -67,6 +67,7 @@ protected:
 private slots:
     void on_tbtSet_clicked();
     void on_tbtPlay_clicked(bool checked);
+
 };
 
 #endif // DEVWIDGET_H

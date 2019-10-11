@@ -312,7 +312,7 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
              continue;
          }
          //如果数据是传感器未接入，也不发生保存数据.
-         if(msg.channels[i].weight == 65535 && !cfg.m_recv_sensor_off){
+         if(msg.channels[i].weight == 65535){
              continue;
          }
          DeviceData dd;
@@ -370,7 +370,7 @@ bool Device::WriteValues(MsgSensorData& msg)
          if(IsPaused(msg.channels[i].addr)){
              continue;
          }
-         if(msg.channels[i].weight == 65535 && !cfg.m_recv_sensor_off){
+         if(msg.channels[i].weight == 65535){
              continue;
          }
          DeviceData dd;

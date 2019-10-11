@@ -305,3 +305,4 @@ void ChannelWidget::on_tbtPlay_clicked(bool checked)
     qDebug() << "play=" << checked;
     emit onPlayClick(m_addr,checked);
 }
+

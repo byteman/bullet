@@ -203,6 +203,10 @@ private slots:
 
     void on_rb1_clicked();
 
+    void on_btnStartAll_clicked();
+
+    void on_btnStopAll_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 

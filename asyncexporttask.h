@@ -1,16 +1,17 @@
-#ifndef ASYNCEXPORTTASK_H
+﻿#ifndef ASYNCEXPORTTASK_H
 #define ASYNCEXPORTTASK_H
 
 #include <QObject>
 #include <QFuture>
 #include <QFutureWatcher>
-
+#include <models.h>
 
 class AsyncExportTask:public QObject
 {
     Q_OBJECT
 public:
     AsyncExportTask(QString serialNo,
+                    QString name,
                     QVector<int> chans,
                     qint64 from,
                     qint64 to,
@@ -34,12 +35,15 @@ signals:
 
 private:
     QString         _serialNo;
+      QString         _name;
     QVector<int>    _chans;
     qint64          _from;
     qint64          _to;
     QString         _dest;
     QString         _uuid;
     QFutureWatcher<bool> *watcher;
+
+    bool writeFile(int chan, DeviceDataList ddl, QString file);
 };
 
 #endif // ASYNCEXPORTTASK_H

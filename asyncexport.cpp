@@ -1,4 +1,4 @@
-#include "asyncexport.h"
+﻿#include "asyncexport.h"
 #include "singletonholder.h"
 #include "dao.h"
 #include "qtcsv/writer.h"
@@ -19,13 +19,14 @@ AsyncExportManager &AsyncExportManager::instance()
 }
 
 bool AsyncExportManager::AddTask(QString serialNo,
+                                 QString name,
                                  QVector<int> chans,
                                  qint64 from,
                                  qint64 to,
                                  QString dest)
 {
 
-   AsyncExportTask *task = new AsyncExportTask(serialNo,chans,from,to,dest);
+   AsyncExportTask *task = new AsyncExportTask(serialNo,name,chans,from,to,dest);
    connect(task,SIGNAL(onSucc(AsyncExportTask*,QString)),this,SLOT(on_Succ(AsyncExportTask*,QString)));
 
    connect(task,SIGNAL(onFail(AsyncExportTask*,QString)),this,SLOT(on_Fail(AsyncExportTask*,QString)));

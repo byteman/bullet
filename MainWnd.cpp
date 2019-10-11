@@ -326,8 +326,15 @@ void MainWnd::on_start_menu_click(bool)
         qDebug()<<"Can not GetCurrentDeviceId";
         return;
     }
-    if(devices!=NULL)
+    if(devices!=NULL){
+
+        QVector<int> chans = devices->GetSelectChan();
+        for(int i = 0; i < chans.size(); i++)
+        {
+            dvm.ControlDeviceChan(id,chans[i],false);
+        }
         devices->SetSelectRecState(false);
+    }
 
 }
 void MainWnd::on_stop_menu_click(bool)
@@ -338,8 +345,14 @@ void MainWnd::on_stop_menu_click(bool)
         qDebug()<<"Can not GetCurrentDeviceId";
         return;
     }
-    if(devices!=NULL)
+    if(devices!=NULL){
+        QVector<int> chans = devices->GetSelectChan();
+        for(int i = 0; i < chans.size(); i++)
+        {
+            dvm.ControlDeviceChan(id,chans[i],true);
+        }
         devices->SetSelectRecState(true);
+    }
 
 }
 void MainWnd::on_clearup_menu_click(bool)
@@ -1108,13 +1121,13 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("启动选择通道"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_start_menu_click(bool)));
+//    action = new QAction(QString::fromLocal8Bit("启动选择通道"),this);
+//    menu->addAction(action);
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_start_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("停止选择通道"),this);
-    menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
+//    action = new QAction(QString::fromLocal8Bit("停止选择通道"),this);
+//    menu->addAction(action);
+//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
 
 
 //    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
@@ -1507,14 +1520,13 @@ void MainWnd::on_btnExport_clicked()
     qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
     qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
 
-    QString fileName = QFileDialog::getSaveFileName(this,QStringLiteral("保存文件"),
-                               name+".csv",
-                               tr("csv (*.csv)"));
+    QString fileName = QFileDialog::getExistingDirectory(this,QStringLiteral("保存文件"));
     qDebug() << "Filename=" << fileName;
     if(fileName.length() < 3){
         return;
     }
-    AsyncExportManager::instance().AddTask(id,chans,from,to,fileName);
+    qDebug() << "from="<<from << "to=" <<to;
+    AsyncExportManager::instance().AddTask(id,name,chans,from,to,fileName);
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
     // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
@@ -1876,4 +1888,14 @@ void MainWnd::updateTimes()
 void MainWnd::on_rb1_clicked()
 {
 
+}
+
+void MainWnd::on_btnStartAll_clicked()
+{
+    on_start_menu_click(true);
+}
+
+void MainWnd::on_btnStopAll_clicked()
+{
+    on_stop_menu_click(true);
 }
