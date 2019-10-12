@@ -19,12 +19,19 @@ DAO& DAO::instance()
     static SingletonHolder<DAO> sh;
     return *sh.get();
 }
-QSqlError DAO::Init(QString DataBase)
+QSqlError DAO::Init(QString DataBase,QString DataDb)
 {
     qDebug() << "open database " << DataBase;
     QSqlError err = ConnectDB("host",8888,"UserName","PassWord",DataBase);
-    if(err.isValid()) return err;
-
+    if(err.isValid()) {
+        qDebug() << "open config database failed";
+        return err;
+    }
+    err = ConnectDataDB("host",8888,"UserName","PassWord",DataDb);
+    if(err.isValid()) {
+        qDebug() << "open data database failed";
+        return err;
+    }
     qDebug() << "create data table =" << err.text();
 
     err = CreateDeviceTable();
@@ -47,9 +54,29 @@ QSqlError DAO::Init(QString DataBase)
     }
     return db.lastError();
 }
+QSqlError DAO::ConnectDataDB(QString host, int port, QString UserName, QString PassWord, QString DataBase)
+{
+    db_data = QSqlDatabase::addDatabase(SQL_DRIVER,"data");
+    db_data.setHostName(host);
+    db_data.setPort(port);
+    db_data.setDatabaseName(DataBase);
+    db_data.setUserName(UserName);
+    db_data.setPassword(PassWord);
+    if(db_data.open())
+    {
+       qDebug()<<"success!";
+    }else{
+       qDebug()<<"failure";
+
+       return db_data.lastError();
+    }
+    qDebug() << "err=" << db_data.lastError().text();
+    return db_data.lastError();
+
+}
 QSqlError DAO::ConnectDB(QString host, int port, QString UserName, QString PassWord, QString DataBase)
 {
-    db = QSqlDatabase::addDatabase(SQL_DRIVER);
+    db = QSqlDatabase::addDatabase(SQL_DRIVER,"config");
     db.setHostName(host);
     db.setPort(port);
     db.setDatabaseName(DataBase);
@@ -72,7 +99,7 @@ QSqlError DAO::DeviceCount(int &count)
 {
     QString sql = QString("select count(*) as cout from tbl_device");
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.exec(sql);
     while (query.next())
     {
@@ -84,7 +111,7 @@ QSqlError DAO::DeviceCount(int &count)
 QSqlError DAO::DeviceAdd(QString serialNo, QString name)
 {
     QString sql = QString("insert into %1(time,serialNo,name) values(?,?,?);").arg(DEV_DEVICE_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     query.addBindValue(QDateTime::currentDateTime().toMSecsSinceEpoch());
     query.addBindValue(serialNo);
@@ -107,7 +134,7 @@ QSqlError DAO::DeviceAdd(QString serialNo, QString name)
 QSqlError DAO::DeviceRemove(QString serialNo)
 {
     QString sql = QString("delete from %1 where serialNo=?;").arg(DEV_DEVICE_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     qDebug() <<"sql=" <<sql;
     query.prepare(sql);
 
@@ -127,7 +154,7 @@ QSqlError DAO::DeviceRemove(QString serialNo)
 QSqlError DAO::DeviceUpdate(QString serialNo, QString name)
 {
     QString sql = QString("update tbl_device set name= :name where serialNo= :serialNo;");
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     //query.exec(sql);
     query.bindValue(":name", name);
@@ -143,7 +170,7 @@ QSqlError DAO::DeviceList(DeviceInfoList &devices)
 {
 
     QString sql = QString("select * from %1").arg(DEV_DEVICE_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.exec(sql);
     while (query.next())
     {
@@ -159,7 +186,7 @@ QSqlError DAO::DeviceList(DeviceInfoList &devices)
 QSqlError DAO::DeviceChannalAdd(QString serialNo, int chan,DeviceChnConfig& cfg)
 {
     QString sql = QString("insert into %1(serialNo,chanNr,chanName,maxValue,minValue,paused,startTime,endTime) values(?,?,?,?,?,?,?,?);").arg(DEV_DEVICE_CHAN_CFG_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
 
     query.prepare(sql);
     qDebug() << "sql = " << sql;
@@ -179,7 +206,7 @@ QSqlError DAO::DeviceChannalAdd(QString serialNo, int chan,DeviceChnConfig& cfg)
 QSqlError DAO::DeviceChannalRemove(QString serialNo)
 {
     QString sql = QString("delete from %1 where serialNo=?;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
 
     query.prepare(sql);
 
@@ -199,7 +226,7 @@ QSqlError DAO::DeviceChannalRemove(QString serialNo)
 bool DAO::DeviceChannalExists(QString serialNo, int chan)
 {
     QString sql = QString("select * from %1 where serialNo=? and chanNr=?;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     qDebug() << "DeviceChannalExists " << serialNo << " chan=" << chan << sql;
     query.addBindValue(serialNo);
@@ -219,7 +246,7 @@ QSqlError DAO::DeviceChannalUpdate(QString serialNo, int chan, DeviceChnConfig &
         return DeviceChannalAdd(serialNo,chan,cfg);
     }
     QString sql = QString("update %1 set chanName=:chanName,maxValue=:maxValue,minValue=:minValue,paused=:paused,startTime=:startTime,endTime=:endTime where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     qDebug() << "update sql" << sql;
     query.bindValue(":chanName", cfg.chanName);
@@ -245,7 +272,7 @@ QSqlError DAO::DeviceChannalGet(QString serialNo, int chan, DeviceChnConfig &cfg
 {
 
     QString sql = QString("select * from %1 where serialNo= :serialNo and chanNr= :chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     query.bindValue(":serialNo",serialNo);
     query.bindValue(":chanNr",chan);
@@ -283,7 +310,7 @@ QSqlError DAO::DeviceChannalUpdateState(QString serialNo, int chan, bool paused)
         sql = QString("update %1 set paused=:paused,startTime=%2 where serialNo=:serialNo and chanNr=:chanNr;").arg(DEV_DEVICE_CHAN_CFG_TABLE).arg(QDateTime::currentMSecsSinceEpoch()/1000);
     }
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
     qDebug() << "DeviceChannalUpdateState sql=" << sql;
     qDebug() <<"serial=" << serialNo << " chan=" << chan << "paused=" << paused;
@@ -297,7 +324,7 @@ QSqlError DAO::DeviceChannalUpdateState(QString serialNo, int chan, bool paused)
 QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceData &data)
 {
     QString sql = QString("insert into tbl_%1_data(time,chan,value) values(?,?,?);").arg(serialNo);
-    QSqlQuery query;
+    QSqlQuery query(db_data);
 
     query.prepare(sql);
     query.addBindValue(data.timestamp);
@@ -317,20 +344,20 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceData &data)
 QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
 {
     QSqlError err;
-    db.transaction();
+    db_data.transaction();
     for(int i = 0; i < data.size();i++)
     {
         if(DeviceDataAdd(serialNo, data[i]).isValid()){
 
         }
     }
-    db.commit();
+    db_data.commit();
     return QSqlError();
 }
 QSqlError DAO::DeviceDataRemove(QString serialNo,qint64 from,qint64 to)
 {
     QString sql = QString("delete from tbl_%1_data where time < ?;").arg(serialNo);
-    QSqlQuery query;
+    QSqlQuery query(db_data);
     query.prepare(sql);
     query.addBindValue(to);
     query.exec(sql);
@@ -342,7 +369,7 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
     //清空某个表
     //delete * from tbl_xx_data;DELETE FROM sqlite_sequence WHERE name = ‘TableName’;
     QString sql = QString("DROP TABLE IF EXISTS tbl_%1_data;").arg(serialNo);
-    QSqlQuery query;
+    QSqlQuery query(db_data);
 
     query.exec(sql);
     //sqlite_sequence 这个表示记录每个表中的自增加id的当前编号，但是我drop表以后，再新建立表格，应该就用新的id了
@@ -357,7 +384,7 @@ QSqlError DAO::DeviceDataRemove(QString serialNo)
 QSqlError DAO::DeviceDataInfo(QString serialNo, qint64 &start, qint64 &end, qint64 &count)
 {
     QString sql = QString("select min(time) as start,max(time) as end,count(id) as total from tbl_%1_data ; ").arg(serialNo);
-    QSqlQuery query;
+    QSqlQuery query(db_data);
     query.prepare(sql);
 
 
@@ -396,7 +423,7 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
                                DeviceDataList &dataList)
 {
     QString sql = QString("select time,chan,value from tbl_%1_data where chan =? and time > ? and time < ?; ").arg(serialNo);
-    QSqlQuery query;
+    QSqlQuery query(db_data);
     query.prepare(sql);
     qDebug() << sql;
     qDebug() << serialNo << chan << from << to;
@@ -423,7 +450,7 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
 bool DAO::ExistKey(QString key)
 {
     QString sql = QString("select * from %1 where key=?;").arg(DEV_DEVICE_PARAM_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
 
     query.addBindValue(key);
@@ -440,7 +467,7 @@ bool DAO::ExistKey(QString key)
 bool DAO::getParam(QString key, QString &value)
 {
     QString sql = QString("select * from %1 where key=?;").arg(DEV_DEVICE_PARAM_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
 
     query.addBindValue(key);
@@ -458,7 +485,7 @@ bool DAO::getParam(QString key, QString &value)
 QSqlError DAO::updateParam(QString key, QString value)
 {
     QString sql = QString("update %1 set value= :value where key= :key;").arg(DEV_DEVICE_PARAM_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
 
     query.bindValue(":key", key);
@@ -471,7 +498,7 @@ QSqlError DAO::updateParam(QString key, QString value)
 QSqlError DAO::insertParam(QString key, QString value)
 {
     QString sql = QString("insert into %1(key,value) values(?,?);").arg(DEV_DEVICE_PARAM_TABLE);
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.prepare(sql);
 
     query.addBindValue(key);
@@ -501,7 +528,7 @@ QSqlError DAO::DbRecycle()
     //VACUUM
     QString sql_create = "VACUUM;";
 
-    QSqlQuery query;
+    QSqlQuery query(db_data);
     query.exec(sql_create);
     return query.lastError();
 }
@@ -551,7 +578,7 @@ QSqlError DAO::CreateDeviceTable()
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_device` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `serialNo` TEXT NOT NULL UNIQUE, `name` TEXT NOT NULL UNIQUE )";
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.exec(sql_create);
     return query.lastError();
 
@@ -561,7 +588,7 @@ QSqlError DAO::CreateDeviceChannelConfigTable()
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_device_chan_config` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `serialNo` TEXT NOT NULL, `chanNr` INTEGER NOT NULL, `chanName` TEXT NOT NULL, `maxValue` INTEGER, `minValue` INTEGER,`paused` INTEGER NOT NULL,`startTime`	INTEGER,`endTime`	INTEGER )";
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.exec(sql_create);
     return query.lastError();
 }
@@ -570,7 +597,7 @@ QSqlError DAO::CreateDataTable(QString serialNo)
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `" + QString("tbl_%1_data").arg(serialNo) + "` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `chan` INTEGER NOT NULL, `value` INTEGER NOT NULL )";
 
-    QSqlQuery query;
+    QSqlQuery query(db_data);
     query.exec(sql_create);
     return query.lastError();
 
@@ -579,7 +606,7 @@ QSqlError DAO::CreateParamTable()
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_param` ( `key` TEXT NOT NULL UNIQUE, `value` TEXT );";
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     query.exec(sql_create);
     return query.lastError();
 

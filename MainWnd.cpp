@@ -132,7 +132,9 @@ bool MainWnd::Init()
     initGoLibrary();
     //首先初始化数据管理模块.
 
-    QSqlError err =  DAO::instance().Init(utils::GetWorkDir()+"/measure.db");
+    QSqlError err =  DAO::instance().Init(
+                utils::GetWorkDir()+"/config.db",
+                utils::GetWorkDir()+"/data.db");
     if(err.isValid()){
         //初始化失败
         AddLog(err.text());

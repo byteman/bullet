@@ -12,7 +12,7 @@ class DAO
 public:
     DAO();
     static DAO& instance();
-    QSqlError Init(QString DataBase);
+    QSqlError Init(QString DataBase,QString DataDb);
     QSqlError ConnectDB(QString host, int port, QString UserName, QString PassWord, QString DataBase);
     //设备管理
     QSqlError DeviceCount(int &count);
@@ -68,10 +68,12 @@ public:
 private:
 
     QSqlDatabase db;
+    QSqlDatabase db_data;
     QSqlError CreateDeviceTable();
     QSqlError CreateDeviceChannelConfigTable();
     bool DeviceChannalExists(QString serialNo, int chan);
     QSqlError CreateParamTable();
+    QSqlError ConnectDataDB(QString host, int port, QString UserName, QString PassWord, QString DataBase);
 };
 
 #endif // DAO_H
