@@ -444,7 +444,7 @@ background:#444444;
 
 QTableView::item:selected,QListView::item:selected,QTreeView::item:selected{
 color:#DCDCDC;
-background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #484848,stop:1 #383838);
+background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #3f77ca,stop:1 #4f77ca);
 }
 
 QTableView::item:hover,QListView::item:hover,QTreeView::item:hover{

@@ -16,7 +16,9 @@ public:
     AsyncExportManager();
     static AsyncExportManager& instance();
     //把某个序号设备下的某些通道的数据导出.
-    bool AddTask(QString serialNo,
+    bool AddTask(
+                int format,
+                QString serialNo,
                  QString name,
                  QVector<int> chans,
                  qint64 from,

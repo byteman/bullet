@@ -96,6 +96,8 @@ private:
      void updateTimes();
      QVector<int> GetMainSelectChannel();
      void updateTime();
+     bool GetCurrentDeviceName(QString &name);
+     bool IsOk(QString title, QString message);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -227,6 +229,7 @@ protected slots:
     void on_opendir_click(QString order);
     void on_stop_menu_click(bool);
     void on_start_menu_click(bool);
+    void on_clear_history_menu_click(bool);
 };
 
 #endif // UIDEMO01_H

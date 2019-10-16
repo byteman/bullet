@@ -39,6 +39,10 @@ bool Config::Init()
     if(m_ftp_host.length() < 3){
         m_ftp_enable = false;
     }
+    m_file_format = DAO::instance().ReadIntParam("format",1);
+    if(m_file_format > 1 ){
+        m_file_format = 1;
+    }
     return true;
 }
 
@@ -122,5 +126,12 @@ bool Config::SetFtpBase(QString base)
 {
     DAO::instance().WriteStringParam("ftp_base",base);
     m_ftp_base = base;
+    return true;
+}
+
+bool Config::SetFileForamt(int format)
+{
+    DAO::instance().WriteIntParam("format",format);
+    m_file_format = format;
     return true;
 }

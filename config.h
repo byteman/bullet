@@ -24,7 +24,7 @@ struct Config
     bool SetFtpPwd(QString pwd);
     bool SetFtpPort(int port);
     bool SetFtpBase(QString base);
-
+    bool SetFileForamt(int format);
 
     bool m_use_sys_time;
     bool m_recv_sensor_off; //是否接收传感器脱落后的重量值.
@@ -43,7 +43,7 @@ struct Config
     QString m_ftp_base;
     int     m_ftp_port;
     bool    m_ftp_enable;
-
+    unsigned char     m_file_format; //文件格式.
 
 public:
     bool EnableRecvSensorOff(bool en);

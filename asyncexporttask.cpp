@@ -5,7 +5,15 @@
 #include <QFuture>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
-AsyncExportTask::AsyncExportTask(QString serialNo,
+
+#include "xlsxdocument.h"
+#include "xlsxchartsheet.h"
+#include "xlsxcellrange.h"
+#include "xlsxchart.h"
+#include "xlsxrichstring.h"
+#include "xlsxworkbook.h"
+
+AsyncExportTask::AsyncExportTask(FileFormat format,QString serialNo,
                                  QString name,
                                  QVector<int> chans,
                                  qint64 from,
@@ -17,7 +25,8 @@ AsyncExportTask::AsyncExportTask(QString serialNo,
                                 _from(from),
                                 _to(to),
                                 _dest(dest),
-                                watcher(NULL)
+                                watcher(NULL),
+                                _fileFormat(format)
 {
     _uuid=QString("%1-%2").arg(serialNo).arg(QDateTime::currentMSecsSinceEpoch());
 }
@@ -104,12 +113,32 @@ bool AsyncExportTask::_run()
     return !err.isValid();
 }
 #else
-bool AsyncExportTask::writeFile(int chan,DeviceDataList ddl,QString filePath)
+bool AsyncExportTask::writeXlsxFile(int chan,DeviceDataList ddl,QString filePath)
+{
+
+    QXlsx::Document xlsxW;
+    xlsxW.write("A1", "time"); // write "Hello Qt!" to cell(A,1). it's shared string.
+   // xlsxW.write("B1", QString(QStringLiteral("通道")+"%1").arg(chan));
+    xlsxW.write("B1","value");
+    for(int j = 0; j < ddl.size(); j++)
+    {
+        //xlsxW.write(j+2,1,j);
+        xlsxW.write(j+2,1,QString("%1").arg(QDateTime::fromMSecsSinceEpoch(ddl[j].timestamp*1000).toString("yyyy-MM-dd hh:mm:ss")));
+        xlsxW.write(j+2,2,ddl[j].value);
+    }
+
+    xlsxW.saveAs(filePath); // save the document as 'Test.xlsx'
+
+    return true;
+}
+bool AsyncExportTask::writeCsvFile(int chan,DeviceDataList ddl,QString filePath)
 {
     QtCSV::StringData strData;
     QStringList strHeader;
     strHeader << QStringLiteral("time");
-    strHeader << QString("%1").arg(chan);
+    strHeader << "value";
+
+    //strHeader << QString("%1").arg(chan);
 
     for(int j = 0; j < ddl.size(); j++)
     {
@@ -156,9 +185,16 @@ bool AsyncExportTask::_run()
     int count = 0;
     while(i.hasNext()){
         i.next();
+         qDebug() << "count=" << count;
+        if(_fileFormat == FF_XLSX){
 
-        writeFile(i.key(),i.value(),QString("%1/%2_%3.csv").
-                  arg(_dest).arg(_name).arg(i.key()));
+            writeXlsxFile(i.key(),i.value(),QString("%1/%2_%3.xlsx").
+                      arg(_dest).arg(_name).arg(i.key()));
+        }else{
+            writeCsvFile(i.key(),i.value(),QString("%1/%2_%3.csv").
+                      arg(_dest).arg(_name).arg(i.key()));
+        }
+
         emit onProgress(this,10+ 80*count/ddm.size());
         count++;
     }

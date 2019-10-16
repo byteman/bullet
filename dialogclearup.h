@@ -1,4 +1,4 @@
-#ifndef DIALOGCLEARUP_H
+﻿#ifndef DIALOGCLEARUP_H
 #define DIALOGCLEARUP_H
 
 #include <QDialog>
@@ -24,6 +24,8 @@ private slots:
     void on_btnExit_clicked();
 
     void on_btnClearUp_clicked();
+
+    void on_btnClearAll_clicked();
 
 private:
     Ui::DialogClearUp *ui;

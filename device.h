@@ -56,6 +56,7 @@ public:
     QQueue<SensorData>* GetHistoryData(int chan);
     void Sync();
     bool WriteValuesBuf(MsgSensorData &msg);
+    bool ClearHist();
 private:
     DeviceDataList ddl;
     QMap<int,DeviceChannel> m_channels;

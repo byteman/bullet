@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -608,8 +608,8 @@ QToolButton#btnShou:hover{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>648</width>
-            <height>237</height>
+            <width>1261</width>
+            <height>698</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -769,21 +769,28 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>接收传感器空载压力值</string>
+                      <string>导出数据格式</string>
                      </property>
                     </widget>
                    </item>
                    <item row="1" column="1">
-                    <widget class="QCheckBox" name="chkSensorOff">
+                    <widget class="QComboBox" name="cbxFileFormat">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
                       </font>
                      </property>
-                     <property name="text">
-                      <string/>
-                     </property>
+                     <item>
+                      <property name="text">
+                       <string>XLSX</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>CSV</string>
+                      </property>
+                     </item>
                     </widget>
                    </item>
                    <item row="2" column="0">

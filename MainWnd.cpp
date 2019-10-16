@@ -131,10 +131,11 @@ bool MainWnd::Init()
     //StateManager::instance().parse("state.xlms");
     initGoLibrary();
     //首先初始化数据管理模块.
-
+    QString dbDir = utils::GetWorkDir()+"/data/";
+    utils::MkMutiDir(dbDir);
     QSqlError err =  DAO::instance().Init(
                 utils::GetWorkDir()+"/config.db",
-                utils::GetWorkDir()+"/data.db");
+                dbDir);
     if(err.isValid()){
         //初始化失败
         AddLog(err.text());
@@ -273,6 +274,15 @@ bool MainWnd::GetCurrentDeviceId(QString& id)
     id = item->data(0,Qt::UserRole).toString();
     return true;
 }
+bool MainWnd::GetCurrentDeviceName(QString& name)
+{
+    QTreeWidgetItem* item =  ui->treeWidget->currentItem();
+    if(item==NULL){
+         return false;
+    }
+    name = item->text(0);
+    return true;
+}
 bool MainWnd::GetCurrentDeviceId2(QString& id)
 {
     QTreeWidgetItem* item =  ui->treeWidget2->currentItem();
@@ -356,6 +366,36 @@ void MainWnd::on_stop_menu_click(bool)
         devices->SetSelectRecState(true);
     }
 
+}
+void MainWnd::on_clear_history_menu_click(bool)
+{
+    QString id;
+
+    QString name;
+     if(!CheckPassWord() )return;
+    if(!GetCurrentDeviceName(name)){
+        qDebug()<<"Can not GetCurrentDeviceName";
+        return;
+    }
+    if(!IsOk(QStringLiteral("注意"),QString(QStringLiteral("是否清空%1号设备未发送完成的历史数据")).arg(name))){
+        return;
+    }
+
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    dvm.ClearHistory(id);
+}
+bool MainWnd::IsOk(QString title,QString message)
+{
+    QMessageBox msg(this);
+    msg.setWindowTitle(title);
+    msg.setText(message);
+   // msg.setIcon(QMessageBox::information);
+    msg.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+    return msg.exec() == QMessageBox::Ok;
 }
 void MainWnd::on_clearup_menu_click(bool)
 {
@@ -719,6 +759,7 @@ void MainWnd::reloadDeviceList2()
 {
     QList<Device*> devices;
     ui->treeWidget2->clear();
+    ui->treeWidget2->setSortingEnabled(true);
     ui->treeWidget2->setIconSize(QSize(48,48));
     dvm.ListDevice(devices);
     for(int i = 0; i < devices.size();i++)
@@ -726,7 +767,7 @@ void MainWnd::reloadDeviceList2()
         QTreeWidgetItem* item = NULL;
         item = new QTreeWidgetItem(QStringList(devices[i]->name()));
 
-        ui->treeWidget2->addTopLevelItem(item);
+         ui->treeWidget2->addTopLevelItem(item);
 
         item->setIcon(0,icon_device[1]);
 
@@ -736,18 +777,22 @@ void MainWnd::reloadDeviceList2()
             //m_cur_dev_id = devices[i]->id();
         }
     }
+    ui->treeWidget2->sortItems(0,Qt::SortOrder::AscendingOrder);
 }
 //加载左侧设备列表.
 void MainWnd::reloadDeviceList()
 {
     QList<Device*> devices;
     ui->treeWidget->clear();
+    ui->treeWidget->setSortingEnabled(true);
+
     ui->treeWidget->setIconSize(QSize(48,48));
     dvm.ListDevice(devices);
     for(int i = 0; i < devices.size();i++)
     {
         QTreeWidgetItem* item = NULL;
         item = new QTreeWidgetItem(QStringList(devices[i]->name()));
+
 
         ui->treeWidget->addTopLevelItem(item);
 
@@ -761,6 +806,7 @@ void MainWnd::reloadDeviceList()
 
         }
     }
+    ui->treeWidget->sortItems(0,Qt::SortOrder::AscendingOrder);
 }
 #include <QSignalMapper>
 QVector<int> MainWnd::GetSelectChannel()
@@ -1119,13 +1165,13 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("数据清理"),this);
+    action = new QAction(QString::fromLocal8Bit("电脑数据清理"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
-//    action = new QAction(QString::fromLocal8Bit("启动选择通道"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_start_menu_click(bool)));
+    action = new QAction(QString::fromLocal8Bit("设备数据清理"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clear_history_menu_click(bool)));
 
 //    action = new QAction(QString::fromLocal8Bit("停止选择通道"),this);
 //    menu->addAction(action);
@@ -1187,11 +1233,12 @@ void MainWnd::loadSysConfig()
     ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
     //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
-    ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
+    //ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
     ui->edtFtpHost->setText(Config::instance().m_ftp_host);
     ui->edtFtpName->setText(Config::instance().m_ftp_user);
     ui->edtFtpPwd->setText(Config::instance().m_ftp_pwd);
     ui->edtFtpBase->setText(Config::instance().m_ftp_base);
+    ui->cbxFileFormat->setCurrentIndex(Config::instance().m_file_format);
     //ui->edtHost->setText(Config::instance().m_host_name);
 }
 static bool loading = false;
@@ -1528,7 +1575,7 @@ void MainWnd::on_btnExport_clicked()
         return;
     }
     qDebug() << "from="<<from << "to=" <<to;
-    AsyncExportManager::instance().AddTask(id,name,chans,from,to,fileName);
+    AsyncExportManager::instance().AddTask(Config::instance().m_file_format,id,name,chans,from,to,fileName);
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
     // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));

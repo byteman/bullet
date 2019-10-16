@@ -103,6 +103,13 @@ bool Device::Reset(quint8 delay_s)
     WriteCmd(MSG_RESET,data);
     return true;
 }
+bool Device::ClearHist()
+{
+    QByteArray data;
+
+    WriteCmd(MSG_HIST_CLEAR_REQ,data);
+    return true;
+}
 void Device::WriteParam(MsgDevicePara &para)
 {
 

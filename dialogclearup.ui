@@ -29,27 +29,6 @@
     </font>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>179</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial</family>
-     <pointsize>14</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>清除</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
@@ -71,12 +50,12 @@
     <string>之前的数据</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnClearUp">
+  <widget class="QPushButton" name="btnClearAll">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>40</x>
      <y>270</y>
-     <width>271</width>
+     <width>281</width>
      <height>51</height>
     </rect>
    </property>
@@ -89,7 +68,7 @@
     </font>
    </property>
    <property name="text">
-    <string>清理</string>
+    <string>全部删除</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnExit">
@@ -237,6 +216,27 @@
    </property>
    <property name="text">
     <string>数据条数：</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnClearUp">
+   <property name="geometry">
+    <rect>
+     <x>44</x>
+     <y>173</y>
+     <width>131</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>14</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>清除</string>
    </property>
   </widget>
  </widget>

@@ -6,11 +6,18 @@
 #include <QFutureWatcher>
 #include <models.h>
 
+enum FileFormat{
+  FF_XLSX=0,
+  FF_CSV=1,
+
+};
 class AsyncExportTask:public QObject
 {
     Q_OBJECT
 public:
-    AsyncExportTask(QString serialNo,
+    AsyncExportTask(
+                    FileFormat format,
+                    QString serialNo,
                     QString name,
                     QVector<int> chans,
                     qint64 from,
@@ -42,8 +49,9 @@ private:
     QString         _dest;
     QString         _uuid;
     QFutureWatcher<bool> *watcher;
-
-    bool writeFile(int chan, DeviceDataList ddl, QString file);
+    FileFormat _fileFormat;
+    bool writeCsvFile(int chan, DeviceDataList ddl, QString file);
+    bool writeXlsxFile(int chan, DeviceDataList ddl, QString filePath);
 };
 
 #endif // ASYNCEXPORTTASK_H

@@ -114,6 +114,13 @@ void DeviceManager::ResetDeviceCount(QString dev_id)
     return dev_map[dev_id]->ResetCount();
 }
 
+bool DeviceManager::ClearHistory(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return false ;
+    return dev_map[dev_id]->ClearHist();
+}
+
 int DeviceManager::GetDeviceCount(QString dev_id)
 {
     if(!dev_map.contains(dev_id))
@@ -180,7 +187,7 @@ bool DeviceManager::RemoveDevice(QString dev_id)
         qDebug() << " DeviceChannalRemove failed " << err.text();
     }
     //3.删除设备数据表中数据.
-    err = DAO::instance().DeviceDataRemove(dev_id);
+    err = DAO::instance().DeviceDataTblRemove(dev_id);
     if(err.isValid()){
         qDebug() << " DeviceDataRemove failed " << err.text();
     }
@@ -220,6 +227,7 @@ bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
     //在添加一个设备的数据表.
     err = DAO::instance().CreateDataTable(dev_id);
     if(err.isValid()){
+
         qDebug() << " CreateDataTable" << dev_id << " failed= " << err.text();
     }
     addOneDevice(dev_id,dev_name);

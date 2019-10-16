@@ -18,7 +18,9 @@ AsyncExportManager &AsyncExportManager::instance()
     return *sh.get();
 }
 
-bool AsyncExportManager::AddTask(QString serialNo,
+bool AsyncExportManager::AddTask(
+                                int format,
+                                QString serialNo,
                                  QString name,
                                  QVector<int> chans,
                                  qint64 from,
@@ -26,7 +28,7 @@ bool AsyncExportManager::AddTask(QString serialNo,
                                  QString dest)
 {
 
-   AsyncExportTask *task = new AsyncExportTask(serialNo,name,chans,from,to,dest);
+   AsyncExportTask *task = new AsyncExportTask((FileFormat)format,serialNo,name,chans,from,to,dest);
    connect(task,SIGNAL(onSucc(AsyncExportTask*,QString)),this,SLOT(on_Succ(AsyncExportTask*,QString)));
 
    connect(task,SIGNAL(onFail(AsyncExportTask*,QString)),this,SLOT(on_Fail(AsyncExportTask*,QString)));

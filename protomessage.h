@@ -18,6 +18,8 @@ enum MessageID{
    MSG_RT_AD, //实时AD和重量.
    MSG_REMOVE_FILE,
    MSG_WRITE_PARAM_RESP=0x85, //修改设备厂商
+    MSG_HIST_CLEAR_REQ=0x9,
+        MSG_HIST_CLEAR_RESP=0x89,
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;

@@ -24,6 +24,7 @@ public:
     bool ResetAllDevice(quint8 delay_s);
     bool ResetDevice(QString dev_id,quint8 delay_s);
     void ResetDeviceCount(QString dev_id);
+    bool ClearHistory(QString dev_id);
     int  GetDeviceCount(QString dev_id);
 //设备管理接口.
     bool SetSaveInt(int s);

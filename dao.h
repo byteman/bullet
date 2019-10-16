@@ -12,7 +12,10 @@ class DAO
 public:
     DAO();
     static DAO& instance();
-    QSqlError Init(QString DataBase,QString DataDb);
+    QSqlError Init(QString DataBase,QString DbDir);
+    //打开设备数据库
+    QSqlError InitDataDb(QString DbDir,QStringList Devices);
+
     QSqlError ConnectDB(QString host, int port, QString UserName, QString PassWord, QString DataBase);
     //设备管理
     QSqlError DeviceCount(int &count);
@@ -36,6 +39,7 @@ public:
     //添加一组测力数据.
     QSqlError DeviceDataAdd(QString serialNo,DeviceDataList& data);
     //清空某个设备的所有数据.
+    QSqlError DeviceDataTblRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo,qint64 from,qint64 to);
     QSqlError DeviceDataInfo(QString serialNo,qint64 &start,qint64 &end, qint64 &count);
@@ -63,17 +67,24 @@ public:
     QSqlError CreateDataTable(QString serialNo);
     QSqlError WriteBoolParam(QString key, bool value);
 
-    QSqlError DbRecycle();
+    QSqlError DbRecycle(QString serialNo);
 
 private:
 
     QSqlDatabase db;
     QSqlDatabase db_data;
+    QMap<QString,QSqlDatabase> dataDbMap;
+    QString data_dir;
     QSqlError CreateDeviceTable();
     QSqlError CreateDeviceChannelConfigTable();
     bool DeviceChannalExists(QString serialNo, int chan);
     QSqlError CreateParamTable();
-    QSqlError ConnectDataDB(QString host, int port, QString UserName, QString PassWord, QString DataBase);
+    QSqlError ConnectDataDB(QString host,
+                            int port,
+                            QString UserName,
+                            QString PassWord,
+                            QString Path,
+                            QString DeviceName);
 };
 
 #endif // DAO_H
