@@ -88,7 +88,7 @@ private:
 
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
-     void loadStateFile(bool create=false);
+     void loadStateFile(bool create=true);
      QString buildReportInput(QString order);
      void updateOrderState();
      bool CheckPassWord();
@@ -208,6 +208,8 @@ private slots:
     void on_btnStartAll_clicked();
 
     void on_btnStopAll_clicked();
+
+    void on_cbxFileFormat_currentIndexChanged(int index);
 
 protected:
     void timerEvent(QTimerEvent *);

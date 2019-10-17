@@ -19,7 +19,7 @@ bool StateManager::getCellString(QXlsx::Document &xlsx,
     QXlsx::Cell* cell = xlsx.cellAt(row,col);
     if(cell==NULL){
         qDebug("load cell failed row%d col%d",row,col);
-        return true;
+        return false;
     }
     value = cell->readValue().toString();
 
@@ -55,19 +55,29 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
     do{
         CellState cs;
         row++;
+        if(!getCellString(xlsx,row,5,cs.PressDev)){
+            qDebug() << row << "---------------------------end";
+            return true;
+        }
+        if(!getCellString(xlsx,row,5,cs.PressDev) || cs.PressDev.length() < 1){
+            //如果获取不到温度，说明读取完成.
+            qDebug("------------read %s finished!",sheet.toStdString().c_str());
+            return true;
+        }
         if(!getCellString(xlsx,row,1,cs.Temp) || cs.Temp.length() < 1){
             //如果获取不到温度，说明读取完成.
-            qDebug("read %s finished!",sheet.toStdString().c_str());
-            return true;
+            //qDebug("read %s finished!",sheet.toStdString().c_str());
+            //return true;
         }
 
         if(!getCellString(xlsx,row,2,cs.TestNo) || cs.TestNo.length() < 1){
+            //如果测试单号为空，跳过这个单号，继续找下一个单号.
             //qDebug("get %s testNo row=%d col=%d failed",sheet.toStdString().c_str(),row,2);
             continue;
         }
         getCellString(xlsx,row,3,cs.TestUser);
         getCellString(xlsx,row,4,cs.ProjGroup);
-        getCellString(xlsx,row,5,cs.PressDev);
+        //getCellString(xlsx,row,5,cs.PressDev);
         if(!parsePressDev(cs)){
             //qDebug("get %s parsePressDev row=%d col=%d failed",sheet.toStdString().c_str(),row,5);
             continue;

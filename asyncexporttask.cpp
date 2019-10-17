@@ -117,6 +117,7 @@ bool AsyncExportTask::writeXlsxFile(int chan,DeviceDataList ddl,QString filePath
 {
 
     QXlsx::Document xlsxW;
+    xlsxW.setColumnWidth(1,25);
     xlsxW.write("A1", "time"); // write "Hello Qt!" to cell(A,1). it's shared string.
    // xlsxW.write("B1", QString(QStringLiteral("通道")+"%1").arg(chan));
     xlsxW.write("B1","value");

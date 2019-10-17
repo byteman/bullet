@@ -1766,7 +1766,8 @@ QString MainWnd::buildReportInput(QString order)
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
                 .arg(order).arg(order).arg(temp);
-        root["db"] = utils::GetWorkDir()+"/measure.db";
+        root["db"] = utils::GetWorkDir()+"/config.db";
+        root["data_dir"] = QString("%1/data").arg(utils::GetWorkDir());
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
@@ -1947,4 +1948,9 @@ void MainWnd::on_btnStartAll_clicked()
 void MainWnd::on_btnStopAll_clicked()
 {
     on_stop_menu_click(true);
+}
+
+void MainWnd::on_cbxFileFormat_currentIndexChanged(int index)
+{
+    Config::instance().SetFileForamt(index);
 }
