@@ -737,29 +737,6 @@ margin-top:0px;
                    <bool>false</bool>
                   </property>
                   <layout class="QGridLayout" name="gridLayout">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_12">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>主机名称</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLineEdit" name="edtHost">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="1" column="0">
                     <widget class="QLabel" name="label_2">
                      <property name="font">
@@ -804,20 +781,23 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>实时波形缓存时间（分钟)</string>
+                      <string>实验室名称</string>
                      </property>
                     </widget>
                    </item>
                    <item row="2" column="1">
-                    <widget class="QSpinBox" name="sbWaveMin">
+                    <widget class="QComboBox" name="cbxCorp">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
                        <pointsize>14</pointsize>
-                       <weight>50</weight>
-                       <bold>false</bold>
                       </font>
                      </property>
+                     <item>
+                      <property name="text">
+                       <string>光明A1-实验室</string>
+                      </property>
+                     </item>
                     </widget>
                    </item>
                    <item row="3" column="0">
@@ -861,6 +841,42 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
+                   <item row="0" column="1">
+                    <widget class="QLineEdit" name="edtHost">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_12">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>主机名称</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>压力报告路径</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="4" column="1">
                     <widget class="QLineEdit" name="edtPort">
                      <property name="font">
@@ -871,95 +887,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="0">
-                    <widget class="QLabel" name="lblFtpAddr">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Ftp地址</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="5" column="1">
-                    <widget class="QLineEdit" name="edtFtpHost">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="0">
-                    <widget class="QLabel" name="lblFtpAddr_2">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Ftp用户名</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="1">
-                    <widget class="QLineEdit" name="edtFtpName">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="0">
-                    <widget class="QLabel" name="lblFtpAddr_3">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Ftp密码</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="1">
-                    <widget class="QLineEdit" name="edtFtpPwd">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="8" column="0">
-                    <widget class="QLabel" name="lblFtpAddr_4">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Ftp路径</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="8" column="1">
                     <widget class="QLineEdit" name="edtFtpBase">
                      <property name="font">
                       <font>

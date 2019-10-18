@@ -1230,16 +1230,16 @@ void MainWnd::onSucc(QString serialNo, QString err)
 void MainWnd::loadSysConfig()
 {
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
-    ui->sbWaveMin->setValue(Config::instance().m_rt_wave_min);
+    ui->cbxCorp->setCurrentIndex(Config::instance().m_corp_index);
     //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
     //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
     //ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
-    ui->edtFtpHost->setText(Config::instance().m_ftp_host);
-    ui->edtFtpName->setText(Config::instance().m_ftp_user);
-    ui->edtFtpPwd->setText(Config::instance().m_ftp_pwd);
+    //ui->edtFtpHost->setText(Config::instance().m_ftp_host);
+    //ui->edtFtpName->setText(Config::instance().m_ftp_user);
+    //ui->edtFtpPwd->setText(Config::instance().m_ftp_pwd);
     ui->edtFtpBase->setText(Config::instance().m_ftp_base);
     ui->cbxFileFormat->setCurrentIndex(Config::instance().m_file_format);
-    //ui->edtHost->setText(Config::instance().m_host_name);
+    ui->edtHost->setText(Config::instance().m_host_name);
 }
 static bool loading = false;
 //加载状态文件.
@@ -1681,8 +1681,12 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 
 void MainWnd::on_opendir_click(QString dir)
 {
-    QString dir_gbk = utils::UTF82GBK(dir);
-    bool ok = QDesktopServices::openUrl(QUrl(dir_gbk));
+    //QString dir_gbk = utils::UTF82GBK(dir);
+   // QTextCodec *code = QTextCodec::codecForName("GB2312");//解决中文路径问题
+    //std::string name = code->fromUnicode(fileName).data();
+
+    //bool ok = QDesktopServices::openUrl(QUrl(dir,QUrl::TolerantMode));
+    bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
 }
 void MainWnd::on_report_click(QString order)
@@ -1747,7 +1751,22 @@ func BuildPressReport(
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+QString MainWnd::getFtpDir(QString order)
+{
 
+   return QString("%1/%2/%3/%4/").
+           arg(Config::instance().m_ftp_base).
+           arg(ui->cbxCorp->currentText()).
+           arg(QDate::currentDate().toString("yyyy/MM")).
+           arg(order);
+
+}
+QString MainWnd::parseDateTime(QString order)
+{
+    int year = order.mid(1,4).toInt();
+    int mon = order.mid(5,2).toInt();
+    return QString(QStringLiteral("%1年/%2月")).arg(year).arg(mon);
+}
 QString MainWnd::buildReportInput(QString order)
 {
     QString name = ui->cbxHost->currentText();
@@ -1766,8 +1785,14 @@ QString MainWnd::buildReportInput(QString order)
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
                 .arg(order).arg(order).arg(temp);
+        root["ftp_dir"] = QString(QStringLiteral("%1/%2/%3/%4/%5_%6压力测试表.xlsx"))
+                .arg(Config::instance().m_ftp_base)
+                .arg(ui->cbxCorp->currentText())
+                .arg(parseDateTime(order))
+                .arg(order).arg(order).arg(temp);
         root["db"] = utils::GetWorkDir()+"/config.db";
         root["data_dir"] = QString("%1/data").arg(utils::GetWorkDir());
+        root["corp_name"] = ui->cbxCorp->currentText();
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
@@ -1778,7 +1803,7 @@ QString MainWnd::buildReportInput(QString order)
 //            FtpPort int `json:"ftp_port"` //ftp端口
 //            FtpDir string `json:"ftp_dir"` //ftp下的目录
         root["ftp_enable"] = Config::instance().m_ftp_enable;
-        root["ftp_dir"] = Config::instance().m_ftp_base;
+        //root["ftp_dir"] = getFtpDir(order);
         root["ftp_pwd"] = Config::instance().m_ftp_pwd;
         root["ftp_url"] = Config::instance().m_ftp_host;
         root["ftp_port"] = Config::instance().m_ftp_port;

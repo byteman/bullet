@@ -24,6 +24,10 @@ Device::Device():
     m_start_send(true),
     m_packet_count(0)
 {
+    for(int i = 1; i <= 12; i++)
+    {
+        m_channels[i] = DeviceChannel();
+    }
     //connect(&timer,SIGNAL(timeout()),this,SLOT(timeout()));
 }
 bool Device::online() const
@@ -88,6 +92,8 @@ qint32 Device::weight() const
 
 bool Device::IsPaused(int chan)
 {
+    //qDebug() << "serial=" << m_dev_id << " chan=" << chan << " paused=" << m_channels[chan].config.paused;
+
     return m_channels[chan].config.paused;
 }
 
@@ -495,6 +501,7 @@ void Device::UpdateState(int chan,bool pause)
 
 void Device::UpdateChanConfig(int chan, DeviceChnConfig &cfg)
 {
+    //qDebug() << "UpdateChanConfig=" << m_dev_id << "chan=" << chan << "paused=" << cfg.paused;
     if(m_channels.contains(chan)){
         m_channels[chan].config = cfg;
     }

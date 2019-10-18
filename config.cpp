@@ -35,14 +35,21 @@ bool Config::Init()
     m_ftp_user= DAO::instance().ReadStringParam("ftp_user","");
     m_ftp_pwd= DAO::instance().ReadStringParam("ftp_pwd","");
     m_ftp_port = DAO::instance().ReadIntParam("ftp_port",21);
-    m_ftp_base = DAO::instance().ReadStringParam("ftp_base","/");
+
+    QString ftpbase = "//172.30.201.210/电芯研究院/测试数据库/2 电芯测试/22.测试数据/2.循环测试报告";
+
+    m_ftp_base = DAO::instance().ReadStringParam("ftp_base",ftpbase);
     if(m_ftp_host.length() < 3){
         m_ftp_enable = false;
+    }else{
+        m_ftp_enable = true;
     }
     m_file_format = DAO::instance().ReadIntParam("format",1);
     if(m_file_format > 1 ){
         m_file_format = 1;
     }
+    m_corp_index = DAO::instance().ReadIntParam("corpIdx",0);
+
     return true;
 }
 
@@ -97,6 +104,8 @@ bool Config::SetFtpHost(QString host)
     m_ftp_host = host;
     if(m_ftp_host.length() < 3){
         m_ftp_enable = false;
+    }else{
+        m_ftp_enable = true;
     }
     return true;
 }
@@ -133,5 +142,12 @@ bool Config::SetFileForamt(int format)
 {
     DAO::instance().WriteIntParam("format",format);
     m_file_format = format;
+    return true;
+}
+
+bool Config::SetCorpNameInx(int idx)
+{
+    DAO::instance().WriteIntParam("corpIdx",idx);
+    m_corp_index = idx;
     return true;
 }

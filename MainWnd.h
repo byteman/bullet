@@ -98,6 +98,9 @@ private:
      void updateTime();
      bool GetCurrentDeviceName(QString &name);
      bool IsOk(QString title, QString message);
+
+     QString getFtpDir(QString order);
+     QString parseDateTime(QString order);
 private slots:
     void chan_click(int chan);
     void buttonClick();

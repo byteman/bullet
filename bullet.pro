@@ -8,7 +8,7 @@ QT       += core  gui network
 CONFIG += C++11
 #CONFIG += console
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets sql printsupport
-
+DEFINES+=CUTELOGGER_LIBRARY
 TARGET = bullet
 TEMPLATE = app
 debug{
@@ -16,6 +16,7 @@ debug{
     OBJECTS_DIR=debug
 }
 INCLUDEPATH+=./qtcsv ./qtcsv/include
+INCLUDEPATH+=./cutelogger/include
 INCLUDEPATH+=./ext/ ./ext/include
 LIBS+=-L./ext/lib -lWS2_32
 win32:LIBS += -lIphlpapi
@@ -83,7 +84,14 @@ SOURCES += main.cpp\
     myping.cpp \
     crc16.cpp \
     websetclient.cpp \
-    ftpupload.cpp
+    ftpupload.cpp \
+    cutelogger/src/AbstractAppender.cpp \
+    cutelogger/src/AbstractStringAppender.cpp \
+    cutelogger/src/ConsoleAppender.cpp \
+    cutelogger/src/FileAppender.cpp \
+    cutelogger/src/Logger.cpp \
+    cutelogger/src/OutputDebugAppender.cpp \
+    cutelogger/src/RollingFileAppender.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \

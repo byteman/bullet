@@ -30,6 +30,16 @@ bool DeviceManager::addOneDevice(QString& serialNo, QString& name)
     dev->setName(name);
     dev_lock.lock();
     dev_map[serialNo] = dev;
+    if(serialNo == "304a2658d961"){
+        qDebug() << "serialno";
+    }
+    for(int i = 1; i<= 12; i++)
+    {
+        DeviceChnConfig cfg;
+        DAO::instance().DeviceChannalGet(serialNo,i,cfg);
+        dev->UpdateChanConfig(i,cfg);
+    }
+
     dev_lock.unlock();
     return true;
 }

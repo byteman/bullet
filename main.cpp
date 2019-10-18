@@ -10,7 +10,27 @@
 #include <machinechecker.h>
 #include "cmddebug.h"
 #include <Windows.h>
+#include "Logger.h"
+#include "ConsoleAppender.h"
+#include "FileAppender.h"
+void initLogger()
+{
 
+    QSettings config("bullet.ini", QSettings::IniFormat);
+     config.setIniCodec("UTF-8");
+    bool enable_log        = config.value("/config/log",false).toBool();
+
+    if(!enable_log)
+    {
+        return;
+    }
+    ConsoleAppender* consoleAppender = new ConsoleAppender;
+    consoleAppender->setFormat("[%{type:-7}] <%{Function}> %{message}\n");
+    cuteLogger->registerAppender(consoleAppender);
+
+    cuteLogger->registerAppender(new FileAppender("bullet.log"));
+
+}
 bool checkOne()
 {
     //  创建互斥量
