@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <QTime>
+#include <QFileInfoList>
 class Utils
 {
 public:
@@ -32,6 +33,7 @@ public:
 
     static QString utf8ToGb2312(QString strUtf8);
     static QString GetWorkDir();
+    static QFileInfoList ListDirFiles(QString dir,QString ext);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

@@ -59,6 +59,7 @@ QSqlError DAO::Init(QString DataBase,QString DbDir)
     for(int i =0; i < list.size(); i++)
     {
         CreateDataTable(list[i].serialNo);
+        CreateDataTableIndex(list[i].serialNo);
         //Devices.push_back(list[i].serialNo);
     }
     return err;
@@ -143,7 +144,7 @@ QSqlError DAO::DeviceCount(int &count)
 //添加一个新设备.
 QSqlError DAO::DeviceAdd(QString serialNo, QString name)
 {
-    QString sql = QString("insert into %1(time,serialNo,name) values(?,?,?);").arg(DEV_DEVICE_TABLE);
+    QString sql = QString("insert or ignore into %1(time,serialNo,name) values(?,?,?);").arg(DEV_DEVICE_TABLE);
     QSqlQuery query(db);
     query.prepare(sql);
     query.addBindValue(QDateTime::currentDateTime().toMSecsSinceEpoch());
@@ -385,14 +386,19 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
         return QSqlError(serialNo+QStringLiteral("不存在"));
     }
 
-    dataDbMap[serialNo].transaction();
+    if(!dataDbMap[serialNo].transaction()){
+        qDebug() << "transaction failed";
+    }
     for(int i = 0; i < data.size();i++)
     {
-        if(DeviceDataAdd(serialNo, data[i]).isValid()){
-
+        err = DeviceDataAdd(serialNo, data[i]);
+        if(err.isValid()){
+            //qDebug() << "DeviceDataAdd " << i<< " err" << err.text();
         }
     }
-    dataDbMap[serialNo].commit();
+    if(!dataDbMap[serialNo].commit()){
+        qDebug() << "commit failed";
+    }
     return QSqlError();
 }
 #include "utils.h"
@@ -668,10 +674,40 @@ QSqlError DAO::CreateDeviceChannelConfigTable()
     query.exec(sql_create);
     return query.lastError();
 }
+QSqlError DAO::CreateDataTableIndex(QString serialNo)
+{
+    QString sql_create_idx1 = "CREATE INDEX IF NOT EXISTS `chan_time_idx` ON " + QString("tbl_%1_data").arg(serialNo) + "( `chan` , `time` )";
+    QString sql_create_idx2 = "CREATE INDEX IF NOT EXISTS `time_idx` ON " + QString("tbl_%1_data").arg(serialNo) + "(  `time` )";
+    QString sql_create_idx3 = "CREATE INDEX IF NOT EXISTS `chan_idx` ON " + QString("tbl_%1_data").arg(serialNo) + "(  `chan` )";
 
+    if(!dataDbMap.contains(serialNo)){
+        qDebug() << "serialNo=" <<serialNo << " not exist";
+        return QSqlError(serialNo+QStringLiteral("不存在"));
+    }
+
+    QSqlQuery query(dataDbMap[serialNo]);
+    //qDebug() << sql_create_idx1;
+    query.exec(sql_create_idx1);
+    QSqlError err = query.lastError();
+    if(err.isValid()){
+        qDebug() << sql_create_idx1 << err.text();
+    }
+    query.exec(sql_create_idx2);
+    err = query.lastError();
+    if(err.isValid()){
+        qDebug() << sql_create_idx2 << err.text();
+    }
+    query.exec(sql_create_idx3);
+    err = query.lastError();
+    if(err.isValid()){
+        qDebug() << sql_create_idx3 << err.text();
+    }
+    return query.lastError();
+
+}
 QSqlError DAO::CreateDataTable(QString serialNo)
 {
-    QString sql_create = "CREATE TABLE IF NOT EXISTS `" + QString("tbl_%1_data").arg(serialNo) + "` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `chan` INTEGER NOT NULL, `value` INTEGER NOT NULL )";
+    QString sql_create = "CREATE TABLE IF NOT EXISTS `" + QString("tbl_%1_data").arg(serialNo) + "` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `chan` INTEGER NOT NULL, `value` INTEGER NOT NULL, UNIQUE(time, chan))";
     if(dataDbMap.contains(serialNo)){
         return QSqlError(serialNo+QStringLiteral("已经存在"));
     }

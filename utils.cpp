@@ -36,6 +36,18 @@ QString utils::GetWorkDir()
     return path;
 
 }
+#include <QDir>
+QFileInfoList utils::ListDirFiles(QString dirName, QString ext)
+{
+
+    QDir dir(dirName);
+    dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+    dir.setSorting(QDir::Size | QDir::Reversed);
+    QStringList filterList;
+    filterList << ext;   //设置筛选条件
+    return  dir.entryInfoList(filterList);
+
+}
 
 TimeStamp::TimeStamp(QString _tag):
     tag(_tag)

@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1332,6 +1332,59 @@ QToolButton#btnShou:hover{
 }</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="2">
+              <widget class="QPushButton" name="btnImport">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
+
+border-raidus:0px;
+border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));
+background-color: rgb(0, 170, 255);
+border-width:1px;
+border-style:sold;
+}
+
+QPushButton:hove{
+border-raidus:0px;
+border-style:solid;
+border-width:0px 0px 2px 0px;
+padding:4px 4px 2px 4px;
+border-color:#00BB9E;
+background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 #525252);
+}</string>
+               </property>
+               <property name="text">
+                <string>导入数据</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDateTimeEdit" name="dteTo">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="displayFormat">
+                <string>yyyy/M/d H:mm:ss</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_6">
                <property name="font">
@@ -1345,6 +1398,19 @@ QToolButton#btnShou:hover{
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QCheckBox" name="chkMeasure">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>启用测量工具</string>
                </property>
               </widget>
              </item>
@@ -1367,76 +1433,7 @@ QToolButton#btnShou:hover{
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="label_8">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>时间范围</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QComboBox" name="cbxTimeSpan">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <item>
-                <property name="text">
-                 <string>最近10分钟</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>最近20分钟</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>最近1个小时</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>最近2小时</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>最近5小时</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>最近10小时</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="0" column="4">
-              <widget class="QCheckBox" name="chkMeasure">
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>启用测量工具</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QLabel" name="label_7">
                <property name="font">
                 <font>
@@ -1452,26 +1449,7 @@ QToolButton#btnShou:hover{
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDateTimeEdit" name="dteTo">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>微软雅黑</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="displayFormat">
-                <string>yyyy/M/d H:mm:ss</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
+             <item row="2" column="4">
               <widget class="QPushButton" name="btnQuery">
                <property name="font">
                 <font>
@@ -1505,7 +1483,7 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
                </property>
               </widget>
              </item>
-             <item row="1" column="4">
+             <item row="2" column="2">
               <widget class="QPushButton" name="btnExport">
                <property name="font">
                 <font>

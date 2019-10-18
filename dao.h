@@ -85,6 +85,7 @@ private:
                             QString PassWord,
                             QString Path,
                             QString DeviceName);
+    QSqlError CreateDataTableIndex(QString serialNo);
 };
 
 #endif // DAO_H

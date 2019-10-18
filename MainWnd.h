@@ -214,6 +214,8 @@ private slots:
 
     void on_cbxFileFormat_currentIndexChanged(int index);
 
+    void on_btnImport_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -224,6 +226,7 @@ protected:
 protected:
     virtual void closeEvent(QCloseEvent *);
 protected slots:
+    void onUsbImportSucc();
     void onResetResult(Device *, bool);
     void on_report_click(QString order);
     void fileChange(const QString &path);

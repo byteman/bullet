@@ -1,4 +1,4 @@
-#include "frmmessagebox.h"
+﻿#include "frmmessagebox.h"
 #include "ui_frmmessagebox.h"
 #include "iconhelper.h"
 #include "myhelper.h"
@@ -22,7 +22,7 @@ frmMessageBox::frmMessageBox(QWidget *parent) :
     connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(close()));
     //窗体居中显示
     myHelper::FormInCenter(this);
-
+    ui->lab_Title->setText(QStringLiteral("提示"));
 }
 
 frmMessageBox::~frmMessageBox()
@@ -35,14 +35,14 @@ void frmMessageBox::SetMessage(const QString &msg, int type)
     if (type == 0) {
         ui->labIcoMain->setStyleSheet("border-image: url(:/image/info.png);");
         ui->btnCancel->setVisible(false);
-        ui->lab_Title->setText("提示");
+        ui->lab_Title->setText(QStringLiteral("提示"));
     } else if (type == 1) {
         ui->labIcoMain->setStyleSheet("border-image: url(:/image/question.png);");
-        ui->lab_Title->setText("询问");
+        ui->lab_Title->setText(QStringLiteral("询问"));
     } else if (type == 2) {
         ui->labIcoMain->setStyleSheet("border-image: url(:/image/error.png);");
         ui->btnCancel->setVisible(false);
-        ui->lab_Title->setText("错误");
+        ui->lab_Title->setText(QStringLiteral("错误"));
     }
 
     ui->labInfo->setText(msg);

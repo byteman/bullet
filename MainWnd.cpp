@@ -17,6 +17,7 @@
 #include "gotypes.h"
 #include "asyncexport.h"
 #include <QInputDialog>
+#include "usbimport.h"
 #define MAX_CHAN_NR 12
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -251,8 +252,8 @@ void MainWnd::on_reset_count_click(bool)
 void MainWnd::on_add_device_click(bool)
 {
     if(!this->CheckPassWord())return;
-    if(dvm.DeviceCount() >=8 ){
-         myHelper::ShowMessageBoxError(QStringLiteral("最多添加8个设备"));
+    if(dvm.DeviceCount() >=12 ){
+         myHelper::ShowMessageBoxError(QStringLiteral("最多添加12个设备"));
          return;
     }
     DialogDevice dlg;
@@ -390,12 +391,21 @@ void MainWnd::on_clear_history_menu_click(bool)
 }
 bool MainWnd::IsOk(QString title,QString message)
 {
-    QMessageBox msg(this);
-    msg.setWindowTitle(title);
-    msg.setText(message);
-   // msg.setIcon(QMessageBox::information);
-    msg.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
-    return msg.exec() == QMessageBox::Ok;
+
+    int result = myHelper::ShowMessageBoxQuesion(message);
+    if (result == 1) {
+       return true;
+    } else {
+       return false;
+    }
+
+
+//    QMessageBox msg(this);
+//    msg.setWindowTitle(title);
+//    msg.setText(message);
+//   // msg.setIcon(QMessageBox::information);
+//    msg.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+//    return msg.exec() == QMessageBox::Ok;
 }
 void MainWnd::on_clearup_menu_click(bool)
 {
@@ -1056,8 +1066,8 @@ void MainWnd::initDeviceChannels()
     ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
     ui->dteTo->setDateTime(QDateTime::currentDateTime());
     //on_cbxTimeSpan_currentIndexChanged(0);
-    ui->cbxTimeSpan->setVisible(false);
-    ui->label_8->setVisible(false);
+   // ui->cbxTimeSpan->setVisible(false);
+    //ui->label_8->setVisible(false);
     devices = new MyDevices(MAX_CHAN_NR+1,ui->gbDevices);
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
@@ -1203,6 +1213,8 @@ void MainWnd::initUI()
 
     connect(&AsyncExportManager::instance(),SIGNAL(onProgress(QString,int,int)),this,SLOT(onProgress(QString,int,int)));
     connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
+
+    connect(UsbImport::instance(),SIGNAL(onSucc()),this,SLOT(onUsbImportSucc()));
 
  //加载设备状态.
 
@@ -1379,6 +1391,13 @@ void MainWnd::closeEvent(QCloseEvent *event)
        }
 
 
+}
+
+void MainWnd::onUsbImportSucc()
+{
+    ui->btnImport->setEnabled(true);
+    ui->btnImport->setText(QStringLiteral("导入数据"));
+    QMessageBox::information(this,QStringLiteral("提示"),QStringLiteral("导入完成"));
 }
 //切换后触发.
 void MainWnd::on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
@@ -1978,4 +1997,27 @@ void MainWnd::on_btnStopAll_clicked()
 void MainWnd::on_cbxFileFormat_currentIndexChanged(int index)
 {
     Config::instance().SetFileForamt(index);
+}
+//从U盘数据中导入压力数据.
+void MainWnd::on_btnImport_clicked()
+{
+    QString id,name;
+    if(!GetCurrentDeviceId2(id)){
+        return;
+    }
+    if(!GetCurrentDeviceId2Name(name)){
+        return;
+    }
+    bool ok = IsOk(QStringLiteral("操作确认"),QString(QStringLiteral("%1%2号模块中吗?")).arg(QStringLiteral("确认导入数据到")).arg(name));
+    if(!ok){
+        return;
+    }
+    QString dirName = QFileDialog::getExistingDirectory(this,QStringLiteral("选择导入文件目录"));
+    qDebug() << "Filename=" << dirName;
+    if(dirName.length() < 3){
+        return;
+    }
+    ui->btnImport->setEnabled(false);
+    ui->btnImport->setText(QStringLiteral("正在分析"));
+    UsbImport::instance()->start(id,dirName);
 }
