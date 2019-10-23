@@ -17,3 +17,7 @@ datadir
 report.dll
 *.log
 *.pdb
+.vs
+.idea
+doc
+*.lib
