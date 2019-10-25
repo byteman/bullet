@@ -1783,6 +1783,7 @@ QString MainWnd::getFtpDir(QString order)
            arg(order);
 
 }
+
 QString MainWnd::parseDateTime(QString order)
 {
     int year = order.mid(1,4).toInt();
@@ -1803,10 +1804,10 @@ QString MainWnd::buildReportInput(QString order)
         QString temp  = orders[order].at(0).Temp;
         root["order_no"] = order;
         root["temp"] =temp ;
-        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
+        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表_%6.xlsx"))
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
-                .arg(order).arg(order).arg(temp);
+                .arg(order).arg(order).arg(temp).arg(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
         root["ftp_dir"] = QString(QStringLiteral("%1/%2/%3/%4/%5_%6压力测试表.xlsx"))
                 .arg(Config::instance().m_ftp_base)
                 .arg(ui->cbxCorp->currentText())
