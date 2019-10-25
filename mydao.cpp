@@ -89,5 +89,5 @@ bool MyDAO::QueryBarCode(QString barcode, BarInfo &info)
         info.chan = query.value("channel").toInt();
         //dev.id      = query.value("id").toInt();
     }
-    return query.lastError();
+    return !query.lastError().isValid();
 }
