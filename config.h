@@ -47,6 +47,10 @@ struct Config
     bool    m_ftp_enable;
     unsigned char     m_file_format; //文件格式.
 
+    //导出数据格式
+    QString m_battery_dev_ip; //电芯测试设备的ip地址.
+
+
 public:
     bool EnableRecvSensorOff(bool en);
 };

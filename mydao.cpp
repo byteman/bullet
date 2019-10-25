@@ -92,7 +92,7 @@ bool MyDAO::QueryBarCode(QString barcode, BarInfo &info)
 {
     QSqlQuery query;
     QString sql = QString("select * from indextable where barcode=`%1` order by StartTime desc limit 1").arg(barcode);
-
+    LOG_DEBUG() << sql;
     query.exec(sql);
     while (query.next())
     {

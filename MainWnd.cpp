@@ -1721,28 +1721,38 @@ void MainWnd::on_export_click(QString order)
     QString x =  ui->cbxHost->currentText();
     CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
     if(orders.size() == 0){
+        qDebug() << "orders size=" << orders.size();
        return;
     }
     if(!orders.contains(order)){
+        qDebug() << "orders not contains=" << order;
         return;
     }
     QVector<CellState> &states =  orders[order];
     QString devip = "";
     QStringList cells;
-    QSqlError err = MyDAO::instance().ConnectDB("127.0.0.1",3309,"root","123456","192.168.1.254");
+    QSqlError err = MyDAO::instance().ConnectDB("localhost",
+                                                3309,
+                                                "root",
+                                                "123456",
+                                                Config::instance().m_battery_dev_ip);
     if(err.isValid()){
-        qDebug() << err.text();
+        qDebug() << "connect mysql error=" << err.text();
         return;
     }
+    qDebug() << "database connect ok states size=" << states.size();
     for(int i = 0; i <states.size(); i++)
     {
         BarInfo bar;
+        qDebug() << "cell No=" << states[i].CellNo;
         if(MyDAO::instance().QueryBarCode( states[i].CellNo,bar)){
             devip = bar.devip;
             cells.push_back(QString("%1_%2").arg(bar.chan).arg(bar.logguid));
             if(i == 0){
 
             }
+        }else{
+            qDebug() << "QueryBarCode error";
         }
     }
     MyDAO::instance().CloseDB();
