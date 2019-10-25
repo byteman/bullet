@@ -15,7 +15,11 @@ MyDAO::MyDAO()
 
 
 }
-
+MyDAO& MyDAO::instance()
+{
+    static SingletonHolder<MyDAO> sh;
+    return *sh.get();
+}
 QSqlError MyDAO::Init(QString host, int port, QString UserName, QString PassWord, QString DataBase)
 {
     QSqlError err = ConnectDB(host,port,UserName,PassWord,DataBase);
@@ -73,6 +77,12 @@ QSqlError MyDAO::ReConnnectDB()
 
 }
 
+QSqlError MyDAO::CloseDB()
+{
+    db.close();
+    return QSqlError();
+}
+
 QString MyDAO::GetLastError()
 {
     return db.lastError().text();
@@ -81,13 +91,18 @@ QString MyDAO::GetLastError()
 bool MyDAO::QueryBarCode(QString barcode, BarInfo &info)
 {
     QSqlQuery query;
-    QString sql = QString("select * from indextable where barcode=%1 order by start_time desc limit 1").arg(barcode);
+    QString sql = QString("select * from indextable where barcode=`%1` order by StartTime desc limit 1").arg(barcode);
 
     query.exec(sql);
     while (query.next())
     {
-        info.chan = query.value("channel").toInt();
+        info.chan = query.value("Channel").toInt();
+        info.logguid = query.value("LogGuid").toString();
+        info.devip = query.value("DeviceAddr").toString();
+        info.devid = query.value("DeviceID").toInt();
+        info.barcode = query.value("Barcode").toString();
+
         //dev.id      = query.value("id").toInt();
     }
-    return query.lastError();
+    return !query.lastError().isValid();
 }

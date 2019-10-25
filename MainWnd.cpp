@@ -1643,6 +1643,7 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
    }
     QSignalMapper *signalMapper = new QSignalMapper(this);
     QSignalMapper *signalMapper2 = new QSignalMapper(this);
+    QSignalMapper *signalMapper3 = new QSignalMapper(this);
    ui->orderList->clear();
    //ui->cbxTestNo->clear();
    QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
@@ -1674,6 +1675,10 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
         QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
          btnOpenDir->setGeometry(0,0,80,40);
 
+         QPushButton *btnExport = new QPushButton(QStringLiteral("导出充放电数据"));
+          btnExport->setGeometry(0,0,80,40);
+
+
        connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
        //QString dir = QString("%1").arg(1);
         QString dir = QString(QStringLiteral("%1/%2/%3"))
@@ -1683,13 +1688,19 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 
        signalMapper2->setMapping(btnOpenDir, dir);
 
+
+       connect(btnExport, SIGNAL(clicked()), signalMapper3, SLOT(map()));
+
+       signalMapper3->setMapping(btnExport, i.key());
+
        connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
        signalMapper->setMapping(btnReport, i.key());
 
 
+       ui->orderList->setItemWidget(item, 3, btnExport);
+       ui->orderList->setItemWidget(item, 4, btnReport);
+       ui->orderList->setItemWidget(item, 5, btnOpenDir);
 
-       ui->orderList->setItemWidget(item, 3, btnReport);
-       ui->orderList->setItemWidget(item, 4, btnOpenDir);
 
 
        ++i;
@@ -1698,9 +1709,48 @@ void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
                this, SLOT(on_report_click(QString)));
    connect(signalMapper2, SIGNAL(mapped(QString)),
                this, SLOT(on_opendir_click(QString)));
+   connect(signalMapper3, SIGNAL(mapped(QString)),
+               this, SLOT(on_export_click(QString)));
 
 }
 
+#include "myDAO.h"
+void MainWnd::on_export_click(QString order)
+{
+    //根据订单获取其下的所有电芯编号.
+    QString x =  ui->cbxHost->currentText();
+    CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
+    if(orders.size() == 0){
+       return;
+    }
+    if(!orders.contains(order)){
+        return;
+    }
+    QVector<CellState> &states =  orders[order];
+    QString devip = "";
+    QStringList cells;
+    QSqlError err = MyDAO::instance().ConnectDB("127.0.0.1",3309,"root","123456","192.168.1.254");
+    if(err.isValid()){
+        qDebug() << err.text();
+        return;
+    }
+    for(int i = 0; i <states.size(); i++)
+    {
+        BarInfo bar;
+        if(MyDAO::instance().QueryBarCode( states[i].CellNo,bar)){
+            devip = bar.devip;
+            cells.push_back(QString("%1_%2").arg(bar.chan).arg(bar.logguid));
+            if(i == 0){
+
+            }
+        }
+    }
+    MyDAO::instance().CloseDB();
+    QString cells_str= cells.join('#');
+    qDebug() << devip << cells_str;
+
+
+}
 void MainWnd::on_opendir_click(QString dir)
 {
     //QString dir_gbk = utils::UTF82GBK(dir);

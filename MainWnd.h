@@ -238,6 +238,7 @@ protected slots:
     void on_stop_menu_click(bool);
     void on_start_menu_click(bool);
     void on_clear_history_menu_click(bool);
+    void on_export_click(QString order);
 };
 
 #endif // UIDEMO01_H
