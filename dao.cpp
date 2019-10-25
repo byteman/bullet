@@ -401,6 +401,20 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
     }
     return QSqlError();
 }
+
+QSqlError DAO::DeviceChanDataRemove(QString serialNo, int chan)
+{
+    QString sql = QString("delete from tbl_%1_data where chan=%2;").arg(serialNo).arg(chan);
+    if(!dataDbMap.contains(serialNo)){
+        return QSqlError(serialNo+QStringLiteral("不存在"));
+    }
+     QSqlQuery query(dataDbMap[serialNo]);
+     qDebug() << sql  << chan;
+    //query.prepare(sql);
+    //query.addBindValue(to);
+    query.exec(sql);
+    return query.lastError();
+}
 #include "utils.h"
 QSqlError DAO::DeviceDataTblRemove(QString serialNo)
 {

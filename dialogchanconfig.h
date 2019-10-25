@@ -14,7 +14,7 @@ class DialogChanConfig : public QDialog
 public:
     explicit DialogChanConfig(QWidget *parent = NULL);
     ~DialogChanConfig();
-    void SetChanConfig(QString serialNo,int chan,DeviceChnConfig& cfg);
+    void SetChanConfig(QString serialNo,QString devname,int chan,DeviceChnConfig& cfg);
     bool GetChanConfig(DeviceChnConfig& cfg);
 
 private slots:
@@ -22,9 +22,14 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_btnChanClear_clicked();
+
 private:
     Ui::DialogChanConfig *ui;
     DeviceChnConfig cfg;
+    bool CheckPassWord();
+    bool IsOk(QString title, QString message);
+    QString devName;
 };
 
 #endif // DIALOGCHANCONFIG_H

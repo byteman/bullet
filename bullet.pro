@@ -92,7 +92,8 @@ SOURCES += main.cpp\
     cutelogger/src/Logger.cpp \
     cutelogger/src/OutputDebugAppender.cpp \
     cutelogger/src/RollingFileAppender.cpp \
-    usbimport.cpp
+    usbimport.cpp \
+    mydao.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -157,7 +158,8 @@ HEADERS  += tcpserver.h \
     myping.h \
     websetclient.h \
     ftpupload.h \
-    usbimport.h
+    usbimport.h \
+    mydao.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \

@@ -199,9 +199,12 @@ void MainWnd::onChannelClick(int addr)
     DialogChanConfig dlg;
     DeviceChnConfig cfg;
     //cfg.chanName = QString(QStringLiteral("通道%1")).arg(addr+1);
-
+    QString devname="";
+    if(!GetCurrentDeviceName(devname)){
+       return;
+    }
     dvm.GetDeviceChan(m_cur_dev_id,addr,cfg);
-    dlg.SetChanConfig(m_cur_dev_id,addr,cfg);
+    dlg.SetChanConfig(m_cur_dev_id,devname,addr,cfg);
     int result = dlg.exec();
     if(result == QDialog::Accepted){
         dlg.GetChanConfig(cfg);

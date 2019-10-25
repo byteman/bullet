@@ -39,6 +39,7 @@ public:
     //添加一组测力数据.
     QSqlError DeviceDataAdd(QString serialNo,DeviceDataList& data);
     //清空某个设备的所有数据.
+    QSqlError DeviceChanDataRemove(QString serialNo,int chan);
     QSqlError DeviceDataTblRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo,qint64 from,qint64 to);
