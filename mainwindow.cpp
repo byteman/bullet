@@ -134,8 +134,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->btnStop->setEnabled(false);
 
 
-    checkAll(true);
-    ui->rball->setChecked(true);
+    checkAll(false);
+    ui->rball->setChecked(false);
     //srv->setParent(this);
 //    connect(&srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
 //    connect(&srv,SIGNAL(Message(SessMessage)),&dvm
@@ -205,6 +205,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_waveWdg->SetChannelName(3,QStringLiteral("轴向位移"));
     m_waveWdg->SetChannelName(4,QStringLiteral("轴力"));
     m_waveWdg->SetChannelName(5,QStringLiteral("孔压"));
+    m_waveWdg->DisplayAllChannel(false);
     this->startTimer(1000);
     if(srv->start(8881)){
 
@@ -508,12 +509,15 @@ void MainWindow::onWaveMsg(Device *dev, MsgWaveData data)
    }
    m_waveWdg->AppendData(data);
    static int count = 0;
-   if( (count++ % m_refresh_count) == 0)
-   {
+   if(isOneCheck()){
+       if( (count++ % m_refresh_count) == 0)
+       {
 
-       m_waveWdg->Display();
+           m_waveWdg->Display();
 
+       }
    }
+
 //   for(int i = 0; i < 8; i++){
 //       double min,max;
 //       m_waveWdg->GetValueRange(i,min,max);
@@ -574,41 +578,50 @@ void MainWindow::on_rball_clicked(bool checked)
 {
     m_waveWdg->DisplayAllChannel(checked);
     checkAll(checked);
+    m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb2_clicked(bool checked)
 {
     m_waveWdg->DisplayChannel(1,checked);
     isAllCheck();
+    m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb3_clicked(bool checked)
 {
 m_waveWdg->DisplayChannel(2,checked);
+isAllCheck();
+m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb4_clicked(bool checked)
 {
 m_waveWdg->DisplayChannel(3,checked);
 isAllCheck();
+m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb5_clicked(bool checked)
 {
 m_waveWdg->DisplayChannel(4,checked);
 isAllCheck();
+m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb6_clicked(bool checked)
 {
 m_waveWdg->DisplayChannel(5,checked);
 isAllCheck();
+m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb7_clicked(bool checked)
 {
+
     m_waveWdg->DisplayChannel(6,checked);
     isAllCheck();
+    m_waveWdg->Clear();
 }
 
 void MainWindow::on_rb8_clicked(bool checked)
@@ -617,6 +630,7 @@ void MainWindow::on_rb8_clicked(bool checked)
     m_waveWdg->DisplayChannel(7,checked);
 
 isAllCheck();
+m_waveWdg->Clear();
 }
 void MainWindow::isAllCheck()
 {
@@ -631,7 +645,19 @@ void MainWindow::isAllCheck()
             //ui->rb8->isChecked();
     ui->rball->setChecked(isAll);
 }
-
+bool MainWindow::isOneCheck()
+{
+    bool isAll = false;
+    isAll = ui->rb1->isChecked()||
+            ui->rb2->isChecked()||
+            ui->rb3->isChecked()||
+            ui->rb4->isChecked()||
+            ui->rb5->isChecked()||
+            ui->rb6->isChecked();
+            //ui->rb7->isChecked()&
+            //ui->rb8->isChecked();
+    return isAll;
+}
 void MainWindow::onCalibResult(Device *dev, int chan, int index, int result)
 {
     QMessageBox::information(this,"信息","标定完成");
@@ -861,6 +887,16 @@ void MainWindow::on_treeWidget_clicked(const QModelIndex &index)
 }
 
 void MainWindow::on_treeWidget_itemChanged(QTreeWidgetItem *item, int column)
+{
+
+}
+
+void MainWindow::on_rb2_clicked()
+{
+
+}
+
+void MainWindow::on_rball_clicked()
 {
 
 }

@@ -1,4 +1,4 @@
-#include "qcustomplotchannel.h"
+﻿#include "qcustomplotchannel.h"
 static QColor colors[8] = {Qt::darkCyan,Qt::yellow,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
@@ -102,6 +102,11 @@ void QCustomPlotChannel::GetValueRange(double &min, double &max)
 void QCustomPlotChannel::GetKeyRange(double &min, double &max)
 {
 
+}
+
+bool QCustomPlotChannel::IsShow()
+{
+    return    m_graph->visible();
 }
 
 void QCustomPlotChannel::Display(bool show)

@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -73,6 +73,7 @@ private:
     void InitDevice(QList<Device*> &devices);
 
     QString GetDevice(int ch);
+    bool isOneCheck();
 private slots:
     void onCalibResult(Device* dev, int chan, int index, int result);
     void onRealTimeResult(Device* dev,RT_AD_RESULT result);
@@ -183,6 +184,10 @@ private slots:
     void on_treeWidget_clicked(const QModelIndex &index);
 
     void on_treeWidget_itemChanged(QTreeWidgetItem *item, int column);
+
+    void on_rb2_clicked();
+
+    void on_rball_clicked();
 
 protected:
     void timerEvent(QTimerEvent *);

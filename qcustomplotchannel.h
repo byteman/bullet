@@ -1,4 +1,4 @@
-#ifndef QCUSTOMPLOTCHANNEL_H
+﻿#ifndef QCUSTOMPLOTCHANNEL_H
 #define QCUSTOMPLOTCHANNEL_H
 
 #include "igraphicchannel.h"
@@ -17,6 +17,7 @@ public:
     virtual void SetName(QString &name);
     virtual void GetValueRange(double& min,double &max);
     virtual void GetKeyRange(double& min,double &max);
+    virtual bool IsShow();
 private:
     QCPGraph* m_graph;
     double m_min,m_max;

@@ -1,4 +1,4 @@
-#include "ilinechart.h"
+﻿#include "ilinechart.h"
 
 void ILineChart::DisplayAllChannel(bool show)
 {
@@ -21,8 +21,10 @@ void ILineChart::AppendDataArray(QVector<QVector<double>> &samples)
 {
     for(int i = 0; i < channels.size();i++)
     {
+        if(channels[i]->IsShow()){
+            channels[i]->AddDataArray(samples[i]);
+        }
 
-        channels[i]->AddDataArray(samples[i]);
     }
 }
 #if 0

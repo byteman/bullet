@@ -1,4 +1,4 @@
-#include "qcustomchart.h"
+﻿#include "qcustomchart.h"
 #include "qcustomplotchannel.h"
 void QCustomChart::Init()
 {
@@ -54,7 +54,7 @@ QCustomChart::QCustomChart(QCustomPlot *parent, int num):
    m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
    m_plot->xAxis->scaleRange(0,200);
    m_plot->yAxis->scaleRange(0,2000);
-   m_plot->xAxis->setLabel("时间");
+   m_plot->xAxis->setLabel(QStringLiteral("时间"));
    //m_plot->yAxis->setLabel("牛顿");
 
    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
@@ -87,7 +87,7 @@ void QCustomChart::DisplayChannel(int chan,bool show)
 {
     ILineChart::DisplayChannel(chan,show);
     m_plot->rescaleAxes();
-    m_plot->replot(QCustomPlot::rpQueuedReplot);
+    m_plot->replot();
 }
 
 void QCustomChart::DisplayAllChannel(bool show)
@@ -103,12 +103,22 @@ void QCustomChart::DisplayAllChannel(bool show)
     }
     m_plot->replot();
 }
-
+int QCustomChart::GetShowChan()
+{
+    int num = 0;
+    for(int i = 0; i < channels.size(); i++)
+    {
+        if(channels[i]->IsShow()){
+            num++;
+        }
+    }
+    return num;
+}
 void QCustomChart::Display()
 {
 
     m_plot->rescaleAxes();
-    if(channels.size() > 1){
+    if(GetShowChan() > 1){
         m_plot->yAxis->scaleRange(1.5);
     }
     m_plot->replot();

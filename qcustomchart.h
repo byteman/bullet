@@ -1,4 +1,4 @@
-#ifndef QCUSTOMCHART_H
+﻿#ifndef QCUSTOMCHART_H
 #define QCUSTOMCHART_H
 
 #include "ilinechart.h"
@@ -14,6 +14,7 @@ private:
     void SetChannel(int num);
 
     void Init();
+    int GetShowChan();
 public:
     virtual void DisplayChannel(int chan=0,bool bshow=true);
     virtual void DisplayAllChannel(bool show);

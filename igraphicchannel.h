@@ -1,4 +1,4 @@
-#ifndef IGRAPHICCHANNEL_H
+﻿#ifndef IGRAPHICCHANNEL_H
 #define IGRAPHICCHANNEL_H
 #include <QPen>
 #include "ifilter.h"
@@ -12,6 +12,7 @@ public:
     virtual void Display(bool isShow)=0;
     virtual void Clear()=0;
     virtual int  Size()=0;
+      virtual bool IsShow()=0;
       virtual void SetName(QString &name) = 0;
     virtual void SetPen(QPen& pen)=0;
     virtual void GetKeyRange(double& min,double &max)=0;
