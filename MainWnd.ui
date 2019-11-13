@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -705,7 +705,7 @@ border-right-color: rgb(80, 170, 255);</string>
                  <widget class="QGroupBox" name="groupBox">
                   <property name="minimumSize">
                    <size>
-                    <width>600</width>
+                    <width>800</width>
                     <height>600</height>
                    </size>
                   </property>
@@ -750,7 +750,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="1">
+                   <item row="1" column="2">
                     <widget class="QComboBox" name="cbxFileFormat">
                      <property name="font">
                       <font>
@@ -785,7 +785,20 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>系统语言</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="2">
                     <widget class="QComboBox" name="cbxCorp">
                      <property name="font">
                       <font>
@@ -800,20 +813,7 @@ margin-top:0px;
                      </item>
                     </widget>
                    </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="label_4">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>系统语言</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="1">
+                   <item row="3" column="2">
                     <widget class="QComboBox" name="cbxLang">
                      <property name="font">
                       <font>
@@ -828,8 +828,8 @@ margin-top:0px;
                      </item>
                     </widget>
                    </item>
-                   <item row="4" column="0">
-                    <widget class="QLabel" name="label">
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_4">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -837,17 +837,7 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>监听端口</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLineEdit" name="edtHost">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
+                      <string>压力报告路径</string>
                      </property>
                     </widget>
                    </item>
@@ -864,8 +854,8 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="0">
-                    <widget class="QLabel" name="lblFtpAddr_4">
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -873,12 +863,12 @@ margin-top:0px;
                       </font>
                      </property>
                      <property name="text">
-                      <string>压力报告路径</string>
+                      <string>监听端口</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="1">
-                    <widget class="QLineEdit" name="edtPort">
+                   <item row="0" column="2">
+                    <widget class="QLineEdit" name="edtHost">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -887,7 +877,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="1">
+                   <item row="5" column="2">
                     <widget class="QLineEdit" name="edtFtpBase">
                      <property name="font">
                       <font>
@@ -897,6 +887,35 @@ margin-top:0px;
                      </property>
                      <property name="text">
                       <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="2">
+                    <widget class="QLineEdit" name="edtPort">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="3">
+                    <widget class="QPushButton" name="btnOpenReport">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>45</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>80</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>打开</string>
                      </property>
                     </widget>
                    </item>

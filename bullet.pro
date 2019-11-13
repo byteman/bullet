@@ -93,7 +93,10 @@ SOURCES += main.cpp\
     cutelogger/src/OutputDebugAppender.cpp \
     cutelogger/src/RollingFileAppender.cpp \
     usbimport.cpp \
-    mydao.cpp
+    mydao.cpp \
+    mainwindow.cpp \
+    qftp.cpp \
+    qurlinfo.cpp
 
 HEADERS  += tcpserver.h \
     imsginterface.h \
@@ -159,7 +162,10 @@ HEADERS  += tcpserver.h \
     websetclient.h \
     ftpupload.h \
     usbimport.h \
-    mydao.h
+    mydao.h \
+    mainwindow.h \
+    qftp.h \
+    qurlinfo.h
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
@@ -173,7 +179,8 @@ FORMS    += MainWnd.ui \
     dialogmerge.ui \
     chanselect.ui \
     dialogreport.ui \
-    dialogclearup.ui
+    dialogclearup.ui \
+    mainwindow.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

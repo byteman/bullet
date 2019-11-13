@@ -23,6 +23,7 @@
 #include "myplottrace.h"
 #include <QFileSystemWatcher>
 #include "ftpupload.h"
+#include "mainwindow.h"
 namespace Ui {
 class MainWnd;
 }
@@ -67,6 +68,7 @@ private:
      QRubberBand *rubberBand;
      QPoint rubberOrigin;
      GPServer* srv;
+     MainWindow *ftp;
      void loadDeviceUI();
      bool Init();
      QTreeWidgetItem *findItemById(QString id);
@@ -215,6 +217,8 @@ private slots:
     void on_cbxFileFormat_currentIndexChanged(int index);
 
     void on_btnImport_clicked();
+
+    void on_btnOpenReport_clicked();
 
 protected:
     void timerEvent(QTimerEvent *);

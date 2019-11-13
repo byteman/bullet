@@ -353,22 +353,41 @@ void MainWnd::on_start_menu_click(bool)
     }
 
 }
+//下载u盘数据
+#include "mainwindow.h"
 void MainWnd::on_stop_menu_click(bool)
 {
     QString id;
-    if(!GetCurrentDeviceId(id))
-    {
-        qDebug()<<"Can not GetCurrentDeviceId";
+    if(!GetCurrentDeviceId(id)){
+        qDebug()<<"Can not GetCurrentDeviceName";
         return;
     }
-    if(devices!=NULL){
-        QVector<int> chans = devices->GetSelectChan();
-        for(int i = 0; i < chans.size(); i++)
-        {
-            dvm.ControlDeviceChan(id,chans[i],true);
-        }
-        devices->SetSelectRecState(true);
+    Device* dev = dvm.GetDevice(id);
+    if(dev==NULL){
+        return;
     }
+
+    QString host;
+    if(!dev->GetHostAddr(host)){
+        return;
+    }
+    if(ftp!=NULL){
+        delete ftp;
+        ftp = NULL;
+    }
+    if(ftp==NULL){
+        ftp = new MainWindow();
+    }
+
+    ftp->setHost(host);
+
+    //ftp.setWindowFlags(Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint | Qt::Dialog);
+    //ftp.setWindowModality(Qt::ApplicationModal);
+    ftp->setAttribute(Qt::WA_ShowModal, true);
+    ftp->setWindowFlags(ftp->windowFlags() | Qt::WindowStaysOnTopHint);
+
+    ftp->showNormal();
+
 
 }
 void MainWnd::on_clear_history_menu_click(bool)
@@ -746,6 +765,7 @@ MainWnd::MainWnd(QWidget *parent) :
     ui(new Ui::MainWnd),
     m_cur_dev_id(""),
     bFirst(true),
+    ftp(NULL),
     bQueryOrderState(false),
     watcher(NULL)
 {
@@ -1186,9 +1206,9 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clear_history_menu_click(bool)));
 
-//    action = new QAction(QString::fromLocal8Bit("停止选择通道"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
+    action = new QAction(QString::fromLocal8Bit("下载U盘数据"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
 
 
 //    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
@@ -1840,6 +1860,8 @@ QString MainWnd::buildReportInput(QString order)
 
              o["dev_chan"] = orders[order].at(i).PressDevChan;
              o["dev_name"] = orders[order].at(i).PressDevId;
+             o["ctrl_name"] = orders[order].at(i).ChargeDev;
+
 //             o["file_name"] = QString("%1/%2/%3/%4.xls")
 //                     .arg(Config::instance().m_data_dir)
 //                     .arg(ui->cbxHost->currentText())
@@ -2024,4 +2046,12 @@ void MainWnd::on_btnImport_clicked()
     ui->btnImport->setEnabled(false);
     ui->btnImport->setText(QStringLiteral("正在分析"));
     UsbImport::instance()->start(id,dirName);
+}
+
+void MainWnd::on_btnOpenReport_clicked()
+{
+    QString dir  = Config::instance().m_ftp_base+"/"+ui->cbxCorp->currentText();
+
+    bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+    qDebug() << "open " << dir << " result=" << ok;
 }
