@@ -81,7 +81,6 @@ SOURCES += main.cpp\
     asyncexporttask.cpp \
     dialogclearup.cpp \
     nettools.cpp \
-    myping.cpp \
     crc16.cpp \
     websetclient.cpp \
     ftpupload.cpp \
@@ -158,7 +157,6 @@ HEADERS  += tcpserver.h \
     asyncexporttask.h \
     dialogclearup.h \
     nettools.h \
-    myping.h \
     websetclient.h \
     ftpupload.h \
     usbimport.h \

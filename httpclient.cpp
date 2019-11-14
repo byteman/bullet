@@ -1,4 +1,4 @@
-#include "httpclient.h"
+﻿#include "httpclient.h"
 #include <QJsonDocument>
 
 
@@ -229,8 +229,10 @@ bool AjaxResponse::GetJsonObject(QJsonDocument &json)
 QJsonParseError AjaxResponse::GetJSON(QJsonDocument &json)
 {
     QJsonParseError json_error;
+    //qDebug() << QString(this->data);
+
     json = QJsonDocument::fromJson(this->data, &json_error);
-    qDebug() << QString(json.toJson(QJsonDocument::Compact));
+    //qDebug() << "GetJson" << QString(json.toJson(QJsonDocument::Compact));
     return json_error;
 }
 

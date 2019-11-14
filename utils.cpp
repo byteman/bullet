@@ -49,6 +49,56 @@ QFileInfoList utils::ListDirFiles(QString dirName, QString ext)
 
 }
 
+#include <windows.h>
+#include "psapi.h"
+#include"stdio.h"
+#include <tlhelp32.h>
+bool utils::ExistProcess(const char* name)
+{
+
+        int i=0;
+        PROCESSENTRY32 pe32;
+        pe32.dwSize = sizeof(pe32);
+        HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if(hProcessSnap == INVALID_HANDLE_VALUE)
+        {
+            i+=0;
+        }
+        BOOL bMore = ::Process32First(hProcessSnap, &pe32);
+        while(bMore)
+        {
+            //printf(" 进程名称：%s \n", pe32.szExeFile);
+
+            //if(strcmp(name,pe32.szExeFile)==0)
+            {
+                //printf("进程运行中");
+                i+=1;
+            }
+            bMore = ::Process32Next(hProcessSnap, &pe32);
+        }
+        if(i>1){           //大于1，排除自身
+            return true;
+        }else{
+            return false;
+        }
+
+}
+#include <QProcess>
+bool utils::KillProcess(QString name)
+{
+   QString c = QString("taskkill /im %1 /f").arg(name);
+   int pInt = QProcess::execute(c);    //关闭后台notepad.exe进程，阻塞式运行,一直占用cpu,成功返回0，失败返回1
+   qDebug()<<"pInt:"<<pInt;
+   return pInt;
+}
+
+bool utils::StartProcess(QString name)
+{
+    QProcess p;
+    p.start(name);
+    return true;
+}
+
 TimeStamp::TimeStamp(QString _tag):
     tag(_tag)
 {

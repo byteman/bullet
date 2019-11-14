@@ -1,12 +1,14 @@
-﻿#pragma execution_character_set("utf-8")
-
+﻿//#pragma execution_character_set("utf-8")
+//#ifdef _MSC_BUILD
+//#pragma execution_character_set("utf-8")
+//#endif
 #include "MainWnd.h"
 #include "ui_MainWnd.h"
 #include "iconhelper.h"
 #include "myhelper.h"
 #include "dao.h"
 #include "dialogparams.h"
-#include "dialogdevice.h"
+#include "dialogdevice.h" 
 #include "dialogchanconfig.h"
 #include "utils.h"
 #include "config.h"
@@ -18,6 +20,7 @@
 #include "asyncexport.h"
 #include <QInputDialog>
 #include "usbimport.h"
+#include "Logger.h"
 #define MAX_CHAN_NR 12
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -29,14 +32,34 @@ void MainWnd::outputVer()
 {
     AddLog(QString("Ver-%1-%2").arg("1.0.1").arg(__DATE__));
 }
+void MainWnd::StartServer()
+{
+     QString app = utils::GetWorkDir()+"/export.exe";
+#if 0
+
+    utils::StartProcess(app);
+#else
+  proc = new QProcess(this);
+
+  qDebug() << "start " << app;
+  proc->start(app);
+  if(!proc->waitForStarted()){
+      qDebug() << "wait for start failed";
+      return;
+  }
+  QString strResult = QString::fromLocal8Bit(proc->readAllStandardOutput());
+  qDebug() << "start result" << strResult;
+
+#endif
+}
 void MainWnd::StartReceiver()
 {
     srv = new GPServer();
 
     if(!srv->start(Config::instance().m_local_port)){
-        AddLog(QString::fromLocal8Bit("服务启动失败,检查端口8881是否被占用!!"));
+        AddLog(QStringLiteral("服务启动失败,检查端口8881是否被占用!!"));
     }else{
-        AddLog(QString::fromLocal8Bit("服务启动成功"));
+        AddLog(QStringLiteral("服务启动成功"));
     }
 //    QStringList ip = NetTools::get_local_ip();
 //    for(int i = 0; i< ip.size();i++)
@@ -107,7 +130,9 @@ static  funcBuildReport pFnBuildReport  = NULL;
 static  funcGetOrderState pFnGetOrderState = NULL;
 void initGoLibrary()
 {
+     LOG_DEBUG("LoadLibrary report.dll");
      HINSTANCE hInstance = LoadLibraryA("report.dll");
+     LOG_DEBUG() << "LoadLibrary result=" << hInstance;
      if (NULL != hInstance)
      {
          qDebug() <<"LoadLib succ";
@@ -129,11 +154,14 @@ void initGoLibrary()
 bool MainWnd::Init()
 {
     outputVer();
-    //StateManager::instance().parse("state.xlms");
-    initGoLibrary();
+    LOG_DEBUG("initGoLibrary");
+    //initGoLibrary();
+
     //首先初始化数据管理模块.
     QString dbDir = utils::GetWorkDir()+"/data/";
+    LOG_DEBUG() << "MkMutiDir->" <<dbDir;
     utils::MkMutiDir(dbDir);
+    LOG_DEBUG("load config.db");
     QSqlError err =  DAO::instance().Init(
                 utils::GetWorkDir()+"/config.db",
                 dbDir);
@@ -143,15 +171,21 @@ bool MainWnd::Init()
         myHelper::ShowMessageBoxError(err.text());
         return false;
     }
+    LOG_DEBUG("Config init");
     Config::instance().Init();
     //首先初始化设备管理器.
+    LOG_DEBUG("InitDvm init");
     if(!InitDvm()){
         AddLog(err.text());
         myHelper::ShowMessageBoxError(err.text());
         return false;
     }
     //初始化UI相关.
+    LOG_DEBUG("initUI");
     this->initUI();
+    LOG_DEBUG("start export");
+    StartServer();
+    LOG_DEBUG("init complete");
 
     return true;
 }
@@ -165,7 +199,7 @@ void MainWnd::Message(SessMessage s)
 
 void MainWnd::onResetResult(Device *, bool)
 {
-    myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("复位设备成功"));
+    myHelper::ShowMessageBoxInfo(QStringLiteral("复位设备成功"));
 
 }
 void MainWnd::onNotify(QString msg)
@@ -315,9 +349,9 @@ void MainWnd::on_remove_device_click(bool)
          return;
      }
      if(dvm.RemoveDevice(id)){
-         myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备成功"));
+         myHelper::ShowMessageBoxInfo(QStringLiteral("删除设备成功"));
      }else{
-         myHelper::ShowMessageBoxInfo(QString::fromLocal8Bit("删除设备失败"));
+         myHelper::ShowMessageBoxInfo(QStringLiteral("删除设备失败"));
      }
      reloadDeviceList();
       reloadDeviceList2();
@@ -568,51 +602,73 @@ void MainWnd::DevOnline(Device *dev)
         }
 }
 //构造命令
-
-//定时查询某台主机上所有订单的状态。
-void MainWnd::updateOrderState()
+QString MainWnd::queryOrderState()
 {
     if(pFnGetOrderState!=NULL){
         QGoString str(ui->cbxHost->currentText());
         char* res=NULL;
         pFnGetOrderState(str.toGoString(),&res);
-        QJsonDocument doc =  QJsonDocument::fromJson(res);
-        QJsonObject o = doc.object();
-        for(int i=0; i < ui->orderList->topLevelItemCount();i++)
-        {
-           QTreeWidgetItem* item =  ui->orderList->topLevelItem(i);
-           if(item==NULL){
-               continue;
-           }
-           QString order = item->text(0);
-           if(o.contains(order)){
-               //如果包含了订单的状态.
-               QJsonObject o2 = o[order].toObject();
-               int state = o2["state"].toInt();
-               QString msg = "";
-               switch(state)
-               {
-                   case 0:
-                        msg = QStringLiteral("未开始");
-                        break;
-                   case 1:
-                       msg = o2["message"].toString();//QStringLiteral("正在生成报告...");
-                       break;
-                   case 2:
-                       msg = QStringLiteral("生成报告成功");
-                       break;
-                   case 3:
-                       msg = o2["message"].toString();
-                       break;
-               }
-               item->setText(5,msg);
+        return res;
+    }else{
+        ajax.get("http://localhost:9527/GetOrdersState",this,SLOT(on_query_report_response(AjaxResponse)));
+        return "";
+    }
+}
+#include <QTextCodec>
+void MainWnd::refreshOrderState(QString res)
+{
+    qDebug() <<"-----" <<  res;
+    QJsonDocument doc =  QJsonDocument::fromJson(res.toUtf8());
+    QJsonObject o = doc.object();
+    for(int i=0; i < ui->orderList->topLevelItemCount();i++)
+    {
+       QTreeWidgetItem* item =  ui->orderList->topLevelItem(i);
+       if(item==NULL){
+           continue;
+       }
+       QString order = item->text(0);
+       if(o.contains(order)){
+           //如果包含了订单的状态.
+           QJsonObject o2 = o[order].toObject();
+           int state = o2["state"].toInt();
+           QString msg = "";
+           switch(state)
+           {
+               case 0:
+                    msg = QStringLiteral("未开始");
+                    break;
+               case 1:
+                   msg = o2["message"].toString();
+                   qDebug() <<msg;
+                   //msg = QString::fromLocal8Bit(msg.toLocal8Bit().data());
+                   //strcpy(tmpCamra->Name,str.toStdString().data());
+
+                   //msg = QTextCodec::codecForName("UTF-8")->toUnicode()
+                  // qDebug() << msg.toUtf8()
+                   break;
+               case 2:
+                   msg = QStringLiteral("生成报告成功");
+                   break;
+               case 3:
+                   msg = o2["message"].toString();
+                   break;
            }
 
-        }
-
-        qDebug() << "result=" << res;
+           item->setText(5,msg);
+       }
 
     }
+
+}
+//定时查询某台主机上所有订单的状态。
+void MainWnd::updateOrderState()
+{
+        QString res = queryOrderState();
+        if(res.length() < 1) return;
+        refreshOrderState(res);
+        qDebug() << "result=" << res;
+
+
 }
 //1s 定时监测设备是否在线.
 void MainWnd::timerEvent(QTimerEvent *)
@@ -770,16 +826,16 @@ MainWnd::MainWnd(QWidget *parent) :
     watcher(NULL)
 {
     qRegisterMetaType<SessMessage>("SessMessage");
-        qDebug() << "111111111";
+    LOG_DEBUG() << "ui->setupUi";
     ui->setupUi(this);
-    qDebug() << "after setup ui";
+    LOG_DEBUG() << "Init begin";
     if(this->Init())
     {
-         qDebug() << "222222";
+        LOG_DEBUG() << "Init ok";
         this->Start();
     }
 
-     qDebug() << "333333";
+    qDebug() << "MainWnd complete";
 
 
 }
@@ -787,6 +843,7 @@ MainWnd::MainWnd(QWidget *parent) :
 MainWnd::~MainWnd()
 {
     delete ui;
+    utils::KillProcess("export.exe");
 }
 void MainWnd::reloadDeviceList2()
 {
@@ -1173,54 +1230,54 @@ void MainWnd::initUI()
     menu=new QMenu(this);
     menu2=new QMenu(this);
     QIcon setting= QIcon(":image/setting.png");
-    QAction* action = new QAction(setting,QString::fromLocal8Bit(" 配置参数"),this);
+    QAction* action = new QAction(setting,QStringLiteral("配置参数"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
 
-//    action = new QAction(QString::fromLocal8Bit("标定重量"),this);
+//    action = new QAction(QStringLiteral("标定重量"),this);
 //    menu->addAction(action);
 
 //    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("复位设备"),this);
+    action = new QAction(QStringLiteral("复位设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("删除设备"),this);
+    action = new QAction(QStringLiteral("删除设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_remove_device_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("修改设备"),this);
+    action = new QAction(QStringLiteral("修改设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_modify_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("升级设备"),this);
+    action = new QAction(QStringLiteral("升级设备"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_update_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("电脑数据清理"),this);
+    action = new QAction(QStringLiteral("电脑数据清理"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clearup_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("设备数据清理"),this);
+    action = new QAction(QStringLiteral("设备数据清理"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_clear_history_menu_click(bool)));
 
-    action = new QAction(QString::fromLocal8Bit("下载U盘数据"),this);
+    action = new QAction(QStringLiteral("下载U盘数据"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
 
 
-//    action = new QAction(QString::fromLocal8Bit("复位计数器"),this);
+//    action = new QAction(QStringLiteral("复位计数器"),this);
 //    menu->addAction(action);
 //    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
-//    action = new QAction(QString::fromLocal8Bit("获取计数器"),this);
+//    action = new QAction(QStringLiteral("获取计数器"),this);
 //    menu->addAction(action);
 //    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
 
 
 //GetCount
-    action = new QAction(QString::fromLocal8Bit("添加设备"),this);
+    action = new QAction(QStringLiteral("添加设备"),this);
     menu2->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
 
@@ -1405,7 +1462,7 @@ void MainWnd::on_btnShou_clicked()
 
 void MainWnd::closeEvent(QCloseEvent *event)
 {
-    int result = myHelper::ShowMessageBoxQuesion(QString::fromLocal8Bit("确定离开?"));
+    int result = myHelper::ShowMessageBoxQuesion(QStringLiteral("确定离开?"));
        if (result == 1) {
            this->dvm.Sync();
            event->accept();
@@ -1731,6 +1788,32 @@ void MainWnd::on_opendir_click(QString dir)
     bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
 }
+void MainWnd::on_gen_report_response(AjaxResponse r)
+{
+    qDebug() << r.error;
+}
+void MainWnd::on_query_report_response(AjaxResponse r)
+{
+    if(r.error){
+        return;
+    }
+    QJsonDocument doc;
+
+    if(QJsonParseError::NoError == r.GetJSON(doc).error)
+    {
+        refreshOrderState(doc.toJson());
+    }
+
+
+    qDebug() << r.error;
+}
+void MainWnd::report_reqeust(QString order)
+{
+    ajax.post("http://localhost:9527/GenerateReport",
+              buildReportInputJson(order),
+              this,
+              SLOT(on_gen_report_response(AjaxResponse)));
+}
 void MainWnd::on_report_click(QString order)
 {
     qDebug() << order << " click";
@@ -1746,6 +1829,8 @@ void MainWnd::on_report_click(QString order)
 
         qDebug() << "code=" << code << "result=" << res;
 
+    }else{
+        report_reqeust(order);
     }
 
 }
@@ -1812,6 +1897,12 @@ QString MainWnd::parseDateTime(QString order)
 }
 QString MainWnd::buildReportInput(QString order)
 {
+    QJsonDocument doc = buildReportInputJson(order);
+
+    return doc.toJson();
+}
+QJsonDocument MainWnd::buildReportInputJson(QString order)
+{
     QString name = ui->cbxHost->currentText();
     CellTestOrderList& orders =  StateManager::instance().GetOrderList(name);
     //QString order = "";//ui->cbxTestNo->currentText();
@@ -1839,14 +1930,7 @@ QString MainWnd::buildReportInput(QString order)
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
-//        FtpEnable bool `json:"ftp_enable"` //是否允许ftp上传
-//            FtpUser string `json:"ftp_user"` //ftp用户名
-//            FtpPwd string `json:"ftp_pwd"`	//ftp密码
-//            FtpUrl string `json:"ftp_url"` //ftp服务器的地址 ，不能加ftp:// 直接是域名或者ip地址.
-//            FtpPort int `json:"ftp_port"` //ftp端口
-//            FtpDir string `json:"ftp_dir"` //ftp下的目录
         root["ftp_enable"] = Config::instance().m_ftp_enable;
-        //root["ftp_dir"] = getFtpDir(order);
         root["ftp_pwd"] = Config::instance().m_ftp_pwd;
         root["ftp_url"] = Config::instance().m_ftp_host;
         root["ftp_port"] = Config::instance().m_ftp_port;
@@ -1861,12 +1945,6 @@ QString MainWnd::buildReportInput(QString order)
              o["dev_chan"] = orders[order].at(i).PressDevChan;
              o["dev_name"] = orders[order].at(i).PressDevId;
              o["ctrl_name"] = orders[order].at(i).ChargeDev;
-
-//             o["file_name"] = QString("%1/%2/%3/%4.xls")
-//                     .arg(Config::instance().m_data_dir)
-//                     .arg(ui->cbxHost->currentText())
-//                     .arg(order)
-//                     .arg(states[i].CellNo);
              o["cell_no"] =states[i].CellNo;
 
             arr.push_back(o);
@@ -1876,7 +1954,9 @@ QString MainWnd::buildReportInput(QString order)
 
     }
     doc.setObject(root);
-    return doc.toJson();
+    return doc;
+    //doc.setObject(root);
+   // return doc.toJson();
 }
 
 

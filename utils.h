@@ -34,6 +34,9 @@ public:
     static QString utf8ToGb2312(QString strUtf8);
     static QString GetWorkDir();
     static QFileInfoList ListDirFiles(QString dir,QString ext);
+    static bool ExistProcess(const char* name);
+    static bool KillProcess(QString name);
+    static bool StartProcess(QString name);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

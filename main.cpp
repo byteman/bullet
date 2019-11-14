@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 
        return 0;
     }
-
-    QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
+    initLogger();
+    //QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
     //InitConsoleWindow();
     MachineChecker checker;
     if(1){

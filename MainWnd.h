@@ -24,6 +24,9 @@
 #include <QFileSystemWatcher>
 #include "ftpupload.h"
 #include "mainwindow.h"
+#include "httpclient.h"
+#include <QJsonDocument>
+#include <QProcess>
 namespace Ui {
 class MainWnd;
 }
@@ -44,6 +47,7 @@ protected:
 
 private:
         Ui::MainWnd *ui;
+        QProcess* proc;
      MyDevices* devices;
     bool bQueryOrderState;
     bool bFirst;
@@ -61,6 +65,7 @@ private:
      QIcon icon_channel;
      QIcon icon_dir;
      QIcon icon_file;
+     Ajax   ajax;
      QMenu* menu;
      QMenu* menu2;
      QString m_cur_station;
@@ -91,6 +96,7 @@ private:
      QTreeWidgetItem *findItemById2(QString id);
      void SelectAll(bool en);
      void loadStateFile(bool create=true);
+     QJsonDocument buildReportInputJson(QString order);
      QString buildReportInput(QString order);
      void updateOrderState();
      bool CheckPassWord();
@@ -103,6 +109,10 @@ private:
 
      QString getFtpDir(QString order);
      QString parseDateTime(QString order);
+     void report_reqeust(QString order);
+     QString queryOrderState();
+     void refreshOrderState(QString res);
+     void StartServer();
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -242,6 +252,8 @@ protected slots:
     void on_stop_menu_click(bool);
     void on_start_menu_click(bool);
     void on_clear_history_menu_click(bool);
+    void on_gen_report_response(AjaxResponse r);
+    void on_query_report_response(AjaxResponse r);
 };
 
 #endif // UIDEMO01_H
