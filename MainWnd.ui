@@ -438,11 +438,11 @@
             <attribute name="headerVisible">
              <bool>false</bool>
             </attribute>
-            <attribute name="headerDefaultSectionSize">
-             <number>180</number>
-            </attribute>
             <attribute name="headerMinimumSectionSize">
              <number>38</number>
+            </attribute>
+            <attribute name="headerDefaultSectionSize">
+             <number>180</number>
             </attribute>
             <column>
              <property name="text">
@@ -737,6 +737,29 @@ margin-top:0px;
                    <bool>false</bool>
                   </property>
                   <layout class="QGridLayout" name="gridLayout">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_12">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>主机名称</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLineEdit" name="edtHost">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="1" column="0">
                     <widget class="QLabel" name="label_2">
                      <property name="font">
@@ -750,7 +773,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
+                   <item row="1" column="1">
                     <widget class="QComboBox" name="cbxFileFormat">
                      <property name="font">
                       <font>
@@ -785,6 +808,16 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
+                   <item row="2" column="1">
+                    <widget class="QLineEdit" name="edtCorpName">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="3" column="0">
                     <widget class="QLabel" name="label_4">
                      <property name="font">
@@ -798,22 +831,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="2">
-                    <widget class="QComboBox" name="cbxCorp">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>光明A1-实验室</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                   <item row="3" column="2">
+                   <item row="3" column="1">
                     <widget class="QComboBox" name="cbxLang">
                      <property name="font">
                       <font>
@@ -826,32 +844,6 @@ margin-top:0px;
                        <string>中文</string>
                       </property>
                      </item>
-                    </widget>
-                   </item>
-                   <item row="5" column="0">
-                    <widget class="QLabel" name="lblFtpAddr_4">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>压力报告路径</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_12">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>主机名称</string>
-                     </property>
                     </widget>
                    </item>
                    <item row="4" column="0">
@@ -867,8 +859,8 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="2">
-                    <widget class="QLineEdit" name="edtHost">
+                   <item row="4" column="1">
+                    <widget class="QLineEdit" name="edtPort">
                      <property name="font">
                       <font>
                        <family>微软雅黑</family>
@@ -877,7 +869,20 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="2">
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="lblFtpAddr_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>压力报告路径</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="1">
                     <widget class="QLineEdit" name="edtFtpBase">
                      <property name="font">
                       <font>
@@ -890,17 +895,7 @@ margin-top:0px;
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="2">
-                    <widget class="QLineEdit" name="edtPort">
-                     <property name="font">
-                      <font>
-                       <family>微软雅黑</family>
-                       <pointsize>14</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="5" column="3">
+                   <item row="5" column="2">
                     <widget class="QPushButton" name="btnOpenReport">
                      <property name="minimumSize">
                       <size>
@@ -1029,11 +1024,11 @@ margin-top:0px;
             <attribute name="headerVisible">
              <bool>false</bool>
             </attribute>
-            <attribute name="headerDefaultSectionSize">
-             <number>180</number>
-            </attribute>
             <attribute name="headerMinimumSectionSize">
              <number>38</number>
+            </attribute>
+            <attribute name="headerDefaultSectionSize">
+             <number>180</number>
             </attribute>
             <column>
              <property name="text">

@@ -22,6 +22,7 @@ LIBS+=-L./ext/lib -lWS2_32
 win32:LIBS += -lIphlpapi
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
+    dialogcorpmanager.cpp \
     tcpserver.cpp \
     device.cpp \
     devicemanager.cpp \
@@ -98,6 +99,7 @@ SOURCES += main.cpp\
     qurlinfo.cpp
 
 HEADERS  += tcpserver.h \
+    dialogcorpmanager.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
@@ -167,6 +169,7 @@ HEADERS  += tcpserver.h \
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
+    dialogcorpmanager.ui \
     dialogparams.ui \
     dialogcalib.ui \
     frmmessagebox.ui \

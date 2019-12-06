@@ -113,6 +113,9 @@ private:
      QString queryOrderState();
      void refreshOrderState(QString res);
      void StartServer();
+     QString GetNetFile(QString temp,QString order,QString orderKey);
+     bool SaveNetFile(QString netFile, QString localFile);
+     void listOrders(QString host);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -229,6 +232,12 @@ private slots:
     void on_btnImport_clicked();
 
     void on_btnOpenReport_clicked();
+
+    //void on_bntCorpConfig_clicked();
+
+    //void on_cbxCorp_currentIndexChanged(int index);
+
+    void on_edtCorpName_textChanged(const QString &arg1);
 
 protected:
     void timerEvent(QTimerEvent *);

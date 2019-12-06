@@ -348,7 +348,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QPushButton" name="uploadButton">
           <property name="text">
-           <string>上传</string>
+           <string>.</string>
           </property>
          </widget>
         </item>

@@ -34,10 +34,10 @@ void MainWindow::initDisplay()
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     //fileLish 可使用右键菜单
     ui->fileList->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->m_server_menu = new QMenu(this);
+//    this->m_server_menu = new QMenu(this);
 
-    QAction *server_rm = new QAction(QStringLiteral("删除"),this);
-    this->m_server_menu->addAction(server_rm);
+//    QAction *server_rm = new QAction(QStringLiteral("删除"),this);
+//    this->m_server_menu->addAction(server_rm);
 }
 
 void MainWindow::setHost(QString host)
@@ -196,7 +196,7 @@ void MainWindow::addToList(const QUrlInfo &urlInfo)
     item->setText(2, urlInfo.lastModified().toString("MMM dd yyyy"));
     item->setText(3, urlInfo.owner());
     item->setText(4, urlInfo.group());
-    QPixmap pixmap(urlInfo.isDir() ? "./dir.png" : "./file.png");
+    QPixmap pixmap(urlInfo.isDir() ? ":image/dir.png" : ":image/file.png");
     item->setIcon(0, pixmap);
     isDirectory[_FromSpecialEncoding(urlInfo.name())] = urlInfo.isDir();
     ui->fileList->addTopLevelItem(item);
@@ -308,8 +308,8 @@ void MainWindow::showLocalFile()
         ui->treeView->scrollTo(index);
         ui->treeView->resizeColumnToContents(0);
 
-        QPushButton *createBtn = new QPushButton(tr("Create Directory..."));
-        QPushButton *delBtn = new QPushButton(tr("Remove"));
+        QPushButton *createBtn = new QPushButton(QStringLiteral("创建目录"));
+        QPushButton *delBtn = new QPushButton(QStringLiteral("删除"));
 
         connect(createBtn, SIGNAL(clicked()), this, SLOT(mkdir()));
         connect(delBtn, SIGNAL(clicked()), this, SLOT(rm()));
@@ -340,12 +340,12 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index)
 //文件上传
 void MainWindow::on_uploadButton_clicked()
 {  
-    indexCount = ui->treeView->selectionModel()->selectedRows().count();
-    if (indexCount <= 0) {
-        return;
-    }
-    currentIndex = 0;
-    this->uploadLocalFile(currentIndex);
+//    indexCount = ui->treeView->selectionModel()->selectedRows().count();
+//    if (indexCount <= 0) {
+//        return;
+//    }
+//    currentIndex = 0;
+//    this->uploadLocalFile(currentIndex);
 }
 
 void MainWindow::uploadLocalFile(int rowIndex)
@@ -403,9 +403,9 @@ void MainWindow::showFtpTreeViewMenu(const QPoint &pos)
 {
 
     QMenu* menu=new QMenu;
-    menu->addAction(QString(QStringLiteral("新建文件夹")),this,SLOT(slotMkdir()));
+    //menu->addAction(QString(QStringLiteral("新建文件夹")),this,SLOT(slotMkdir()));
     menu->addAction(QString(QStringLiteral("刷新")),this,SLOT(slotRefreshFtpList()));
-    menu->addAction(QString(QStringLiteral("删除")),this,SLOT(slotDeleteFile()));
+    //menu->addAction(QString(QStringLiteral("删除")),this,SLOT(slotDeleteFile()));
     menu->exec(QCursor::pos());
 }
 
@@ -447,8 +447,9 @@ void MainWindow::slotDeleteFile()
 void MainWindow::showLocalTreeViewMenu(const QPoint &pos)
 {
     QMenu* menu=new QMenu;
-    menu->addAction(QString(QStringLiteral("新建文件夹")),this,SLOT(mkdir()));
-    menu->addAction(QString(QStringLiteral("删除")),this,SLOT(rm()));
+//    menu->addAction(QString(QStringLiteral("新建文件夹")),this,SLOT(mkdir()));
+//    menu->addAction(QString(QStringLiteral("删除")),this,SLOT(rm()));
+
     menu->addAction(QString(QStringLiteral("刷新")),this,SLOT(localDirRefresh()));
     menu->exec(QCursor::pos());
 }

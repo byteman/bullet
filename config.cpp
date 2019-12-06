@@ -35,7 +35,7 @@ bool Config::Init()
     m_ftp_user= DAO::instance().ReadStringParam("ftp_user","");
     m_ftp_pwd= DAO::instance().ReadStringParam("ftp_pwd","");
     m_ftp_port = DAO::instance().ReadIntParam("ftp_port",21);
-
+    m_report_name =  config.value("/config/report","PressReportd").toString();
     QString ftpbase = QStringLiteral("//172.30.201.210/电芯研究院/测试数据库/2 电芯测试/22.测试数据/2.循环测试报告");
 
     m_ftp_base = DAO::instance().ReadStringParam("ftp_base",ftpbase);
@@ -49,6 +49,8 @@ bool Config::Init()
         m_file_format = 1;
     }
     m_corp_index = DAO::instance().ReadIntParam("corpIdx",0);
+    qDebug() << "m_corp_index = " <<m_corp_index;
+    m_corp_name = DAO::instance().ReadStringParam("corpName",QStringLiteral("光明A1-实验室"));
 
     return true;
 }
@@ -149,5 +151,38 @@ bool Config::SetCorpNameInx(int idx)
 {
     DAO::instance().WriteIntParam("corpIdx",idx);
     m_corp_index = idx;
+    return true;
+}
+
+bool Config::SetCorpNameList(QStringList &list)
+{
+    DAO::instance().WriteStringParam("corpList",list.join(","));
+    m_corp_list = list;
+    return true;
+}
+//删除一个公司名称.
+bool Config::DeleteCorpName(QString name)
+{
+    //没有这个名字.
+    if(!m_corp_list.contains(name)){
+        return true;
+    }
+    m_corp_list.removeOne(name);
+    return SetCorpNameList(m_corp_list);
+}
+//添加一个公司名
+bool Config::AddCorpName(QString name)
+{
+    if(m_corp_list.contains(name)){
+        return true;
+    }
+    m_corp_list.push_back(name);
+    return SetCorpNameList(m_corp_list);
+}
+
+bool Config::SetCorpName(QString name)
+{
+    m_corp_name = name;
+    DAO::instance().WriteStringParam("corpName",name);
     return true;
 }

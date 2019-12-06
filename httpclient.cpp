@@ -129,7 +129,7 @@ QNetworkReply *Ajax::put(QString url, QJsonDocument body,const QObject *receiver
 }
 QNetworkReply *Ajax::get(QString url, const QObject *receiver, const char *finished)
 {
-    qDebug() << "get " << url;
+    //qDebug() << "get " << url;
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 

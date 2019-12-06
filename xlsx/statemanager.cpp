@@ -37,7 +37,7 @@ bool StateManager::parsePressDev(CellState &cs)
     return ok;
 }
 /**
- * @brief 分析一个订单
+ * @brief 分析一个订单,订单名和温度作为唯一的key.
  * @param xlsx
  * @param sheet
  * @param order
@@ -55,38 +55,43 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
     do{
         CellState cs;
         row++;
-        if(!getCellString(xlsx,row,5,cs.PressDev)){
-            qDebug() << row << "---------------------------end";
+        //先判断压力通道是否存在并有效，否则就认为分析完了，跳出分析过程.长度至少大于=3 [x_y]
+        if(!getCellString(xlsx,row,5,cs.PressDev) || cs.PressDev.length() < 3){
+            //如果获取不到压力设备和通道，说明读取完成.
+            qDebug("------------parse sheet[%s] PressDev=%s row=%d finished!",
+                   sheet.toStdString().c_str(),
+                   cs.PressDev.toStdString().c_str(),
+                   row);
             return true;
         }
-        if(!getCellString(xlsx,row,5,cs.PressDev) || cs.PressDev.length() < 1){
-            //如果获取不到温度，说明读取完成.
-            qDebug("------------read %s finished!",sheet.toStdString().c_str());
-            return true;
+        //压力通道有值，分析其有效性.通道值无效，只是跳过而不退出.
+        if(!parsePressDev(cs)){
+            qDebug("sheet[%s] parsePressDev[%s] row=%d col=%d failed",
+                   sheet.toStdString().c_str(),
+                   cs.PressDev.toStdString().c_str(),
+                   row,5);
+            continue;
         }
-        if(!getCellString(xlsx,row,1,cs.Temp) || cs.Temp.length() < 1){
-            //如果获取不到温度，说明读取完成.
-            //qDebug("read %s finished!",sheet.toStdString().c_str());
-            //return true;
-        }
-
+        //有效的通道号，再去找单号，不能把单号查找放前面，否则会导致无法跳出循环.
         if(!getCellString(xlsx,row,2,cs.TestNo) || cs.TestNo.length() < 1){
             //如果测试单号为空，跳过这个单号，继续找下一个单号.
-            //qDebug("get %s testNo row=%d col=%d failed",sheet.toStdString().c_str(),row,2);
+            qDebug("sheet[%s] testNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,2);
             continue;
         }
-        getCellString(xlsx,row,3,cs.TestUser);
-        getCellString(xlsx,row,4,cs.ProjGroup);
-        //getCellString(xlsx,row,5,cs.PressDev);
-        if(!parsePressDev(cs)){
-            //qDebug("get %s parsePressDev row=%d col=%d failed",sheet.toStdString().c_str(),row,5);
+        if(!getCellString(xlsx,row,7,cs.CellNo) || cs.CellNo.length() < 1){
+            //如果电芯为空，跳过这个电芯
+            qDebug("sheet[%s] cellNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,7);
             continue;
         }
-        getCellString(xlsx,row,6,cs.ChargeDev);
-        getCellString(xlsx,row,7,cs.CellNo);
-        getCellString(xlsx,row,8,cs.TestState);
+        //只要存在订单号和压力通道号和电芯条码存在的情况下才认为是有效的电芯数据.
+        getCellString(xlsx,row,1,cs.Temp); //温度
+        getCellString(xlsx,row,3,cs.TestUser); //测试人
+        getCellString(xlsx,row,4,cs.ProjGroup); //项目组
+        getCellString(xlsx,row,6,cs.ChargeDev); //充放电设备和通道
+        getCellString(xlsx,row,8,cs.TestState); //在柜状态.
 
-        orders[cs.TestNo].push_back(cs);
+        QString order = cs.TestNo +"-"+ cs.Temp; //订单温度唯一编号.
+        orders[order].push_back(cs);
 
 
     }while(true);
@@ -115,7 +120,7 @@ bool StateManager::parse(QString filename)
         //分析每台电脑上的订单.
         hosts[sheet] = order;
     }
-
+    xlsx.saveAs(filename+".bak");
     return true;
 
 }

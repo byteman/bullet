@@ -30,16 +30,19 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.0.1").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.0.6").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
-     QString app = utils::GetWorkDir()+"/export.exe";
+     QString app = utils::GetWorkDir()+"/"+Config::instance().m_report_name;
 #if 0
 
     utils::StartProcess(app);
 #else
-  proc = new QProcess(this);
+ if(proc==NULL){
+     proc = new QProcess(this);
+ }
+
 
   qDebug() << "start " << app;
   proc->start(app);
@@ -155,7 +158,7 @@ bool MainWnd::Init()
 {
     outputVer();
     LOG_DEBUG("initGoLibrary");
-    //initGoLibrary();
+    initGoLibrary();
 
     //首先初始化数据管理模块.
     QString dbDir = utils::GetWorkDir()+"/data/";
@@ -617,7 +620,7 @@ QString MainWnd::queryOrderState()
 #include <QTextCodec>
 void MainWnd::refreshOrderState(QString res)
 {
-    qDebug() <<"-----" <<  res;
+
     QJsonDocument doc =  QJsonDocument::fromJson(res.toUtf8());
     QJsonObject o = doc.object();
     for(int i=0; i < ui->orderList->topLevelItemCount();i++)
@@ -639,12 +642,7 @@ void MainWnd::refreshOrderState(QString res)
                     break;
                case 1:
                    msg = o2["message"].toString();
-                   qDebug() <<msg;
-                   //msg = QString::fromLocal8Bit(msg.toLocal8Bit().data());
-                   //strcpy(tmpCamra->Name,str.toStdString().data());
 
-                   //msg = QTextCodec::codecForName("UTF-8")->toUnicode()
-                  // qDebug() << msg.toUtf8()
                    break;
                case 2:
                    msg = QStringLiteral("生成报告成功");
@@ -822,6 +820,7 @@ MainWnd::MainWnd(QWidget *parent) :
     m_cur_dev_id(""),
     bFirst(true),
     ftp(NULL),
+    proc(NULL),
     bQueryOrderState(false),
     watcher(NULL)
 {
@@ -843,7 +842,10 @@ MainWnd::MainWnd(QWidget *parent) :
 MainWnd::~MainWnd()
 {
     delete ui;
-    utils::KillProcess("export.exe");
+    if(proc!=NULL){
+        proc->kill();
+    }
+    utils::KillProcess(Config::instance().m_report_name);
 }
 void MainWnd::reloadDeviceList2()
 {
@@ -1321,14 +1323,10 @@ void MainWnd::onSucc(QString serialNo, QString err)
 }
 void MainWnd::loadSysConfig()
 {
+    //ui->cbxCorp->clear();
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
-    ui->cbxCorp->setCurrentIndex(Config::instance().m_corp_index);
-    //ui->sbSaveInt->setValue(Config::instance().m_save_intS);
-    //ui->cbUseSysTime->setChecked(Config::instance().m_use_sys_time);
-    //ui->chkSensorOff->setChecked(Config::instance().m_recv_sensor_off);
-    //ui->edtFtpHost->setText(Config::instance().m_ftp_host);
-    //ui->edtFtpName->setText(Config::instance().m_ftp_user);
-    //ui->edtFtpPwd->setText(Config::instance().m_ftp_pwd);
+    ui->edtCorpName->setText(Config::instance().m_corp_name);
+
     ui->edtFtpBase->setText(Config::instance().m_ftp_base);
     ui->cbxFileFormat->setCurrentIndex(Config::instance().m_file_format);
     ui->edtHost->setText(Config::instance().m_host_name);
@@ -1353,7 +1351,7 @@ void MainWnd::loadStateFile(bool create)
     }
 #if 1
     CellTestHost& host = StateManager::instance().GetState();
-
+    //host列表，每个host有一个订单列表.
     QMap<QString,CellTestOrderList>::const_iterator i = host.constBegin();
     while (i != host.constEnd()) {
         qDebug() << i.key();
@@ -1708,74 +1706,79 @@ void MainWnd::on_btnHelp_clicked()
 {
 
 }
+void MainWnd::listOrders(QString host)
+{
+    CellTestOrderList& orders =  StateManager::instance().GetOrderList(host);
+    if(orders.size() == 0){
+       return;
+    }
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+    QSignalMapper *signalMapper2 = new QSignalMapper(this);
+    ui->orderList->clear();
 
+    QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
+
+    while (i != orders.constEnd()) {
+
+        QStringList row;
+        //订单名,把这个名字去掉后面的温度后缀.
+        row.push_back(i.key());
+        //只要有订单存在就
+        if(i.value().size() > 0){
+            //温度.
+           row.push_back(i.value().at(0).Temp);
+        }else{
+
+        }
+        //订单个数
+        row.push_back(QString("%1").arg(i.value().size()));
+        QTreeWidgetItem* item = new QTreeWidgetItem(row);
+        QVector<CellState> cells = i.value();
+
+        for(int j = 0 ; j < cells.size(); j++)
+        {
+             QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList(cells[j].CellNo));
+             item->addChild(subItem);
+        }
+
+        ui->orderList->addTopLevelItem(item);
+        QPushButton *btnReport = new QPushButton(QStringLiteral("生成报告"));
+         btnReport->setGeometry(0,0,80,40);
+
+         QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
+          btnOpenDir->setGeometry(0,0,80,40);
+
+        connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
+        //QString dir = QString("%1").arg(1);
+         QString dir = QString(QStringLiteral("%1/%2/%3"))
+                        .arg(Config::instance().m_data_dir)
+                        .arg(host)
+                        .arg(i.key());
+
+        signalMapper2->setMapping(btnOpenDir, dir);
+
+        connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
+        signalMapper->setMapping(btnReport, i.key());
+
+
+
+        ui->orderList->setItemWidget(item, 3, btnReport);
+        ui->orderList->setItemWidget(item, 4, btnOpenDir);
+
+
+        ++i;
+    }
+    connect(signalMapper, SIGNAL(mapped(QString)),
+                this, SLOT(on_report_click(QString)));
+    connect(signalMapper2, SIGNAL(mapped(QString)),
+                this, SLOT(on_opendir_click(QString)));
+
+}
 void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 {
     qDebug() << "onchage" << arg1 << loading;
      if(loading) return;
-    QString x = arg1;
-   CellTestOrderList& orders =  StateManager::instance().GetOrderList(x);
-   if(orders.size() == 0){
-      return;
-   }
-    QSignalMapper *signalMapper = new QSignalMapper(this);
-    QSignalMapper *signalMapper2 = new QSignalMapper(this);
-   ui->orderList->clear();
-   //ui->cbxTestNo->clear();
-   QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
-
-   while (i != orders.constEnd()) {
-       //cout << i.key() << ": " << i.value() << endl;
-       //ui->cbxTestNo->addItem(i.key());
-      QStringList row;
-      row.push_back(i.key());
-
-      if(i.value().size() > 0){
-          row.push_back(i.value().at(0).Temp);
-      }
-      row.push_back(QString("%1").arg(i.value().size()));
-    QTreeWidgetItem* item = new QTreeWidgetItem(row);
-    QVector<CellState> cells = i.value();
-
-       for(int j = 0 ; j < cells.size(); j++)
-       {
-
-            QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList(cells[j].CellNo));
-            item->addChild(subItem);
-       }
-
-       ui->orderList->addTopLevelItem(item);
-       QPushButton *btnReport = new QPushButton(QStringLiteral("生成报告"));
-        btnReport->setGeometry(0,0,80,40);
-
-        QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
-         btnOpenDir->setGeometry(0,0,80,40);
-
-       connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
-       //QString dir = QString("%1").arg(1);
-        QString dir = QString(QStringLiteral("%1/%2/%3"))
-                       .arg(Config::instance().m_data_dir)
-                       .arg(x)
-                       .arg(i.key());
-
-       signalMapper2->setMapping(btnOpenDir, dir);
-
-       connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
-       signalMapper->setMapping(btnReport, i.key());
-
-
-
-       ui->orderList->setItemWidget(item, 3, btnReport);
-       ui->orderList->setItemWidget(item, 4, btnOpenDir);
-
-
-       ++i;
-   }
-   connect(signalMapper, SIGNAL(mapped(QString)),
-               this, SLOT(on_report_click(QString)));
-   connect(signalMapper2, SIGNAL(mapped(QString)),
-               this, SLOT(on_opendir_click(QString)));
-
+    listOrders(arg1);
 }
 
 void MainWnd::on_opendir_click(QString dir)
@@ -1790,7 +1793,7 @@ void MainWnd::on_opendir_click(QString dir)
 }
 void MainWnd::on_gen_report_response(AjaxResponse r)
 {
-    qDebug() << r.error;
+    //qDebug() << r.error;
 }
 void MainWnd::on_query_report_response(AjaxResponse r)
 {
@@ -1805,7 +1808,7 @@ void MainWnd::on_query_report_response(AjaxResponse r)
     }
 
 
-    qDebug() << r.error;
+    //qDebug() << r.error;
 }
 void MainWnd::report_reqeust(QString order)
 {
@@ -1818,6 +1821,7 @@ void MainWnd::on_report_click(QString order)
 {
     qDebug() << order << " click";
     if(pFnBuildReport){
+        LOG_DEBUG("report by dll");
         QGoString str(buildReportInput(order));
         char* res=NULL;
         int code = pFnBuildReport(str.toGoString(),&res);
@@ -1830,6 +1834,8 @@ void MainWnd::on_report_click(QString order)
         qDebug() << "code=" << code << "result=" << res;
 
     }else{
+        LOG_DEBUG("report by PressReportd.exe");
+        StartServer();
         report_reqeust(order);
     }
 
@@ -1883,7 +1889,7 @@ QString MainWnd::getFtpDir(QString order)
 
    return QString("%1/%2/%3/%4/").
            arg(Config::instance().m_ftp_base).
-           arg(ui->cbxCorp->currentText()).
+           arg(ui->edtCorpName->text()).
            arg(QDate::currentDate().toString("yyyy/MM")).
            arg(order);
 
@@ -1901,32 +1907,55 @@ QString MainWnd::buildReportInput(QString order)
 
     return doc.toJson();
 }
-QJsonDocument MainWnd::buildReportInputJson(QString order)
+QString MainWnd::GetNetFile(QString temp,QString order,QString orderKey)
+{
+    return QString(QStringLiteral("%1/%2/%3/%4/%5_%6压力测试表.xlsx"))
+                    .arg(Config::instance().m_ftp_base)
+                    .arg(ui->edtCorpName->text())
+                    .arg(parseDateTime(order))
+                    .arg(order).arg(order).arg(temp);
+}
+bool MainWnd::SaveNetFile(QString netFile,QString localFile)
+{
+    if(utils::ExistFile(netFile)){
+         QXlsx::Document xlsx(netFile);
+         if(xlsx.load()){
+
+             return xlsx.saveAs(localFile);
+         }
+    }
+    return false;
+}
+
+QJsonDocument MainWnd::buildReportInputJson(QString orderKey)
 {
     QString name = ui->cbxHost->currentText();
     CellTestOrderList& orders =  StateManager::instance().GetOrderList(name);
-    //QString order = "";//ui->cbxTestNo->currentText();
+
     QJsonDocument doc;
     QJsonObject root;
-    if(orders.contains(order) && orders[order].size() > 0){
+    //QString order = "";
+    if(orders.contains(orderKey) && orders[orderKey].size() > 0){
 
         QJsonArray arr;
+        QString order = orders[orderKey].at(0).TestNo;
+        QString temp  = orders[orderKey].at(0).Temp;
+        root["order_no"] = order;//orders[orderKey].at(0).TestNo;
+        root["order_key"] = orderKey;
+        root["temp"] = temp ;
 
-        QString temp  = orders[order].at(0).Temp;
-        root["order_no"] = order;
-        root["temp"] =temp ;
-        root["target_file"] = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表_%6.xlsx"))
+        QString netfile = GetNetFile(temp,order,orderKey);
+
+        QString localfile = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
                 .arg(Config::instance().m_data_dir)
                 .arg(ui->cbxHost->currentText())
-                .arg(order).arg(order).arg(temp).arg(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
-        root["ftp_dir"] = QString(QStringLiteral("%1/%2/%3/%4/%5_%6压力测试表.xlsx"))
-                .arg(Config::instance().m_ftp_base)
-                .arg(ui->cbxCorp->currentText())
-                .arg(parseDateTime(order))
-                .arg(order).arg(order).arg(temp);
+                .arg(orderKey).arg(order).arg(temp);
+       // qDebug() <<"temp=" << temp<< " localfile=" << localfile;
+        root["ftp_dir"] = netfile;
+        root["target_file"] =localfile;
         root["db"] = utils::GetWorkDir()+"/config.db";
         root["data_dir"] = QString("%1/data").arg(utils::GetWorkDir());
-        root["corp_name"] = ui->cbxCorp->currentText();
+        root["corp_name"] = ui->edtCorpName->text();
         root["dir_path"]=Config::instance().m_data_dir;
         root["host"] = ui->cbxHost->currentText();
         root["skip_error"] = true;
@@ -1936,15 +1965,15 @@ QJsonDocument MainWnd::buildReportInputJson(QString order)
         root["ftp_port"] = Config::instance().m_ftp_port;
         root["ftp_user"] = Config::instance().m_ftp_user;
 
-        QVector<CellState> &states =  orders[order];
+        QVector<CellState> &states =  orders[orderKey];
         for(int i = 0; i <states.size(); i++)
         {
              QJsonObject o;
 
 
-             o["dev_chan"] = orders[order].at(i).PressDevChan;
-             o["dev_name"] = orders[order].at(i).PressDevId;
-             o["ctrl_name"] = orders[order].at(i).ChargeDev;
+             o["dev_chan"] = orders[orderKey].at(i).PressDevChan;
+             o["dev_name"] = orders[orderKey].at(i).PressDevId;
+             o["ctrl_name"] = orders[orderKey].at(i).ChargeDev;
              o["cell_no"] =states[i].CellNo;
 
             arr.push_back(o);
@@ -1952,8 +1981,11 @@ QJsonDocument MainWnd::buildReportInputJson(QString order)
         root["chan_array"] = arr;
 
 
+    }else{
+        qDebug() << "can not find order" << orderKey;
     }
     doc.setObject(root);
+    qDebug() << QString(doc.toJson());
     return doc;
     //doc.setObject(root);
    // return doc.toJson();
@@ -2130,8 +2162,42 @@ void MainWnd::on_btnImport_clicked()
 
 void MainWnd::on_btnOpenReport_clicked()
 {
-    QString dir  = Config::instance().m_ftp_base+"/"+ui->cbxCorp->currentText();
+    QString dir  = Config::instance().m_ftp_base+"/"+ui->edtCorpName->text();
 
     bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
+}
+//#include "dialogcorpmanager.h"
+//void MainWnd::on_bntCorpConfig_clicked()
+//{
+//    QStringList old = Config::instance().m_corp_list;
+
+//    DialogCorpManager dlg;
+//    dlg.exec();
+//    QStringList newc = Config::instance().m_corp_list;
+//    if(newc == old){
+//        return;
+//    }
+//    ui->cbxCorp->clear();
+//    ui->cbxCorp->addItems(newc);
+//    int idx = Config::instance().m_corp_index;
+//    if(old.size() > newc.size())
+//    {
+//        //大小变小了
+//        idx = -1;
+//    }
+
+//    Config::instance().SetCorpNameInx(idx);
+//    ui->cbxCorp->setCurrentIndex(idx);
+//}
+
+//void MainWnd::on_cbxCorp_currentIndexChanged(int index)
+//{
+//    qDebug() << "index=" << index;
+//    Config::instance().SetCorpNameInx(index);
+//}
+
+void MainWnd::on_edtCorpName_textChanged(const QString &arg1)
+{
+    Config::instance().SetCorpName(arg1);
 }

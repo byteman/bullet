@@ -37,6 +37,7 @@ public:
     static bool ExistProcess(const char* name);
     static bool KillProcess(QString name);
     static bool StartProcess(QString name);
+    static bool ExistFile(QString file);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

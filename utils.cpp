@@ -88,6 +88,7 @@ bool utils::KillProcess(QString name)
 {
    QString c = QString("taskkill /im %1 /f").arg(name);
    int pInt = QProcess::execute(c);    //关闭后台notepad.exe进程，阻塞式运行,一直占用cpu,成功返回0，失败返回1
+
    qDebug()<<"pInt:"<<pInt;
    return pInt;
 }
@@ -96,7 +97,18 @@ bool utils::StartProcess(QString name)
 {
     QProcess p;
     p.start(name);
+    if(p.waitForStarted()){
+        qDebug() << "wait for start failed";
+        return false;
+    }
     return true;
+}
+#include <QFile>
+bool utils::ExistFile(QString file)
+{
+    QFile f(file);
+
+    return f.exists();
 }
 
 TimeStamp::TimeStamp(QString _tag):

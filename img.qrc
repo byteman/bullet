@@ -16,5 +16,6 @@
         <file>image/shou.png</file>
         <file>image/pause2.png</file>
         <file>image/play2.png</file>
+        <file>image/file.png</file>
     </qresource>
 </RCC>

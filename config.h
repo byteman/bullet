@@ -26,6 +26,10 @@ struct Config
     bool SetFtpBase(QString base);
     bool SetFileForamt(int format);
     bool SetCorpNameInx(int idx);
+    bool SetCorpNameList(QStringList& list);
+    bool DeleteCorpName(QString name);
+    bool AddCorpName(QString name);
+    bool SetCorpName(QString name);
     bool m_use_sys_time;
     bool m_recv_sensor_off; //是否接收传感器脱落后的重量值.
     int  m_local_port; //本机监听端口.
@@ -42,9 +46,11 @@ struct Config
     QString m_ftp_pwd;
     QString m_ftp_base;
     QString m_corp_name;
+    QStringList m_corp_list;
     int     m_corp_index;
     int     m_ftp_port;
     bool    m_ftp_enable;
+    QString m_report_name;
     unsigned char     m_file_format; //文件格式.
 
 public:
