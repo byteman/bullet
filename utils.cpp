@@ -48,7 +48,45 @@ QFileInfoList utils::ListDirFiles(QString dirName, QString ext)
     return  dir.entryInfoList(filterList);
 
 }
+bool utils::FindFiles(const QString& dirPath, QString ext,QFileInfoList &filelist)
+{
+    QDir dir(dirPath);
+    //目录不存在
+    if (!dir.exists()) {
+        return false;
+    }
 
+  //取到所有的文件和文件名，但是去掉.和..的文件夹（这是QT默认有的）
+    dir.setFilter(QDir::Dirs|QDir::Files|QDir::NoDotAndDotDot);
+
+    //文件夹优先
+    dir.setSorting(QDir::DirsFirst);
+    QStringList filterList;
+    filterList << ext;   //设置筛选条件
+    //转化成一个list
+    QFileInfoList list = dir.entryInfoList();
+    if(list.size()< 1 ) {
+        return false;
+    }
+    int i=0;
+
+    //递归算法的核心部分
+    do{
+        QFileInfo fileInfo = list.at(i);
+        //如果是文件夹，递归
+        bool bisDir = fileInfo.isDir();
+        if(bisDir) {
+            FindFiles(fileInfo.filePath(),ext,filelist);
+        }
+        else{
+            //bool isDll = fileInfo.fileName().endsWith(".dll");
+            //qDebug() << fileInfo.filePath() << ":" <<fileInfo.fileName();
+            filelist.push_back(fileInfo);
+        }//end else
+        i++;
+    } while(i < list.size());
+    return true;
+}
 #include <windows.h>
 #include "psapi.h"
 #include"stdio.h"

@@ -55,6 +55,10 @@ public:
                               qint64 from,
                               qint64 to,
                               MultiDeviceDataMap& dataList);
+
+    QSqlError ChannelValueFix(QString serialNo,
+                              qint64 from,
+                              qint64 to,int chan, int maxValue,int fixValue);
     bool ExistKey(QString key);
     bool getParam(QString key, QString &value);
     QSqlError updateParam(QString key, QString value);

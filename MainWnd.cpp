@@ -30,7 +30,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.0.6").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.0.9").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
@@ -389,6 +389,33 @@ void MainWnd::on_start_menu_click(bool)
         devices->SetSelectRecState(false);
     }
 
+}
+#include "dialogfixvalue.h"
+void MainWnd::on_fix_menu_click(bool)
+{
+    QString name;
+    QString id;
+    if(!GetCurrentDeviceName(name)){
+        qDebug()<<"Can not GetCurrentDeviceName";
+        return;
+    }
+    if(!GetCurrentDeviceId(id)){
+        qDebug()<<"Can not GetCurrentDeviceName";
+        return;
+    }
+    if(!IsOk(QStringLiteral("注意"),QString(QStringLiteral("是否修正%1号设备历史数据")).arg(name))){
+        return;
+    }
+    DialogFixValue dlg;
+    dlg.SetDeviceId(id);
+    dlg.exec();
+
+}
+void MainWnd::on_opendata_menu_click(bool)
+{
+    QString path = utils::GetWorkDir() + "/data";
+    bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+    qDebug() << "open " << path << ok;
 }
 //下载u盘数据
 #include "mainwindow.h"
@@ -1228,18 +1255,15 @@ void MainWnd::initUI()
 
 //上下文菜单初始化
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-
+    ui->treeWidget2->setContextMenuPolicy(Qt::CustomContextMenu);
     menu=new QMenu(this);
     menu2=new QMenu(this);
-    QIcon setting= QIcon(":image/setting.png");
-    QAction* action = new QAction(setting,QStringLiteral("配置参数"),this);
+    menu3=new QMenu(this);
+    //QIcon setting= QIcon(":image/setting.png");
+    QAction* action = new QAction(QStringLiteral("配置参数"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_menu_click(bool)));
 
-//    action = new QAction(QStringLiteral("标定重量"),this);
-//    menu->addAction(action);
-
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_write_menu_click(bool)));
 
     action = new QAction(QStringLiteral("复位设备"),this);
     menu->addAction(action);
@@ -1269,13 +1293,13 @@ void MainWnd::initUI()
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
 
+    action = new QAction(QStringLiteral("修正压力值"),this);
+    menu3->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_fix_menu_click(bool)));
 
-//    action = new QAction(QStringLiteral("复位计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_reset_count_click(bool)));
-//    action = new QAction(QStringLiteral("获取计数器"),this);
-//    menu->addAction(action);
-//    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_get_count_click(bool)));
+    action = new QAction(QStringLiteral("打开数据文件"),this);
+    menu3->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_opendata_menu_click(bool)));
 
 
 //GetCount
@@ -1297,6 +1321,7 @@ void MainWnd::initUI()
     connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
 
     connect(UsbImport::instance(),SIGNAL(onSucc()),this,SLOT(onUsbImportSucc()));
+    connect(UsbImport::instance(),SIGNAL(onProgress(int)),this,SLOT(onUsbImportProgress(int)));
 
  //加载设备状态.
 
@@ -1470,7 +1495,12 @@ void MainWnd::closeEvent(QCloseEvent *event)
 
 
 }
-
+//导入的进度指示.
+void MainWnd::onUsbImportProgress(int prog)
+{
+    ui->btnImport->setEnabled(false);
+    ui->btnImport->setText(QStringLiteral("已导入")+QString("%1%").arg(prog));
+}
 void MainWnd::onUsbImportSucc()
 {
     ui->btnImport->setEnabled(true);
@@ -2167,37 +2197,26 @@ void MainWnd::on_btnOpenReport_clicked()
     bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
 }
-//#include "dialogcorpmanager.h"
-//void MainWnd::on_bntCorpConfig_clicked()
-//{
-//    QStringList old = Config::instance().m_corp_list;
-
-//    DialogCorpManager dlg;
-//    dlg.exec();
-//    QStringList newc = Config::instance().m_corp_list;
-//    if(newc == old){
-//        return;
-//    }
-//    ui->cbxCorp->clear();
-//    ui->cbxCorp->addItems(newc);
-//    int idx = Config::instance().m_corp_index;
-//    if(old.size() > newc.size())
-//    {
-//        //大小变小了
-//        idx = -1;
-//    }
-
-//    Config::instance().SetCorpNameInx(idx);
-//    ui->cbxCorp->setCurrentIndex(idx);
-//}
-
-//void MainWnd::on_cbxCorp_currentIndexChanged(int index)
-//{
-//    qDebug() << "index=" << index;
-//    Config::instance().SetCorpNameInx(index);
-//}
 
 void MainWnd::on_edtCorpName_textChanged(const QString &arg1)
 {
     Config::instance().SetCorpName(arg1);
+}
+
+void MainWnd::on_treeWidget2_customContextMenuRequested(const QPoint &pos)
+{
+    qDebug() << "on_treeWidget2_customContextMenuRequested";
+    QTreeWidgetItem* curItem=ui->treeWidget2->itemAt(pos);  //获取当前被点击的节点
+    if(curItem == NULL)
+    {
+        return;
+    }
+    m_cur_dev_id = curItem->data(0,Qt::UserRole).toString();
+    menu3->popup(QCursor::pos());
+}
+
+
+void MainWnd::contextMenuEvent(QContextMenuEvent *event)
+{
+
 }

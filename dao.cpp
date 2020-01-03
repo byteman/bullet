@@ -505,6 +505,37 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
     return QSqlError();
 
 }
+
+QSqlError DAO::ChannelValueFix(QString serialNo,
+                               qint64 from,
+                               qint64 to,
+                               int chan,
+                               int maxValue,
+                               int fixValue)
+{
+
+
+    QString sql = "";
+    if(fixValue > 0){
+        sql = QString("update tbl_%1_data set value= value+%2 where chan=%3 and value>%4;").arg(serialNo).arg(fixValue).arg(chan).arg(maxValue);
+    }else{
+        sql = QString("update tbl_%1_data set value= value-%2 where chan=%3 and value>%4;").arg(serialNo).arg(-fixValue).arg(chan).arg(maxValue);
+    }
+    qDebug() << "sql=" << sql;
+    if(!dataDbMap.contains(serialNo)){
+        return QSqlError(serialNo+QStringLiteral("不存在"));
+    }
+    QSqlQuery query(dataDbMap[serialNo]);
+
+
+    query.prepare(sql);
+
+//    query.bindValue(":key", key);
+//    query.bindValue(":value", value);
+    query.exec();
+
+    return query.lastError();
+}
 //查询某个设备某个通道的历史数据.
 QSqlError DAO::DeviceDataQuery(QString serialNo,
                                int chan,

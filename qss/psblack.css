@@ -387,7 +387,7 @@ max-width:12px;
 }
 
 QScrollBar::handle:vertical{
-background:#242424;
+background:#828282;
 min-height:50px;
 border-radius:6px;
 }

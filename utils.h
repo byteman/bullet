@@ -38,6 +38,7 @@ public:
     static bool KillProcess(QString name);
     static bool StartProcess(QString name);
     static bool ExistFile(QString file);
+    static bool FindFiles(const QString &dirPath,QString ext, QFileInfoList &filelist);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

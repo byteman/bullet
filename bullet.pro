@@ -23,6 +23,7 @@ win32:LIBS += -lIphlpapi
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
     dialogcorpmanager.cpp \
+    dialogfixvalue.cpp \
     tcpserver.cpp \
     device.cpp \
     devicemanager.cpp \
@@ -100,6 +101,7 @@ SOURCES += main.cpp\
 
 HEADERS  += tcpserver.h \
     dialogcorpmanager.h \
+    dialogfixvalue.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
@@ -170,6 +172,7 @@ HEADERS  += tcpserver.h \
 FORMS    += MainWnd.ui \
     channelwidget.ui \
     dialogcorpmanager.ui \
+    dialogfixvalue.ui \
     dialogparams.ui \
     dialogcalib.ui \
     frmmessagebox.ui \

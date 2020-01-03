@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1008,6 +1008,9 @@ margin-top:0px;
               <width>200</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
             </property>
             <property name="styleSheet">
              <string notr="true">border:0px;</string>
@@ -1844,8 +1847,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

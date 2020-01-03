@@ -41,6 +41,7 @@ bool Config::Init()
     m_ftp_base = DAO::instance().ReadStringParam("ftp_base",ftpbase);
     if(m_ftp_host.length() < 3){
         m_ftp_enable = false;
+
     }else{
         m_ftp_enable = true;
     }

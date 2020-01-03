@@ -68,6 +68,7 @@ private:
      Ajax   ajax;
      QMenu* menu;
      QMenu* menu2;
+     QMenu* menu3;
      QString m_cur_station;
      QTimer m_timer;
      QRubberBand *rubberBand;
@@ -132,6 +133,7 @@ private slots:
     void on_btnMenu_Close_clicked();
     void on_btnExit_clicked();
     void on_treeWidget_customContextMenuRequested(const QPoint &pos);
+    void on_treeWidget2_customContextMenuRequested(const QPoint &pos);
     void on_reset_count_click(bool);
     // QWidget interface
     void DevOffline(Device *dev);
@@ -239,6 +241,11 @@ private slots:
 
     void on_edtCorpName_textChanged(const QString &arg1);
 
+
+
+    void on_fix_menu_click(bool);
+    void onUsbImportProgress(int prog);
+    void on_opendata_menu_click(bool);
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -263,6 +270,10 @@ protected slots:
     void on_clear_history_menu_click(bool);
     void on_gen_report_response(AjaxResponse r);
     void on_query_report_response(AjaxResponse r);
+
+    // QWidget interface
+protected:
+    virtual void contextMenuEvent(QContextMenuEvent *event);
 };
 
 #endif // UIDEMO01_H

@@ -16,6 +16,7 @@ UsbImport* UsbImport::instance()
     static SingletonHolder<UsbImport> sh;
     return sh.get();
 }
+//分析并写入一个文件的数据.
 bool UsbImport::parseFile(QString file)
 {
     QList<QStringList> readData = QtCSV::Reader::readToList(file);
@@ -39,6 +40,7 @@ bool UsbImport::parseFile(QString file)
                      dd.chan = j;
                      dd.value = readData.at(i).at(j).toInt();
                      if(dd.value >= 65535){
+                         //跳过未连接的传感器数据.
                          continue;
                      }
                 }
@@ -48,21 +50,28 @@ bool UsbImport::parseFile(QString file)
         }
 
     }
-    QSqlError err = DAO::instance().DeviceDataAdd(m_serial_no,ddl);
-    if(err.isValid()){
-        qDebug() << "DeviceDataAdd err=" << err.text();
+    if(ddl.size() > 0)
+    {
+        QSqlError err = DAO::instance().DeviceDataAdd(m_serial_no,ddl);
+        if(err.isValid()){
+            qDebug() << "DeviceDataAdd err=" << err.text();
+        }
     }
+
     return true;
 }
 //线程函数.
 bool UsbImport::_run()
 {
-    QFileInfoList list = utils::ListDirFiles(m_dir,"*.csv");
-    qDebug() << "serial=" << m_serial_no << " dir=" << m_dir;
+
+    QFileInfoList list ;//= utils::ListDirFiles(m_dir,"*.csv");
+    utils::FindFiles(m_dir,"*.csv",list);//递归遍历所有目录的csv文件.
+    qDebug() << "serial=" << m_serial_no << "file num=" << list.size() << " dir=" << m_dir;
     for(int i = 0; i < list.size(); i++)
     {
         QString file = list[i].absoluteFilePath();
-        qDebug() << "parse csv=" << file;
+        //qDebug() << "parse csv=" << file;
+        emit onProgress((i+1)*100/list.size());
         parseFile(file);
     }
     emit onSucc();
