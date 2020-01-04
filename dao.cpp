@@ -89,6 +89,7 @@ QSqlError DAO::ConnectDataDB(QString host,
     if(dataDbMap.contains(DeviceName)){
         return QSqlError("is opened");
     }
+    //连接名不一样才能创建多个连接对象.否则都是同一个连接.
     QSqlDatabase dbx = QSqlDatabase::addDatabase(SQL_DRIVER,DeviceName);
     dbx.setHostName(host);
     dbx.setPort(port);

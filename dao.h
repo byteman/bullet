@@ -76,9 +76,8 @@ public:
 
 private:
 
-    QSqlDatabase db;
-    QSqlDatabase db_data;
-    QMap<QString,QSqlDatabase> dataDbMap;
+    QSqlDatabase db; //配置数据库
+    QMap<QString,QSqlDatabase> dataDbMap; //数据相关的数据库,一个设备名对应一个连接名.一个连接名只能同时在一个线程中使用,
     QString data_dir;
     QSqlError CreateDeviceTable();
     QSqlError CreateDeviceChannelConfigTable();
