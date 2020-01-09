@@ -57,12 +57,15 @@ public:
     void Sync();
     bool WriteValuesBuf(MsgSensorData &msg);
     bool ClearHist();
+    //是否允许保存数据
+    void SetWriteEnable(bool en);
+    bool IsWriteEnable();
 private:
     DeviceDataList ddl;
     QMap<int,DeviceChannel> m_channels;
     qint32 m_ad;
     qint64 m_last_save_ts;
-
+    bool m_writeEnable;
     qint32 m_weight;
     QString m_dev_id;
     quint16 m_serial_id;

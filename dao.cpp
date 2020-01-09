@@ -1,6 +1,7 @@
 ﻿#include "dao.h"
 #include <QtDebug>
 #include <QDateTime>
+#include <QSqlDriver>
 #include "singletonholder.h"
 //Q_GLOBAL_STATIC(DAO, dao)
 #define SQL_DRIVER "QSQLITE"
@@ -19,6 +20,9 @@ DAO& DAO::instance()
     static SingletonHolder<DAO> sh;
     return *sh.get();
 }
+extern "C"{
+    int sqlite3_threadsafe();
+}
 QSqlError DAO::Init(QString DataBase,QString DbDir)
 {
     qDebug() << "open database " << DataBase;
@@ -28,11 +32,6 @@ QSqlError DAO::Init(QString DataBase,QString DbDir)
         qDebug() << "open config database failed";
         return err;
     }
-//    err = ConnectDataDB("host",8888,"UserName","PassWord",DataDb);
-//    if(err.isValid()) {
-//        qDebug() << "open data database failed";
-//        return err;
-//    }
     qDebug() << "create data table =" << err.text();
 
     err = CreateDeviceTable();
@@ -62,6 +61,13 @@ QSqlError DAO::Init(QString DataBase,QString DbDir)
         CreateDataTableIndex(list[i].serialNo);
         //Devices.push_back(list[i].serialNo);
     }
+    dbimport = QSqlDatabase::addDatabase(SQL_DRIVER,"dbimport");
+    dbexport = QSqlDatabase::addDatabase(SQL_DRIVER,"dbexport");
+    dbquery  = QSqlDatabase::addDatabase(SQL_DRIVER,"dbquery");
+
+    //dbimport.driver()->handle().toInt();
+    //int v = sqlite3_threadsafe();
+    //qDebug() << "safe=" << v;
     return err;
    // return InitDataDb(DbDir,Devices);
 
@@ -379,7 +385,61 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceData &data)
     }
     return query.lastError();
 }
+QSqlError DAO::DeviceDataAddByConn(QSqlDatabase dbconn, QString serial,DeviceData &data)
+{
+    QString sql = QString("insert into tbl_%1_data(time,chan,value) values(?,?,?);").arg(serial);
 
+    QSqlQuery query(dbconn);
+
+    query.prepare(sql);
+    query.addBindValue(data.timestamp);
+    query.addBindValue(data.chan);
+    query.addBindValue(data.value);
+
+    if(!query.exec())
+    {
+       //qDebug()<<query.lastError();
+    }
+    else
+    {
+    }
+    return query.lastError();
+}
+QSqlError DAO::DeviceDataAdd2(QString serialNo, DeviceDataList &data,int &total)
+{
+    QSqlError err;
+
+
+    dbimport.setDatabaseName(QString("%1/%2.db").arg(data_dir).arg(serialNo));
+
+    if(dbimport.open())
+    {
+
+    }else{
+       qDebug()<<"failure";
+
+       return dbimport.lastError();
+    }
+    if(!dbimport.transaction()){
+        dbimport.close();
+        return dbimport.lastError();
+    }
+    for(int i = 0; i < data.size();i++)
+    {
+        err = DeviceDataAddByConn(dbimport,serialNo, data[i]);
+        if(err.isValid()){
+           qDebug() << "DeviceDataAdd " << i<< " err" << err.text();
+        }else{
+            total++;
+        }
+    }
+    if(!dbimport.commit()){
+        qDebug() << "commit failed";
+
+    }
+    dbimport.close();
+    return QSqlError();
+}
 QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
 {
     QSqlError err;
@@ -389,6 +449,7 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
 
     if(!dataDbMap[serialNo].transaction()){
         qDebug() << "transaction failed";
+        return QSqlError(serialNo+QStringLiteral("transaction failed"));
     }
     for(int i = 0; i < data.size();i++)
     {
@@ -548,7 +609,22 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
     if(!dataDbMap.contains(serialNo)){
         return QSqlError(serialNo+QStringLiteral("不存在"));
     }
-    QSqlQuery query(dataDbMap[serialNo]);
+
+    dbquery.setDatabaseName(QString("%1/%2.db").arg(data_dir).arg(serialNo));
+
+    if(dbquery.open())
+    {
+
+    }else{
+       qDebug()<<"failure";
+
+       return dbquery.lastError();
+    }
+    if(!dbquery.transaction()){
+        dbquery.close();
+        return dbquery.lastError();
+    }
+    QSqlQuery query(dbquery);
     query.prepare(sql);
     qDebug() << sql;
     qDebug() << serialNo << chan << from << to;
@@ -569,6 +645,7 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
 
         dataList.push_back(data);
     }
+    dbquery.close();
     return query.lastError();
 }
 

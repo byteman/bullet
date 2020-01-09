@@ -224,6 +224,24 @@ void DeviceManager::Sync()
         i.value()->Sync();
     }
 }
+//全部启用写允许.
+void DeviceManager::SetAllWriteEnable()
+{
+
+    QMapIterator<QString,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+        i.value()->SetWriteEnable(true);
+    }
+}
+
+void DeviceManager::SetWriteEnable(QString dev_id, bool en)
+{
+    Device* dev= GetDevice(dev_id);
+    if(dev!=NULL){
+        dev->SetWriteEnable(en);
+    }
+}
 //添加设备
 //1.数据库中添加一个设备.
 bool DeviceManager::AddDevice(QString dev_id, QString dev_name)
@@ -422,6 +440,7 @@ void DeviceManager::Message(SessMessage msg)
             dev_map[dev_id]->setSess(msg.getSession());
             //dev_map[dev_id]->setHostPort(msg.getHost(),msg.getPort());
             //qDebug() << "get message cmd=" << input_msg.head.cmd_id;
+
             bool succ = dev_map[dev_id]->onMessage(input_msg,output_msg);
             //是否需要回应，并且成功处理数据，才进行回应.
             if(!input_msg.is_ack && succ)

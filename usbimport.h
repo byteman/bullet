@@ -14,12 +14,13 @@ public:
 
 signals:
     void onProgress(int prog);
-    void onSucc();
+    void onSucc(int total);
     void onError(QString err);
 
 private:
     QFutureWatcher<bool> *watcher;
     bool _run();
+    int m_total;
     QString m_dir;
     QString m_serial_no;
     bool parseFile(QString file);

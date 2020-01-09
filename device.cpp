@@ -22,7 +22,8 @@ Device::Device():
     m_sess(NULL),
     m_last_save_ts(0),
     m_start_send(true),
-    m_packet_count(0)
+    m_packet_count(0),
+    m_writeEnable(true)
 {
     for(int i = 1; i <= 12; i++)
     {
@@ -115,6 +116,16 @@ bool Device::ClearHist()
 
     WriteCmd(MSG_HIST_CLEAR_REQ,data);
     return true;
+}
+
+void Device::SetWriteEnable(bool en)
+{
+    m_writeEnable = en;
+}
+
+bool Device::IsWriteEnable()
+{
+    return m_writeEnable;
 }
 void Device::WriteParam(MsgDevicePara &para)
 {
@@ -215,6 +226,8 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 
 
         resp.data.append((const char*)&req.head.sesson_id,sizeof(quint32));
+        //如果有其他线程在写数据库就禁用写入.
+        if(!m_writeEnable) return false;
         return SaveWave(req);
     }
     //注册和心跳包的回应
@@ -381,9 +394,11 @@ bool Device::WriteValues(MsgSensorData& msg)
     {
         //如果这个设备的这个通道已经禁用了。
          if(IsPaused(msg.channels[i].addr)){
+             //通道禁用了不存储
              continue;
          }
          if(msg.channels[i].weight == 65535){
+             //通道数据值为65535 也不存储
              continue;
          }
          DeviceData dd;

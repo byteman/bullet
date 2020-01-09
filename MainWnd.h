@@ -246,6 +246,8 @@ private slots:
     void on_fix_menu_click(bool);
     void onUsbImportProgress(int prog);
     void on_opendata_menu_click(bool);
+    void on_rb1_clicked(bool checked);
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -256,7 +258,7 @@ protected:
 protected:
     virtual void closeEvent(QCloseEvent *);
 protected slots:
-    void onUsbImportSucc();
+    void onUsbImportSucc(int total);
     void onResetResult(Device *, bool);
     void on_report_click(QString order);
     void fileChange(const QString &path);
@@ -265,6 +267,7 @@ protected slots:
     void on_clearup_menu_click(bool);
     void onReply(QString msg);
     void on_opendir_click(QString order);
+    void on_ftp_menu_click(bool);
     void on_stop_menu_click(bool);
     void on_start_menu_click(bool);
     void on_clear_history_menu_click(bool);

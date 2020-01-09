@@ -49,6 +49,8 @@ public:
     bool SetChanConfig(QString &dev_id, int chan,DeviceChnConfig& cfg);
     int DeviceCount();
     void Sync();
+    void SetWriteEnable(QString dev_id,bool en);
+    void SetAllWriteEnable();
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);

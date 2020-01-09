@@ -52,9 +52,14 @@ bool UsbImport::parseFile(QString file)
     }
     if(ddl.size() > 0)
     {
-        QSqlError err = DAO::instance().DeviceDataAdd(m_serial_no,ddl);
+        //在线程中开了一个新的连接来写入数据.没有使用数据的接收写入连接
+        //qDebug() << "add size=" << ddl.size();
+
+        QSqlError err = DAO::instance().DeviceDataAdd2(m_serial_no,ddl,m_total);
         if(err.isValid()){
             qDebug() << "DeviceDataAdd err=" << err.text();
+        }else{
+            qDebug() << "total=" << m_total;
         }
     }
 
@@ -66,6 +71,7 @@ bool UsbImport::_run()
 
     QFileInfoList list ;//= utils::ListDirFiles(m_dir,"*.csv");
     utils::FindFiles(m_dir,"*.csv",list);//递归遍历所有目录的csv文件.
+    m_total = 0;
     qDebug() << "serial=" << m_serial_no << "file num=" << list.size() << " dir=" << m_dir;
     for(int i = 0; i < list.size(); i++)
     {
@@ -74,7 +80,7 @@ bool UsbImport::_run()
         emit onProgress((i+1)*100/list.size());
         parseFile(file);
     }
-    emit onSucc();
+    emit onSucc(m_total);
     return true;
 }
 bool UsbImport::start(QString serial,QString dir)

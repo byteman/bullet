@@ -38,6 +38,7 @@ public:
     QSqlError DeviceDataAdd(QString serialNo,DeviceData& data);
     //添加一组测力数据.
     QSqlError DeviceDataAdd(QString serialNo,DeviceDataList& data);
+    QSqlError       DeviceDataAdd2(QString serialNo,DeviceDataList& data,int &total);
     //清空某个设备的所有数据.
     QSqlError DeviceChanDataRemove(QString serialNo,int chan);
     QSqlError DeviceDataTblRemove(QString serialNo);
@@ -77,6 +78,9 @@ public:
 private:
 
     QSqlDatabase db; //配置数据库
+    QSqlDatabase dbimport;//导入u盘数据的连接.
+    QSqlDatabase dbquery;//查询历史数据的连接.
+    QSqlDatabase dbexport;//导出历史数据的连接.
     QMap<QString,QSqlDatabase> dataDbMap; //数据相关的数据库,一个设备名对应一个连接名.一个连接名只能同时在一个线程中使用,
     QString data_dir;
     QSqlError CreateDeviceTable();
@@ -90,6 +94,7 @@ private:
                             QString Path,
                             QString DeviceName);
     QSqlError CreateDataTableIndex(QString serialNo);
+    QSqlError DeviceDataAddByConn(QSqlDatabase dbconn, QString serial, DeviceData &data);
 };
 
 #endif // DAO_H

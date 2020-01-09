@@ -30,7 +30,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.0.9").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.1.1").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
@@ -64,15 +64,10 @@ void MainWnd::StartReceiver()
     }else{
         AddLog(QStringLiteral("服务启动成功"));
     }
-//    QStringList ip = NetTools::get_local_ip();
-//    for(int i = 0; i< ip.size();i++)
-//    {
-//        AddLog(QString("ip[%1]=%2").arg(i+1).arg(ip.at(i)));
-//    }
-    connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
+    //屏蔽掉在界面中处理网络消息，防止有大量历史数据上来的时候，界面会卡顿.
+    //connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
-    //connect(&ping,SIGNAL(onReply(QString)),this,SLOT(onReply(QString)));
 
 
 }
@@ -390,6 +385,25 @@ void MainWnd::on_start_menu_click(bool)
     }
 
 }
+void MainWnd::on_stop_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id))
+    {
+        qDebug()<<"Can not GetCurrentDeviceId";
+        return;
+    }
+    if(devices!=NULL){
+
+        QVector<int> chans = devices->GetSelectChan();
+        for(int i = 0; i < chans.size(); i++)
+        {
+            dvm.ControlDeviceChan(id,chans[i],true);
+        }
+        devices->SetSelectRecState(true);
+    }
+
+}
 #include "dialogfixvalue.h"
 void MainWnd::on_fix_menu_click(bool)
 {
@@ -419,7 +433,7 @@ void MainWnd::on_opendata_menu_click(bool)
 }
 //下载u盘数据
 #include "mainwindow.h"
-void MainWnd::on_stop_menu_click(bool)
+void MainWnd::on_ftp_menu_click(bool)
 {
     QString id;
     if(!GetCurrentDeviceId(id)){
@@ -981,6 +995,8 @@ void MainWnd::loadChannels()
 }
 void MainWnd::updateTime()
 {
+    //禁用这个根据通道修改时间的功能
+   return ;
    QString id;
    if(!GetCurrentDeviceId2(id)){
         return;
@@ -1291,7 +1307,7 @@ void MainWnd::initUI()
 
     action = new QAction(QStringLiteral("下载U盘数据"),this);
     menu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_stop_menu_click(bool)));
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_ftp_menu_click(bool)));
 
     action = new QAction(QStringLiteral("修正压力值"),this);
     menu3->addAction(action);
@@ -1320,7 +1336,7 @@ void MainWnd::initUI()
     connect(&AsyncExportManager::instance(),SIGNAL(onProgress(QString,int,int)),this,SLOT(onProgress(QString,int,int)));
     connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
 
-    connect(UsbImport::instance(),SIGNAL(onSucc()),this,SLOT(onUsbImportSucc()));
+    connect(UsbImport::instance(),SIGNAL(onSucc(int)),this,SLOT(onUsbImportSucc(int)));
     connect(UsbImport::instance(),SIGNAL(onProgress(int)),this,SLOT(onUsbImportProgress(int)));
 
  //加载设备状态.
@@ -1345,6 +1361,7 @@ void MainWnd::onSucc(QString serialNo, QString err)
 {
     ui->btnExport->setText(QStringLiteral("导出数据"));
     ui->btnExport->setEnabled(true);
+    ui->btnQuery->setEnabled(true);
 }
 void MainWnd::loadSysConfig()
 {
@@ -1501,11 +1518,12 @@ void MainWnd::onUsbImportProgress(int prog)
     ui->btnImport->setEnabled(false);
     ui->btnImport->setText(QStringLiteral("已导入")+QString("%1%").arg(prog));
 }
-void MainWnd::onUsbImportSucc()
+void MainWnd::onUsbImportSucc(int total)
 {
+    dvm.SetAllWriteEnable();
     ui->btnImport->setEnabled(true);
     ui->btnImport->setText(QStringLiteral("导入数据"));
-    QMessageBox::information(this,QStringLiteral("提示"),QStringLiteral("导入完成"));
+    QMessageBox::information(this,QStringLiteral("提示"),QString(QStringLiteral("成功导入了%1条数据")).arg(total));
 }
 //切换后触发.
 void MainWnd::on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
@@ -1552,6 +1570,7 @@ void MainWnd::handleLoadWaveFinished()
 {
     wave->DisplayData(m_ddl);
     ui->btnQuery->setEnabled(true);
+    ui->btnExport->setEnabled(true);
     ui->btnQuery->setText(QStringLiteral("查询"));
 }
 //在后台线程进行数据查询
@@ -1590,9 +1609,11 @@ void MainWnd::on_btnQuery_clicked()
 
 
     const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
+    // QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
     watcher->setFuture(future);
     ui->btnQuery->setText(QStringLiteral("查询中..."));
     ui->btnQuery->setEnabled(false);
+    ui->btnExport->setEnabled(false);
 
 }
 
@@ -1705,6 +1726,7 @@ void MainWnd::on_btnExport_clicked()
     AsyncExportManager::instance().AddTask(Config::instance().m_file_format,id,name,chans,from,to,fileName);
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
+    ui->btnQuery->setEnabled(false);
     // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
 }
 #include <dialogmerge.h>
@@ -2187,6 +2209,7 @@ void MainWnd::on_btnImport_clicked()
     }
     ui->btnImport->setEnabled(false);
     ui->btnImport->setText(QStringLiteral("正在分析"));
+    dvm.SetWriteEnable(id,false);
     UsbImport::instance()->start(id,dirName);
 }
 
@@ -2217,6 +2240,11 @@ void MainWnd::on_treeWidget2_customContextMenuRequested(const QPoint &pos)
 
 
 void MainWnd::contextMenuEvent(QContextMenuEvent *event)
+{
+
+}
+
+void MainWnd::on_rb1_clicked(bool checked)
 {
 
 }
