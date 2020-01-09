@@ -21,6 +21,7 @@
 #include <QInputDialog>
 #include "usbimport.h"
 #include "Logger.h"
+#include "writedbthread.h"
 #define MAX_CHAN_NR 12
 #define LISTEN_PORT 8881
 void MainWnd::AddLog(QString msg)
@@ -149,6 +150,7 @@ void initGoLibrary()
      }
 
 }
+
 bool MainWnd::Init()
 {
     outputVer();
@@ -178,6 +180,8 @@ bool MainWnd::Init()
         myHelper::ShowMessageBoxError(err.text());
         return false;
     }
+    //写数据库的线程启动.
+    WriteDBThread::instance().startThread();
     //初始化UI相关.
     LOG_DEBUG("initUI");
     this->initUI();
@@ -883,10 +887,7 @@ MainWnd::MainWnd(QWidget *parent) :
 MainWnd::~MainWnd()
 {
     delete ui;
-    if(proc!=NULL){
-        proc->kill();
-    }
-    utils::KillProcess(Config::instance().m_report_name);
+
 }
 void MainWnd::reloadDeviceList2()
 {
@@ -1499,12 +1500,33 @@ void MainWnd::on_btnShou_clicked()
     }
     hide =!hide;
 }
+//关闭前的处理工作
+void MainWnd::closeHandle()
+{
+    qDebug() << "close1";
+    srv->stop();
+     qDebug() << "close2";
+    WriteDBThread::instance().stopThread();
+     qDebug() << "close3";
+    this->dvm.Sync();
+      qDebug() << "close4";
+    if(proc!=NULL){
+         qDebug() << "close5";
+        proc->kill();
+         qDebug() << "close6";
+        proc->waitForFinished();
+         qDebug() << "close7";
+    }
+ qDebug() << "close8";
+    //utils::KillProcess(Config::instance().m_report_name);
+     qDebug() << "close9";
 
+}
 void MainWnd::closeEvent(QCloseEvent *event)
 {
     int result = myHelper::ShowMessageBoxQuesion(QStringLiteral("确定离开?"));
        if (result == 1) {
-           this->dvm.Sync();
+           closeHandle();
            event->accept();
        } else {
            event->ignore();
@@ -2176,6 +2198,16 @@ void MainWnd::on_rb1_clicked()
 
 void MainWnd::on_btnStartAll_clicked()
 {
+//    DeviceDataList ddl;
+//    for(int i = 0; i < 10; i++)
+//    {
+//        DeviceData d;
+//        d.chan = 1;
+//        d.timestamp = QDateTime::currentSecsSinceEpoch();
+//        d.value = i;
+//        ddl.push_back(d);
+//    }
+//    WriteDBThread::instance().WriteData("111",ddl);
     on_start_menu_click(true);
 }
 

@@ -117,6 +117,7 @@ private:
      QString GetNetFile(QString temp,QString order,QString orderKey);
      bool SaveNetFile(QString netFile, QString localFile);
      void listOrders(QString host);
+     void closeHandle();
 private slots:
     void chan_click(int chan);
     void buttonClick();

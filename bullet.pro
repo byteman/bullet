@@ -73,6 +73,7 @@ SOURCES += main.cpp\
     dialogmerge.cpp \
     chanselect.cpp \
     mergemanager.cpp \
+    writedbthread.cpp \
     xlsx/statemanager.cpp \
     xlsx/stateinfo.cpp \
     dialogreport.cpp \
@@ -151,6 +152,7 @@ HEADERS  += tcpserver.h \
     dialogmerge.h \
     chanselect.h \
     mergemanager.h \
+    writedbthread.h \
     xlsx/statemanager.h \
     xlsx/stateinfo.h \
     dialogreport.h \

@@ -304,7 +304,7 @@ QQueue<SensorData>* Device::GetHistoryData(int chan)
 }
 #include "dao.h"
 
-
+#include "writedbthread.h"
 bool Device::WriteValuesBuf(MsgSensorData& msg)
 {
 
@@ -360,6 +360,7 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
     //重新开始计时
     last.restart();
 
+    //WriteDBThread::instance().WriteData(msg.m_dev_serial,ddl);
     QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
 
     //写入后需要清空数据

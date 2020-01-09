@@ -33,17 +33,18 @@ public:
     QSqlError DeviceChannalGet(QString serialNo,int chan, DeviceChnConfig &cfg);
     QSqlError DeviceChannalUpdateState(QString serialNo,int chan, bool paused );
 
-     //设备数据管理,一个设备一个表.
+//设备数据管理,一个设备一个表.-----------------------------------------
     //添加一条测力数据.
     QSqlError DeviceDataAdd(QString serialNo,DeviceData& data);
     //添加一组测力数据.
     QSqlError DeviceDataAdd(QString serialNo,DeviceDataList& data);
-    QSqlError       DeviceDataAdd2(QString serialNo,DeviceDataList& data,int &total);
+    QSqlError DeviceDataAdd2(QString serialNo,DeviceDataList& data,int &total);
     //清空某个设备的所有数据.
     QSqlError DeviceChanDataRemove(QString serialNo,int chan);
     QSqlError DeviceDataTblRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo);
     QSqlError DeviceDataRemove(QString serialNo,qint64 from,qint64 to);
+//设备数据的查询
     QSqlError DeviceDataInfo(QString serialNo,qint64 &start,qint64 &end, qint64 &count);
 
     //查询某个设备的某个通道某个时间段的历史数据.
@@ -60,6 +61,8 @@ public:
     QSqlError ChannelValueFix(QString serialNo,
                               qint64 from,
                               qint64 to,int chan, int maxValue,int fixValue);
+    QSqlError DbRecycle(QString serialNo);
+    /////////////////////////////////////////////////////////////
     bool ExistKey(QString key);
     bool getParam(QString key, QString &value);
     QSqlError updateParam(QString key, QString value);
@@ -73,7 +76,7 @@ public:
     QSqlError CreateDataTable(QString serialNo);
     QSqlError WriteBoolParam(QString key, bool value);
 
-    QSqlError DbRecycle(QString serialNo);
+
 
 private:
 
