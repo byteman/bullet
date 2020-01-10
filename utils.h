@@ -39,6 +39,7 @@ public:
     static bool StartProcess(QString name);
     static bool ExistFile(QString file);
     static bool FindFiles(const QString &dirPath,QString ext, QFileInfoList &filelist);
+    static QString gettm(qint64 timestamp);
 };
 QString FormatHex(QByteArray& data);
 int get_random_number();

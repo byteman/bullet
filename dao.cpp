@@ -65,6 +65,10 @@ QSqlError DAO::Init(QString DataBase,QString DbDir)
     dbexport = QSqlDatabase::addDatabase(SQL_DRIVER,"dbexport");
     dbquery  = QSqlDatabase::addDatabase(SQL_DRIVER,"dbquery");
 
+    for(int i = 1; i <12; i++)
+    {
+        dbconns[i] = QSqlDatabase::addDatabase(SQL_DRIVER,QString("chan%1").arg(i));
+    }
     //dbimport.driver()->handle().toInt();
     //int v = sqlite3_threadsafe();
     //qDebug() << "safe=" << v;
@@ -550,6 +554,54 @@ QSqlError DAO::DeviceDataInfo(QString serialNo,
     }
     return query.lastError();
 }
+QSqlError DAO::DeviceDataQueryByConn(
+                                     QString serialNo,
+                                     int chan,
+                                     qint64 from,
+                                     qint64 to,
+                                     DeviceDataList &ddl
+                                     )
+{
+    QString sql = QString("select time,chan,value from tbl_%1_data where chan =? and time > ? and time < ?; ").arg(serialNo);
+
+    //QString conn = QString("%1_%2").arg(serialNo).arg(chan);
+    if(!dbconns.contains(chan)){
+        return QSqlError();
+    }
+    QSqlDatabase db = dbconns[chan];
+
+
+    db.setDatabaseName(QString("%1/%2.db").arg(data_dir).arg(serialNo));
+
+    if(!db.open())
+    {
+        return db.lastError();
+    }
+    QSqlQuery query(db);
+    query.prepare(sql);
+    qDebug() << sql;
+    qDebug() << serialNo << chan << from << to;
+
+    query.addBindValue(chan);
+    query.addBindValue(from);
+    query.addBindValue(to);
+
+    query.exec();
+    while (query.next())
+    {
+        DeviceData data;
+        //dev.id      = query.value("id").toInt();
+
+        data.timestamp   = query.value("time").toLongLong();
+        data.chan = (quint8)query.value("chan").toInt();
+        data.value = query.value("value").toInt();
+        ddl.push_back(data);
+    }
+    db.close();
+
+    return query.lastError();
+
+}
 QSqlError DAO::DeviceDataQuery(QString serialNo,
                           qint64 from,
                           qint64 to,
@@ -619,10 +671,6 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
        qDebug()<<"failure";
 
        return dbquery.lastError();
-    }
-    if(!dbquery.transaction()){
-        dbquery.close();
-        return dbquery.lastError();
     }
     QSqlQuery query(dbquery);
     query.prepare(sql);

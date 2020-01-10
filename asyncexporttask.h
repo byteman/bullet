@@ -5,7 +5,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <models.h>
-
+#include <QAtomicInt>
 enum FileFormat{
   FF_XLSX=0,
   FF_CSV=1,
@@ -34,7 +34,7 @@ public:
     //结束任务.
     bool cancel();
     bool _run();
-    bool writeFile(int chan, DeviceDataList ddl, QString filePath, int format);
+    bool writeFile(int chan, QString filePath, int format);
 signals:
 
     void onProgress(AsyncExportTask* task,int progress);
@@ -43,14 +43,19 @@ signals:
 
 private:
     QString         _serialNo;
-      QString         _name;
+    QString         _name;
     QVector<int>    _chans;
     qint64          _from;
     qint64          _to;
     QString         _dest;
     QString         _uuid;
-    QFutureWatcher<bool> *watcher;
-    FileFormat _fileFormat;
+    QAtomicInt      _prog;
+    int             _total;
+    FileFormat      _fileFormat;
+    QVector<DeviceDataList> ddv;
+    QMutex _mutex;
+    bool writeXlsx();
+    bool writeCsv();
     bool writeCsvFile(int chan, DeviceDataList ddl, QString file);
     bool writeXlsxFile(int chan, DeviceDataList ddl, QString filePath);
 };

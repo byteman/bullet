@@ -298,3 +298,16 @@ int get_random_number()
      int a = qrand()%100;   //随机生成0到9的随机数
      return a;
 }
+#include <ctime>
+#include <QByteArray>
+QString utils::gettm(qint64 timestamp)
+{
+    char buf[32]={0,};
+    qint64 milli = timestamp+ (qint64)8*60*60*1000;//此处转化为东八区北京时间，如果是其它时区需要按需求修改
+    auto mTime = std::chrono::milliseconds(milli);
+    auto tp=std::chrono::time_point<std::chrono::system_clock,std::chrono::milliseconds>(mTime);
+    auto tt = std::chrono::system_clock::to_time_t(tp);
+    std::tm* now = std::gmtime(&tt);
+    qsnprintf(buf,32,"%4d-%02d-%02d %02d:%02d:%02d",now->tm_year+1900,now->tm_mon+1,now->tm_mday,now->tm_hour,now->tm_min,now->tm_sec);
+    return buf;
+}
