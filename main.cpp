@@ -13,6 +13,35 @@
 #include "Logger.h"
 #include "ConsoleAppender.h"
 #include "FileAppender.h"
+#include <QFuture>
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
+#include "xlsxdocument.h"
+#include "xlsxchartsheet.h"
+#include "xlsxcellrange.h"
+#include "xlsxchart.h"
+#include "xlsxrichstring.h"
+#include "xlsxworkbook.h"
+bool writeXlsxFile(int chan,QString filePath)
+{
+
+    QXlsx::Document xlsxW;
+    xlsxW.setColumnWidth(1,25);
+    xlsxW.write("A1", "time"); // write "Hello Qt!" to cell(A,1). it's shared string.
+   // xlsxW.write("B1", QString(QStringLiteral("通道")+"%1").arg(chan));
+    xlsxW.write("B1","value");
+    for(int j = 0; j < 10; j++)
+    {
+        //xlsxW.write(j+2,1,j);
+        xlsxW.write(j+2,1,QString("%1").arg(QDateTime::fromMSecsSinceEpoch(1000).toString("yyyy-MM-dd hh:mm:ss")));
+        xlsxW.write(j+2,2,j);
+    }
+
+    xlsxW.saveAs(filePath); // save the document as 'Test.xlsx'
+
+    return true;
+}
+
 void initLogger()
 {
 
@@ -46,7 +75,18 @@ bool checkOne()
     else
         return true;
 }
-
+void test()
+{
+    QVector<QFuture<bool>> res;
+    for(int i = 0; i < 1000; i++)
+    {
+        res.push_back(QtConcurrent::run(writeXlsxFile,1,QString("%1.xlsx").arg(i)));
+    }
+    for(int i = 0; i < 10; i++)
+    {
+        res[i].waitForFinished();
+    }
+}
 int main(int argc, char *argv[])
 {
 
@@ -57,6 +97,7 @@ int main(int argc, char *argv[])
 
        return 0;
     }
+
     initLogger();
     //QBreakpadInstance.setDumpPath(QLatin1String("crashes_dump"));
     //InitConsoleWindow();

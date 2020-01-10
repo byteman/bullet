@@ -34,6 +34,7 @@ public:
     //结束任务.
     bool cancel();
     bool _run();
+    bool writeFile(int chan, DeviceDataList ddl, QString filePath, int format);
 signals:
 
     void onProgress(AsyncExportTask* task,int progress);

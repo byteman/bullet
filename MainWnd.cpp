@@ -1363,6 +1363,7 @@ void MainWnd::onSucc(QString serialNo, QString err)
     ui->btnExport->setText(QStringLiteral("导出数据"));
     ui->btnExport->setEnabled(true);
     ui->btnQuery->setEnabled(true);
+    ui->btnImport->setEnabled(true);
 }
 void MainWnd::loadSysConfig()
 {
@@ -1544,6 +1545,8 @@ void MainWnd::onUsbImportSucc(int total)
 {
     dvm.SetAllWriteEnable();
     ui->btnImport->setEnabled(true);
+    ui->btnQuery->setEnabled(true);
+    ui->btnExport->setEnabled(true);
     ui->btnImport->setText(QStringLiteral("导入数据"));
     QMessageBox::information(this,QStringLiteral("提示"),QString(QStringLiteral("成功导入了%1条数据")).arg(total));
 }
@@ -1593,6 +1596,7 @@ void MainWnd::handleLoadWaveFinished()
     wave->DisplayData(m_ddl);
     ui->btnQuery->setEnabled(true);
     ui->btnExport->setEnabled(true);
+    ui->btnImport->setEnabled(true);
     ui->btnQuery->setText(QStringLiteral("查询"));
 }
 //在后台线程进行数据查询
@@ -1636,6 +1640,7 @@ void MainWnd::on_btnQuery_clicked()
     ui->btnQuery->setText(QStringLiteral("查询中..."));
     ui->btnQuery->setEnabled(false);
     ui->btnExport->setEnabled(false);
+    ui->btnImport->setEnabled(false);
 
 }
 
@@ -1749,6 +1754,7 @@ void MainWnd::on_btnExport_clicked()
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
     ui->btnQuery->setEnabled(false);
+    ui->btnImport->setEnabled(false);
     // myHelper::ShowMessageBoxInfo(QStringLiteral("导出完成"));
 }
 #include <dialogmerge.h>
@@ -2240,6 +2246,8 @@ void MainWnd::on_btnImport_clicked()
         return;
     }
     ui->btnImport->setEnabled(false);
+    ui->btnQuery->setEnabled(false);
+    ui->btnExport->setEnabled(false);
     ui->btnImport->setText(QStringLiteral("正在分析"));
     dvm.SetWriteEnable(id,false);
     UsbImport::instance()->start(id,dirName);

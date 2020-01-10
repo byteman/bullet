@@ -226,7 +226,7 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 
 
         resp.data.append((const char*)&req.head.sesson_id,sizeof(quint32));
-        //如果有其他线程在写数据库就禁用写入.
+        //如果有其他线程在写数据库就禁用写入.但是在这里禁用界面上就看不到这路的数据了，这样也好，便于调试，如果知道没有显示，就表明没有写入了
         if(!m_writeEnable) return false;
         return SaveWave(req);
     }
@@ -447,11 +447,14 @@ bool Device::ProcessWave(int index,QByteArray &data)
        // }
 
     }
-    if(Config::instance().m_enable_buffer){
-         WriteValuesBuf(msd);
-    }else{
-         WriteValues(msd);
+    if(m_writeEnable){
+        if(Config::instance().m_enable_buffer){
+             WriteValuesBuf(msd);
+        }else{
+             WriteValues(msd);
+        }
     }
+
 
     //存储数据完成后，再回应.如果存储失败，则不回应数据.
     emit OnSensorData(this,msd);
