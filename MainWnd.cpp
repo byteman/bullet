@@ -31,7 +31,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.1.2").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.1.3").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {

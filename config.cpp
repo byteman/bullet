@@ -45,6 +45,9 @@ bool Config::Init()
     }else{
         m_ftp_enable = true;
     }
+    //  FF_XLSX=0,
+    //  FF_CSV=1,
+    //默认用csv格式，速度更快.
     m_file_format = DAO::instance().ReadIntParam("format",1);
     if(m_file_format > 1 ){
         m_file_format = 1;
