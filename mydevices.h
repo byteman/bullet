@@ -35,6 +35,7 @@ public:
     void SetSaveInt(int rangeS);
     void SetOnline(bool online);
     void SetSelectRecState( bool paused);
+    void SetSelectAll(bool sel);
     QVector<int> GetSelectChan();
 public slots:
     void onDoubleClick(int addr,bool zoom);

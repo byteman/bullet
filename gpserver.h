@@ -27,7 +27,7 @@ public slots:
     void onStart();
 signals:
     void finished();
-    void error(QString err);
+    void onError(QString err);
     void onPacket(QString msg);
     void Message(SessMessage msg);
 

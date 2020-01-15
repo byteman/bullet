@@ -43,8 +43,6 @@ SOURCES += main.cpp\
     ifilter.cpp \
     shiftfilter.cpp \
     utils.cpp \
-    csvfile.cpp \
-    syncfile.cpp \
     appinit.cpp \
     iconhelper.cpp \
     channelwidget.cpp \
@@ -95,7 +93,6 @@ SOURCES += main.cpp\
     cutelogger/src/OutputDebugAppender.cpp \
     cutelogger/src/RollingFileAppender.cpp \
     usbimport.cpp \
-    mydao.cpp \
     mainwindow.cpp \
     qftp.cpp \
     qurlinfo.cpp
@@ -124,8 +121,6 @@ HEADERS  += tcpserver.h \
     ifilter.h \
     shiftfilter.h \
     utils.h \
-    csvfile.h \
-    syncfile.h \
     MainWnd.h \
     appinit.h \
     iconhelper.h \
@@ -166,7 +161,6 @@ HEADERS  += tcpserver.h \
     websetclient.h \
     ftpupload.h \
     usbimport.h \
-    mydao.h \
     mainwindow.h \
     qftp.h \
     qurlinfo.h

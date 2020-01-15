@@ -33,6 +33,7 @@ public:
     void ClearDisplay();
     int  Addr();
     bool IsSelected();
+    void Select(bool sel);
     QQueue<SensorData>& GetHistoryData();
     void DisplayDataQueue(QQueue<SensorData> &dataQueue);
     virtual void mouseDoubleClickEvent(QMouseEvent *);

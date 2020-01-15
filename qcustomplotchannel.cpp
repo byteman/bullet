@@ -2,8 +2,8 @@
 static QColor colors[8] = {Qt::darkCyan,Qt::black,Qt::red,Qt::darkRed,Qt::green,Qt::darkGreen,Qt::blue,Qt::cyan};
 
 QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
-    m_graph(graph),
-    lastPointKey(0)
+    lastPointKey(0),
+    m_graph(graph)
 {
 //    m_max = -10000;
 //    m_min = 10000;
@@ -14,7 +14,7 @@ QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
         graph->setPen(pen);
     }
 
-
+    qDebug() << "is m_graph";
     Clear();
 
 }
@@ -41,11 +41,13 @@ void QCustomPlotChannel::SetDataArray(QVector<double> &values)
     }
 
     m_graph->setData(keys,values2,true);
+
 }
 
 void QCustomPlotChannel::AddData(double key2, double value)
 {
     m_graph->addData(key2,value);
+
 }
 
 void QCustomPlotChannel::AddDataArray(QVector<double> &samples)

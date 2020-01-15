@@ -32,6 +32,7 @@ bool GPServer::initSocket(int port)
     {
         QString err = e.displayText().c_str();
         qDebug() << "ccuserver init err: " << err;
+        emit onError(err);
         return false;
     }
 
@@ -81,17 +82,13 @@ void GPServer::onStart()
     _socket = new Poco::Net::DatagramSocket();
     if(!initSocket(_port))
     {
-        emit error("gps init port failed");
         return;
     }
     udp_sess = new GpsSession(_socket);
     _quit = false;
     Poco::Timespan span(100000);
-    qDebug() << "gps onstart";
     while(!_quit){
-        //QTime time;
 
-        //time.start();
         if(_socket->poll(span, Poco::Net::Socket::SELECT_READ))
         {
             try
@@ -108,7 +105,6 @@ void GPServer::onStart()
 
                 msg.setHost(host);
                 msg.setPort(sender.port());
-                //qDebug() << "sender:" << sender.toString() + " port:" << senderPort << datagram.toHex();
 
                 emit Message(msg);
                 //qDebug()<<time.elapsed()<<"ms";
@@ -117,7 +113,7 @@ void GPServer::onStart()
             catch (Poco::Exception& exc)
             {
                 QString err = exc.displayText().c_str();
-                error(QString("gpserver err: %1").arg(exc.displayText().c_str()));
+                onError(QString("gpserver err: %1").arg(exc.displayText().c_str()));
                 qDebug() << "gpserver" << err ;
                 //std::cerr << "UDPEchoServer: " << exc.displayText() << std::endl;
             }

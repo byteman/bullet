@@ -34,6 +34,7 @@ public:
     void ListDevice(QList<Device*> &devices);
     Device* GetDevice(QString dev_id);
 //设备参数读取
+    void ReadDevStatInfo(QString dev_id);
     void ReadParam(QString dev_id);
     void WriteParam(QString dev_id , MsgDevicePara &para);
 //设备通道管理.
@@ -51,6 +52,7 @@ public:
     void Sync();
     void SetWriteEnable(QString dev_id,bool en);
     void SetAllWriteEnable();
+    bool GetDeviceStatInfo(QString& dev_id, DeviceStatInfo& info);
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
@@ -78,6 +80,7 @@ private:
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void ReadParam(Device* dev,MsgDevicePara para);
+    void DeviceInfo(Device* dev,DeviceStatInfo info);
     void WriteParam(Device* dev, bool result);
     void SendData(SessMessage msg);
     void DevOnline(Device* dev);

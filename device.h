@@ -16,6 +16,7 @@ struct DeviceChannel{
     DeviceChnConfig config;
 
 };
+
 class Device:public QObject
 {
     Q_OBJECT
@@ -24,6 +25,10 @@ public:
     bool online() const;
     void setOnline(bool online);
 
+    bool alarm() const;
+    void setAlarm(bool en);
+    //获取设备的信息,如果设备信息未更新过，就返回false.
+    bool getDeviceInfo(DeviceStatInfo& info);
     //检查设备是否在线.
     void checkOnline();
     bool checkCanSave(qint64 time,int saveInt);
@@ -39,6 +44,7 @@ public:
     bool GetHostAddr(QString &ip);
     bool LoadWaveFile(QString file, MsgWaveData &wvd);
     void ReadParam();
+    void ReadDevStatInfo();
     void WriteParam(MsgDevicePara &para);
     void ReadRt();
     qint64 WriteCmd(quint8 cmd, QByteArray &buf);
@@ -75,12 +81,16 @@ private:
     quint16 m_port;
     bool m_start_send;
     bool m_use_sys_time;
+    bool m_alarm;
     bool m_online; //设备是否在线
     bool m_paused; //是否暂停录制.
     int  m_timeout; //在线超时定时器.
     int  m_packet_count; //接收包计数器。
+    bool  m_real_packet; //是否接收到实时包.
     quint16 m_sess_id; //波形回应中的当前会话.
     ISession* m_sess;
+
+    DeviceStatInfo m_info;
     QString CreateDir();
     QString GetFileName();
     void DevNotify(QString msg);
@@ -93,6 +103,9 @@ private:
 
     void WriteValues(SensorData &data);
     bool WriteValues(MsgSensorData &msg);
+    void AlarmParse();
+    bool ParseRealWave(ProtoMessage &msg);
+    bool ProcessRealWave(QByteArray &data);
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);
@@ -100,6 +113,7 @@ signals:
     void Progress(Device* dev,QString progress);
     void Notify(QString msg);
     void ReadParam(Device* dev,MsgDevicePara para);
+    void OnDeviceInfo(Device* dev,DeviceStatInfo para);
     void WriteParam(Device* dev, bool result);
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);

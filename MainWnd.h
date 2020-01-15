@@ -60,7 +60,7 @@ private:
      MultiDeviceDataMap m_ddl;
      DeviceManager dvm;
      QFileSystemWatcher* fileWatcher;
-     QIcon icon_device[2];
+     QIcon icon_device[3];
      QVector<QCheckBox*> rbChanList;
      QIcon icon_channel;
      QIcon icon_dir;
@@ -118,6 +118,9 @@ private:
      bool SaveNetFile(QString netFile, QString localFile);
      void listOrders(QString host);
      void closeHandle();
+     void updateDevInfo(Device* dev,DeviceStatInfo info);
+     void alarmParse(Device *dev, DeviceStatInfo info);
+     void setStyle(int line, int shape);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -127,6 +130,7 @@ private slots:
 private slots:
     void Message(SessMessage s);
     void onNotify(QString msg);
+    void srvError(QString msg);
     void onChannelClick(int addr);
     void on_btnMenu_Min_clicked();
     void onSensorMsg(Device*dev, MsgSensorData data);
@@ -235,7 +239,7 @@ private slots:
     void on_btnImport_clicked();
 
     void on_btnOpenReport_clicked();
-
+    void onDeviceInfo(Device*,DeviceStatInfo);
     //void on_bntCorpConfig_clicked();
 
     //void on_cbxCorp_currentIndexChanged(int index);
@@ -248,6 +252,14 @@ private slots:
     void onUsbImportProgress(int prog);
     void on_opendata_menu_click(bool);
     void on_rb1_clicked(bool checked);
+
+    void on_chkChanAll_clicked(bool checked);
+
+    void on_comboBox_2_currentIndexChanged(int index);
+
+    void on_cbxLine_currentIndexChanged(int index);
+
+    void on_cbxShape_currentIndexChanged(int index);
 
 protected:
     void timerEvent(QTimerEvent *);

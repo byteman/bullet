@@ -55,7 +55,7 @@ bool Config::Init()
     m_corp_index = DAO::instance().ReadIntParam("corpIdx",0);
     qDebug() << "m_corp_index = " <<m_corp_index;
     m_corp_name = DAO::instance().ReadStringParam("corpName",QStringLiteral("光明A1-实验室"));
-
+    m_alarm_level = DAO::instance().ReadIntParam("alarm_level",10);
     return true;
 }
 

@@ -65,15 +65,13 @@ QSqlError DAO::Init(QString DataBase,QString DbDir)
     dbexport = QSqlDatabase::addDatabase(SQL_DRIVER,"dbexport");
     dbquery  = QSqlDatabase::addDatabase(SQL_DRIVER,"dbquery");
 
-    for(int i = 1; i <12; i++)
+    //CreateLogTable();
+    for(int i = 1; i <= 12; i++)
     {
         dbconns[i] = QSqlDatabase::addDatabase(SQL_DRIVER,QString("chan%1").arg(i));
     }
-    //dbimport.driver()->handle().toInt();
-    //int v = sqlite3_threadsafe();
-    //qDebug() << "safe=" << v;
+
     return err;
-   // return InitDataDb(DbDir,Devices);
 
 }
 
@@ -786,6 +784,25 @@ QSqlError DAO::DbRecycle(QString serialNo)
     return query.lastError();
 }
 
+QSqlError DAO::LogAdd(QString serialNo, QString name, QString oper,int result,QString err)
+{
+    QString sql = QString("insert into tbl_log(serial_no,name,timestamp,oper,result,error) values(?,?,?,?,?,?);");
+    QSqlQuery query(db);
+
+    query.prepare(sql);
+    qDebug() << "sql = " << sql;
+
+    query.addBindValue(serialNo);
+    query.addBindValue(name);
+
+    query.addBindValue(QDateTime::currentMSecsSinceEpoch()/1000);
+    query.addBindValue(oper);
+    query.addBindValue(result);
+    query.addBindValue(err);
+    query.exec();
+    return query.lastError();
+}
+
 QSqlError DAO::WriteStringParam(QString key, QString value)
 {
     if(ExistKey(key)){
@@ -836,7 +853,15 @@ QSqlError DAO::CreateDeviceTable()
     return query.lastError();
 
 }
+QSqlError DAO::CreateLogTable()
+{
+    dblog    = QSqlDatabase::addDatabase(SQL_DRIVER,"dblog");
+    QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_log` ( `id` INTEGER NOT NULL UNIQUE, `serial_no` TEXT NOT NULL, `name` TEXT, `timestamp` INTEGER NOT NULL, `oper` TEXT, `result` INTEGER, `error` TEXT, PRIMARY KEY(`id`) )";
 
+    QSqlQuery query(dblog);
+    query.exec(sql_create);
+    return query.lastError();
+}
 QSqlError DAO::CreateDeviceChannelConfigTable()
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `tbl_device_chan_config` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `serialNo` TEXT NOT NULL, `chanNr` INTEGER NOT NULL, `chanName` TEXT NOT NULL, `maxValue` INTEGER, `minValue` INTEGER,`paused` INTEGER NOT NULL,`startTime`	INTEGER,`endTime`	INTEGER )";

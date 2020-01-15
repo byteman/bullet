@@ -35,6 +35,16 @@ struct DeviceData{
     qint64 timestamp; //时间戳
     qint32 value; //测力值.
 };
+//日志数据
+struct LogData{
+    QString serialNo; //设备编号.
+    QString name; //设备名称.
+    qint64  timestamp; //操作时间戳
+    QString oper; //操作的名称.
+    int     result ;// 操作的结果
+    QString err; //错误原因.
+};
+typedef QVector<LogData> LogDataList;
 typedef QVector<DeviceData> DeviceDataList;
 typedef QMap<int,DeviceDataList> MultiDeviceDataMap;
 #endif // MODELS_H

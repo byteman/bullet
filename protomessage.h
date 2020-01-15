@@ -13,13 +13,15 @@ enum MessageID{
    MSG_RESET, //复位设备
    MSG_ENUM_FILES, //枚举设备sd卡内的波形文件.
    MSG_START_REC_WAVE=8,//启动实时发送波形. 0x88表示设备实时波形。
-   MSG_STOP_REC_WAVE, //停止实时发送波形.
-   MSG_CALIB, //0xa
-   MSG_RT_AD, //实时AD和重量.
-   MSG_REMOVE_FILE,
+   MSG_HIST_CLEAR_REQ=9, //停止实时发送波形.
+   MSG_CALIB=10, //10
+   MSG_RT_AD=11, //11实时AD和重量.
+   MSG_REMOVE_FILE=12,
+   MSG_DEVICE_INFO_REQ=0xd, //主动上报.
+   MSG_DEVICE_INFO_RESP=0x8d, //主动上报.
    MSG_WRITE_PARAM_RESP=0x85, //修改设备厂商
-    MSG_HIST_CLEAR_REQ=0x9,
-        MSG_HIST_CLEAR_RESP=0x89,
+   MSG_HIST_CLEAR_RESP=0x89,
+
 };
 typedef quint16 INT16U;
 typedef quint8  INT8U;
@@ -28,6 +30,31 @@ typedef qint8  INT8;
 
 #pragma pack(push)
 #pragma pack(1)
+
+//设备的信息,定时上报
+struct DeviceStatInfo{
+    DeviceStatInfo():
+        TimeStamp(0)
+
+    {
+        //0时间就是无限的,说明还没有更新过.
+    }
+
+    qint64 TimeStamp; //设备当前的时间戳.
+    qint64 TotalDiskSpace; //总的flash盘空间
+    qint64 LeftDiskSpace; //剩余的flash盘空间
+    qint64 TotalUDiskSpace; //总的u盘空间
+    qint64 LeftUDiskSpace; //剩余的u盘
+    qint64 TotalSDiskSpace; //总的sd卡
+    qint64 LeftSDiskSpace; //剩余的sd卡
+    qint64 TotalMemSpace; //总的内存
+    qint64 LeftMemSpace; //剩余的内存
+    qint8  Temprate; //温度
+    qint8  SDExist; //sd卡是否存在
+    qint8  UDiskExist; //u盘是否存在.
+    qint32 ReadIndex; //读取地址.
+    qint32 WriteIndex; //写入地址
+};
 
 typedef struct{
     INT16U index; //当前包序号

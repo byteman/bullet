@@ -53,6 +53,14 @@ void MyDevices::SetSelectRecState(bool paused)
 
 }
 
+void MyDevices::SetSelectAll(bool sel)
+{
+    for(int i = 0; i < widgets.size();i++)
+    {
+        widgets[i]->Select(sel);
+    }
+}
+
 QVector<int> MyDevices::GetSelectChan()
 {
     QVector<int> chans;

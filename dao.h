@@ -63,6 +63,15 @@ public:
                               qint64 from,
                               qint64 to,int chan, int maxValue,int fixValue);
     QSqlError DbRecycle(QString serialNo);
+//操作日志管理,专门建立一个表存操作日志，就是怕影响到压力数据记录
+
+    //添加一条操作日志.
+    QSqlError LogAdd(QString serialNo,QString name,QString oper,int result,QString err);
+    //查询某个时间段的日志.
+    QSqlError LogQuery(QString serialNo,
+                              qint64 from,
+                              qint64 to,
+                              LogDataList& logList);
     /////////////////////////////////////////////////////////////
     bool ExistKey(QString key);
     bool getParam(QString key, QString &value);
@@ -90,6 +99,8 @@ private:
     QSqlDatabase dbimport;//导入u盘数据的连接.
     QSqlDatabase dbquery;//查询历史数据的连接.
     QSqlDatabase dbexport;//导出历史数据的连接.
+    QSqlDatabase dblog;//日志数据的连接.
+
     QMap<int,QSqlDatabase> dbconns;//导出历史数据的连接.
     QMap<QString,QSqlDatabase> dataDbMap; //数据相关的数据库,一个设备名对应一个连接名.一个连接名只能同时在一个线程中使用,
     QString data_dir;
@@ -105,6 +116,7 @@ private:
                             QString DeviceName);
     QSqlError CreateDataTableIndex(QString serialNo);
     QSqlError DeviceDataAddByConn(QSqlDatabase dbconn, QString serial, DeviceData &data);
+    QSqlError CreateLogTable();
 };
 
 #endif // DAO_H

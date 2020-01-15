@@ -25,12 +25,14 @@ public:
     void Clear();
     void ShowChan(int chan,bool en);
     void DisplayData(MultiDeviceDataMap &ddl);
+    void SetStyle(QCPGraph::LineStyle line,
+                  QCPScatterStyle::ScatterShape style,int size=3);
 private:
     QMap<qint64,int> m_keys;
     QWidget* m_parent;
     QCustomPlot *m_plot;
     QColor m_color;
-
+    QVector<QCPScatterStyle> styles;
 
     void Init();
     void AddChannel(int i);

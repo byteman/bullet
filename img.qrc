@@ -17,5 +17,10 @@
         <file>image/pause2.png</file>
         <file>image/play2.png</file>
         <file>image/file.png</file>
+        <file>image/devalarm.png</file>
+        <file>image/SSD.png</file>
+        <file>image/SSD_err.png</file>
+        <file>image/udisk.png</file>
+        <file>image/udisk_err.png</file>
     </qresource>
 </RCC>

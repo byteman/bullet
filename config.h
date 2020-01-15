@@ -37,6 +37,7 @@ struct Config
     bool  m_enable_buffer; //运行buff db
     int  m_buf_num;
     int  m_buf_time;
+    int  m_alarm_level;
     Lang  m_lang; //语言类型.
     int  m_save_intS; //本地保存时间间隔.
     QString m_data_dir;

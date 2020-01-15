@@ -60,7 +60,11 @@ void MainWnd::StartReceiver()
 {
     srv = new GPServer();
 
+    connect(srv,SIGNAL(onError(QString)),this
+            ,SLOT(srvError(QString)));
+
     if(!srv->start(Config::instance().m_local_port)){
+        myHelper::ShowMessageBoxError("服务启动失败,检查端口8881是否被占用!!");
         AddLog(QStringLiteral("服务启动失败,检查端口8881是否被占用!!"));
     }else{
         AddLog(QStringLiteral("服务启动成功"));
@@ -69,6 +73,7 @@ void MainWnd::StartReceiver()
     //connect(srv,SIGNAL(Message(SessMessage)),this,SLOT(Message(SessMessage)));
     connect(srv,SIGNAL(Message(SessMessage)),&dvm
             ,SLOT(Message(SessMessage)));
+
 
 
 }
@@ -86,6 +91,7 @@ bool MainWnd::InitDvm()
     connect(&dvm,SIGNAL(ResetResult(Device*,bool)),this,SLOT(onResetResult(Device*,bool)));
     //connect(&dvm,SIGNAL(CalibResult(Device*,int,int,int)),this,SLOT(onCalibResult(Device*,int,int,int)));
     connect(&dvm,SIGNAL(RealTimeResult(Device*,RT_AD_RESULT)),this,SLOT(onRealTimeResult(Device*,RT_AD_RESULT)));
+    connect(&dvm,SIGNAL(DeviceInfo(Device*,DeviceStatInfo)),this,SLOT(onDeviceInfo(Device*,DeviceStatInfo)));
 
     return dvm.Init();
 }
@@ -208,6 +214,12 @@ void MainWnd::onNotify(QString msg)
 {
 
     //ui->txtLog->append("send--> "+ msg);
+}
+
+void MainWnd::srvError(QString msg)
+{
+    myHelper::ShowMessageBoxError(QStringLiteral("服务启动失败")+msg);
+    QApplication::exit(0);
 }
 /**
  * 点击了某个设备通道的播放或者暂停.
@@ -725,8 +737,13 @@ void MainWnd::timerEvent(QTimerEvent *)
         QTreeWidgetItem* item = findItemById(devices[i]->id());
         if(item!=NULL)
         {
-            if(devices[i]->online())
-                item->setIcon(0,icon_device[0]);
+            if(devices[i]->online()){
+                if(devices[i]->alarm()){
+                    qDebug() << "is alarm";
+                    item->setIcon(0,icon_device[2]);
+                }else
+                    item->setIcon(0,icon_device[0]);
+            }
             else
                 item->setIcon(0,icon_device[1]);
             if(find && curId==devices[i]->id()){
@@ -806,11 +823,18 @@ void MainWnd::changeDevice(QString dev_id)
                 }
             }
 
-
         }
         //修改设备对象的配置.
         dvm.SetChanConfig(dev_id,i,cfg);
     }
+    DeviceStatInfo dsi;
+    if(dvm.GetDeviceStatInfo(dev_id,dsi))
+    {
+         Device* dev = dvm.GetDevice(dev_id);
+         dvm.ReadDevStatInfo(dev_id);
+         updateDevInfo(dev,dsi);
+    }
+
     ui->treeWidget2->setCurrentItem(findItemById2(dev_id));
 
 
@@ -1059,6 +1083,7 @@ void MainWnd::loadDeviceUI()
     //设备状态.icon加载
     icon_device[0].addFile(":image/device.png");
     icon_device[1].addFile(":image/offline.png");
+    icon_device[2].addFile(":image/devalarm.png");
     icon_channel.addFile(":image/channel.png");
     icon_dir.addFile(":image/dir.png");
     icon_file.addFile(":image/channel.png");
@@ -1210,6 +1235,7 @@ void MainWnd::initUI()
     this->setProperty("form", true);
     this->setProperty("canMove", true);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
+    ui->widgetDevInfo->setVisible(false);
     ui->btnLocalIP->setVisible(false);
     ui->btnPing->setVisible(false);
     ui->edtPingIp->setVisible(false);
@@ -1633,7 +1659,9 @@ void MainWnd::on_btnQuery_clicked()
         connect(watcher, SIGNAL(finished()), this, SLOT(handleLoadWaveFinished()));
     }
 
-
+    setStyle(ui->cbxLine->currentIndex(),
+             ui->cbxShape->currentIndex()
+             );
     const QFuture<bool> future = QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
     // QtConcurrent::run(this,&MainWnd::LoadWave, id,chans,from,to);
     watcher->setFuture(future);
@@ -1743,6 +1771,14 @@ void MainWnd::on_btnExport_clicked()
 
     qint64 from = ui->dteFrom->dateTime().toMSecsSinceEpoch()/1000;
     qint64 to = ui->dteTo->dateTime().toMSecsSinceEpoch()/1000;
+
+//    if( ui->dteFrom->dateTime().addYears(1) > ui->dteTo->dateTime())
+//    {
+//        bool ok = IsOk(QStringLiteral("操作确认"),QString(QStringLiteral("%1%2号模块中吗?")).arg(QStringLiteral("确认导入数据到")).arg(name));
+//        if(!ok){
+//            return;
+//        }
+//    }
 
     QString fileName = QFileDialog::getExistingDirectory(this,QStringLiteral("保存文件"));
     qDebug() << "Filename=" << fileName;
@@ -2260,6 +2296,89 @@ void MainWnd::on_btnOpenReport_clicked()
     bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
 }
+void MainWnd::updateDevInfo(Device* dev,DeviceStatInfo info)
+{
+
+    if(dev==NULL || info.TimeStamp == 0 || !dev->online()){
+        ui->pbUdisk->setValue(0);
+        ui->pbSDCard->setValue(0);
+        ui->pbMem->setValue(0);
+        ui->pbData->setValue(0);
+        ui->widgetDevInfo->setVisible(false);
+        return;
+    }
+    if(info.SDExist){
+       ui->lblSDCard->setPixmap(QPixmap(":/image/SSD.png"));
+    }else{
+        ui->lblSDCard->setPixmap(QPixmap(":/image/SSD_err.png"));
+    }
+    if(info.UDiskExist){
+        ui->lblUDisk->setPixmap(QPixmap(":/image/udisk.png"));
+    }else{
+        ui->lblUDisk->setPixmap(QPixmap(":/image/udisk_err.png"));
+    }
+    ui->widgetDevInfo->setVisible(true);
+    ui->lcdTemp->display(QString("%1℃").arg(info.Temprate));
+    if(info.TotalUDiskSpace < 64*1024*1024)
+    {
+        ui->pbUdisk->setValue(0);
+    }else{
+        qint64 v = qint64(100)*info.LeftUDiskSpace / info.TotalUDiskSpace;
+        ui->pbUdisk->setValue(v);
+
+    }
+    if(info.TotalMemSpace < 1)
+    {
+        ui->pbMem->setValue(0);
+    }else{
+        qint64 v = qint64(100)*info.LeftMemSpace / info.TotalMemSpace;
+        ui->pbMem->setValue(v);
+
+    }
+    if(info.TotalSDiskSpace < 1)
+    {
+        ui->pbSDCard->setValue(0);
+    }else{
+        qint64 v = qint64(100)*info.LeftSDiskSpace / info.TotalSDiskSpace;
+        ui->pbSDCard->setValue(v);
+
+    }
+
+    if(info.WriteIndex < 1)
+    {
+        ui->pbData->setValue(0);
+    }else{
+        qint64 v = qint64(100)*(info.WriteIndex - info.ReadIndex) / info.WriteIndex;
+        ui->pbData->setValue(v);
+
+    }
+
+
+
+}
+//设备状态报警
+void MainWnd::alarmParse(Device *dev, DeviceStatInfo info)
+{
+    if(!dev->online()) return;
+
+    dev->setAlarm(!info.SDExist);
+    dev->setAlarm(!info.UDiskExist);
+}
+//收到了设备的信息.判断报警.
+void MainWnd::onDeviceInfo(Device *dev, DeviceStatInfo info)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id)){
+        return;
+    }
+    if(id != dev->id())
+    {
+        return;
+    }
+    //alarmParse(dev,info);
+    updateDevInfo(dev,info);
+    qDebug() << "timestamp" << info.TimeStamp;
+}
 
 void MainWnd::on_edtCorpName_textChanged(const QString &arg1)
 {
@@ -2287,4 +2406,41 @@ void MainWnd::contextMenuEvent(QContextMenuEvent *event)
 void MainWnd::on_rb1_clicked(bool checked)
 {
 
+}
+
+void MainWnd::on_chkChanAll_clicked(bool checked)
+{
+    if(devices!=nullptr)
+        devices->SetSelectAll(checked);
+}
+
+void MainWnd::on_comboBox_2_currentIndexChanged(int index)
+{
+
+}
+void MainWnd::setStyle(int line,int shape)
+{
+    QCPGraph::LineStyle ls = QCPGraph::lsLine;
+    if(line==0)ls = QCPGraph::lsLine;
+    else if(line == 1) ls = QCPGraph::lsStepLeft;
+
+    QCPScatterStyle::ScatterShape sl = QCPScatterStyle::ssNone;
+
+    if(shape == 0) sl = QCPScatterStyle::ssNone;
+    else if(shape == 0) sl = QCPScatterStyle::ssPlus;
+    else if(shape == 1) sl = QCPScatterStyle::ssCross;
+    else if(shape == 2) sl = QCPScatterStyle::ssDisc;
+
+    qDebug() << line << shape;
+    int s = ui->cbxSize->currentText().toInt();
+    wave->SetStyle(ls,sl,s);
+}
+void MainWnd::on_cbxLine_currentIndexChanged(int index)
+{
+    //setStyle(index,ui->cbxShape->currentIndex());
+}
+
+void MainWnd::on_cbxShape_currentIndexChanged(int index)
+{
+    //setStyle(ui->cbxLine->currentIndex(),index);
 }

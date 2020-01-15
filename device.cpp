@@ -23,7 +23,8 @@ Device::Device():
     m_last_save_ts(0),
     m_start_send(true),
     m_packet_count(0),
-    m_writeEnable(true)
+    m_writeEnable(true),m_alarm(false),m_real_packet(false)
+
 {
     for(int i = 1; i <= 12; i++)
     {
@@ -39,6 +40,22 @@ bool Device::online() const
 void Device::setOnline(bool online)
 {
     m_online = online;
+}
+
+bool Device::alarm() const
+{
+    return m_alarm;
+}
+
+void Device::setAlarm(bool en)
+{
+    m_alarm = en;
+}
+
+bool Device::getDeviceInfo(DeviceStatInfo &info)
+{
+    info = m_info;
+    return true;
 }
 
 qint64 Device::WriteCmd(quint8 cmd,QByteArray &buf)
@@ -102,6 +119,12 @@ void Device::ReadParam()
 {
     QByteArray data;
     WriteCmd(MSG_READ_PARAM,data);
+}
+
+void Device::ReadDevStatInfo()
+{
+    QByteArray data;
+    WriteCmd(MSG_DEVICE_INFO_REQ,data);
 }
 bool Device::Reset(quint8 delay_s)
 {
@@ -207,6 +230,44 @@ void Device::DevNotify(QString msg)
     emit Notify(msg);
     qDebug() << msg;
 }
+
+void Device::AlarmParse()
+{
+//    qDebug() << "time=" << m_info.TimeStamp;
+//    qDebug() << "mem" << m_info.TotalMemSpace;
+//    qDebug() << "disk" << m_info.TotalDiskSpace;
+//    qDebug() << "udisk" << m_info.TotalUDiskSpace;
+//    qDebug() << "sdisk" << m_info.TotalSDiskSpace;
+//    qDebug() << "write" << m_info.WriteIndex;
+//    qDebug() << "read" << m_info.ReadIndex;
+    int level = Config::instance().m_alarm_level;
+
+    if(!m_info.SDExist)
+    {m_alarm=true; return;}
+    if(!m_info.UDiskExist){
+        m_alarm=true;return;
+    }
+
+    if(m_info.UDiskExist && m_info.TotalUDiskSpace > 0){
+        int v = qint64(100)*m_info.LeftUDiskSpace / m_info.TotalUDiskSpace;
+        if(v < level) {
+            m_alarm = true;
+            return;
+        }
+
+    }
+    if(m_info.SDExist && m_info.TotalSDiskSpace){
+        int v = qint64(100)*m_info.LeftSDiskSpace / m_info.TotalSDiskSpace;
+        m_alarm= v < level?true:false;
+        if(v < level) {
+            m_alarm = true;
+            return;
+        }
+        qDebug() << "v=" <<v << "level=" << level;
+    }
+    m_alarm = false;
+
+}
 bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
 {
     m_timeout = MAX_TIMEOUT;
@@ -217,6 +278,7 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     //实时波形数据文件.
     if(req.head.cmd_id == MSG_START_REC_WAVE)
     {
+        //存储后定时上发的数据.
         //req
         if(!m_start_send)
         {
@@ -229,6 +291,11 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         //如果有其他线程在写数据库就禁用写入.但是在这里禁用界面上就看不到这路的数据了，这样也好，便于调试，如果知道没有显示，就表明没有写入了
         if(!m_writeEnable) return false;
         return SaveWave(req);
+    }else if(req.head.cmd_id == MSG_WAVE_DATA){
+        //实时数据,只是为了显示
+        m_real_packet = true;
+        ParseRealWave(req);
+        return false; //这个数据不用回应.
     }
     //注册和心跳包的回应
     else if(req.head.cmd_id == MSG_HEART)
@@ -238,6 +305,22 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
         resp.data.append((const char*)&dt,sizeof(sDateTime));
         //qDebug() << "heart beart";
 
+    }
+    else if(req.head.cmd_id == MSG_DEVICE_INFO_REQ)
+    {
+        qDebug() << "MSG_DEVICE_INFO_RESP";
+        DeviceStatInfo di;
+
+        if(req.getData(&di,sizeof(DeviceStatInfo)))
+        {
+            m_info = di;
+            AlarmParse();
+
+
+           emit OnDeviceInfo(this,di);
+        }else{
+            qDebug() << "get device info failed";
+        }
     }
     //读取参数的回应
     else if(req.head.cmd_id == MSG_READ_PARAM)
@@ -423,6 +506,21 @@ bool Device::WriteValues(MsgSensorData& msg)
     return true;
 
 }
+bool Device::ProcessRealWave(QByteArray &data)
+{
+    MsgSensorData msd;
+    msd.m_dev_serial = this->id();
+    //qDebug() <<" sensor" << sizeof(SensorData);
+
+    while(data.size() >= sizeof(SensorData)){
+        SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
+        data.remove(0,sizeof(SensorData));
+        msd.channels.push_back(value);
+    }
+
+    emit OnSensorData(this,msd);
+    return true;
+}
 bool Device::ProcessWave(int index,QByteArray &data)
 {
     MsgSensorData msd;
@@ -442,6 +540,7 @@ bool Device::ProcessWave(int index,QByteArray &data)
         }
 #endif
         //if(value.weight < 65535){
+            //写入历史波形.
             WriteValues(value);
             msd.channels.push_back(value);
        // }
@@ -451,13 +550,17 @@ bool Device::ProcessWave(int index,QByteArray &data)
         if(Config::instance().m_enable_buffer){
              WriteValuesBuf(msd);
         }else{
+            //写入数据库
              WriteValues(msd);
         }
     }
 
 
     //存储数据完成后，再回应.如果存储失败，则不回应数据.
-    emit OnSensorData(this,msd);
+    if(!m_real_packet){
+        //没有实时包就显示历史包，兼容之前的老版本.老版本是没有实时包的.
+        emit OnSensorData(this,msd);
+    }
     return true;
 }
 
@@ -480,6 +583,28 @@ bool Device::SaveWave(ProtoMessage &msg)
     QByteArray wvData = msg.data.mid(12, nsize);
 
     return ProcessWave(sample_start, wvData);
+
+
+}
+bool Device::ParseRealWave(ProtoMessage &msg)
+{
+    QByteArray &data  = msg.data;
+
+    WaveDataHead wvh;
+    memcpy(&wvh,data.data(),sizeof(WaveDataHead));
+
+    quint8 sample_bits = wvh.samplebits;
+    quint8 sample_chan = wvh.nchannel;
+    quint32 sample_total = wvh.totalSamples;
+    quint32 sample_start = wvh.startSample;
+    quint32 sample_num = wvh.nSample;
+
+
+    int nsize = msg.data.size() - 12;
+    //qDebug() << "ssid" << msg.head.sesson_id << "total " << msg.data.size()  << " write " << nsize;
+    QByteArray wvData = msg.data.mid(12, nsize);
+
+    return ProcessRealWave(wvData);
 
 
 }
@@ -552,9 +677,3 @@ bool Device::GetHostAddr(QString &ip)
     //ip = m_host.toString();
     return true;
 }
-
-
-
-
-
-

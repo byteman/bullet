@@ -19,6 +19,8 @@ bool DeviceManager::addOneDevice(QString& serialNo, QString& name)
     Device* dev = new Device();
     connect(dev,SIGNAL(Notify(QString)),this,SLOT(onNotify(QString)));
     connect(dev,SIGNAL(ReadParam(Device*,MsgDevicePara)),this,SLOT(onReadParam(Device*,MsgDevicePara)));
+    connect(dev,SIGNAL(OnDeviceInfo(Device*,DeviceStatInfo)),this,SIGNAL(DeviceInfo(Device*,DeviceStatInfo)));
+
     connect(dev,SIGNAL(WriteParam(Device*,bool)),this,SLOT(onWriteParam(Device*,bool)));
 
     connect(dev,SIGNAL(OnSensorData(Device*,MsgSensorData)),this,SLOT(onSensorMsg(Device*,MsgSensorData)));
@@ -235,6 +237,15 @@ void DeviceManager::SetAllWriteEnable()
     }
 }
 
+bool DeviceManager::GetDeviceStatInfo(QString &dev_id, DeviceStatInfo &info)
+{
+    Device* dev= GetDevice(dev_id);
+    if(dev!=NULL){
+        return dev->getDeviceInfo(info);
+    }
+    return false;
+}
+
 void DeviceManager::SetWriteEnable(QString dev_id, bool en)
 {
     Device* dev= GetDevice(dev_id);
@@ -327,6 +338,13 @@ Device *DeviceManager::GetDevice(QString dev_id)
     if(!dev_map.contains(dev_id))
         return NULL;
     return dev_map[dev_id];
+}
+
+void DeviceManager::ReadDevStatInfo(QString dev_id)
+{
+    if(!dev_map.contains(dev_id))
+        return ;
+    return dev_map[dev_id]->ReadDevStatInfo();
 }
 
 void DeviceManager::onCommResult(Device *dev, int cmd, int result)

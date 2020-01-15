@@ -84,6 +84,9 @@ HistWaveWidget::HistWaveWidget(QWidget *parent):
 
     Init();
     m_plot->clearGraphs();
+    styles.push_back(QCPScatterStyle(QCPScatterStyle::ssStar , 3));
+    styles.push_back(QCPScatterStyle(QCPScatterStyle::ssStar , 3));
+
     for(int i = 0; i < MAX_CHAN; i++)
     {
         AddChannel(i);
@@ -141,6 +144,9 @@ void HistWaveWidget::AddChannel(int index)
     QPen pen(colors[index]);
     pen.setWidth(1);
     graph->setPen(pen);
+    graph->setLineStyle(QCPGraph::lsStepLeft);
+    //graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssStar , 3));
+
 
 }
 //显示指定路的数据.
@@ -159,6 +165,18 @@ void HistWaveWidget::DisplayData(MultiDeviceDataMap &ddl)
     m_plot->yAxis->scaleRange(1.2);
     m_plot->replot();
 
+
+}
+
+void HistWaveWidget::SetStyle(QCPGraph::LineStyle line,
+                              QCPScatterStyle::ScatterShape style,int size)
+{
+    for(int i = 0 ; i < m_plot->graphCount(); i++)
+    {
+        m_plot->graph(i)->setLineStyle(line);
+        m_plot->graph(i)->setScatterStyle(QCPScatterStyle(style , size));
+
+    }
 
 }
 void HistWaveWidget::DisplayData(int chan,DeviceDataList &ddl)
