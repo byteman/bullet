@@ -67,7 +67,9 @@ public:
     void SetWriteEnable(bool en);
     bool IsWriteEnable();
 private:
-    DeviceDataList ddl;
+    DeviceDataList m_ddl;
+    DeviceDataList m_last_ddl;
+    int m_err_cont;
     QMap<int,DeviceChannel> m_channels;
     qint32 m_ad;
     qint64 m_last_save_ts;
@@ -106,6 +108,9 @@ private:
     void AlarmParse();
     bool ParseRealWave(ProtoMessage &msg);
     bool ProcessRealWave(QByteArray &data);
+    bool CheckErrorCnt(DeviceDataList &ddl);
+    bool IsEqual(DeviceDataList &ddl);
+    bool IsNotConnect(int chan);
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);
@@ -118,6 +123,7 @@ signals:
     void CalibResult(Device* dev, int chan, int index, int result);
     void RealTimeResult(Device* dev,RT_AD_RESULT result);
     void ResetResult(Device* dev,bool result);
+
 private slots:
     void timeout();
 };

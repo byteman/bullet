@@ -22,13 +22,14 @@ bool AsyncExportManager::AddTask(
                                 int format,
                                 QString serialNo,
                                  QString name,
+        QString cell,
                                  QVector<int> chans,
                                  qint64 from,
                                  qint64 to,
                                  QString dest)
 {
 
-   AsyncExportTask *task = new AsyncExportTask((FileFormat)format,serialNo,name,chans,from,to,dest);
+   AsyncExportTask *task = new AsyncExportTask((FileFormat)format,serialNo,name,cell,chans,from,to,dest);
    connect(task,SIGNAL(onSucc(AsyncExportTask*,QString)),this,SLOT(on_Succ(AsyncExportTask*,QString)));
 
    connect(task,SIGNAL(onFail(AsyncExportTask*,QString)),this,SLOT(on_Fail(AsyncExportTask*,QString)));
@@ -47,7 +48,8 @@ void AsyncExportManager::on_Progress(AsyncExportTask* task, int progress)
 
 void AsyncExportManager::on_Fail(AsyncExportTask* task, QString err)
 {
-    task->deleteLater();
+    //task->deleteLater();
+    emit onFail(task->serialNo(),err);
 }
 
 void AsyncExportManager::on_Succ(AsyncExportTask* task, QString err)

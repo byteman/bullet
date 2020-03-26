@@ -1,4 +1,4 @@
-#ifndef STATEMANAGER_H
+﻿#ifndef STATEMANAGER_H
 #define STATEMANAGER_H
 
 #include <QObject>
@@ -18,6 +18,8 @@ public:
     CellTestHost& GetState();
     CellTestOrderList& GetOrderList(QString& host);
     QVector<CellState>& GetCells(QString order);
+    QString GetOrderName(QString &host,QString pressId,int pressChan);
+    bool GetCellInfo(QString &host,QString pressId,int pressChan,CellState& cell);
 private:
     CellTestHost hosts;
     bool parseOrder(QXlsx::Document &xlsx,

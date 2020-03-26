@@ -75,12 +75,12 @@ bool StateManager::parseOrder(QXlsx::Document &xlsx,
         //有效的通道号，再去找单号，不能把单号查找放前面，否则会导致无法跳出循环.
         if(!getCellString(xlsx,row,2,cs.TestNo) || cs.TestNo.length() < 1){
             //如果测试单号为空，跳过这个单号，继续找下一个单号.
-            qDebug("sheet[%s] testNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,2);
+           //qDebug("sheet[%s] testNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,2);
             continue;
         }
         if(!getCellString(xlsx,row,7,cs.CellNo) || cs.CellNo.length() < 1){
             //如果电芯为空，跳过这个电芯
-            qDebug("sheet[%s] cellNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,7);
+           // qDebug("sheet[%s] cellNo empty [row=%d col=%d]",sheet.toStdString().c_str(),row,7);
             continue;
         }
         //只要存在订单号和压力通道号和电芯条码存在的情况下才认为是有效的电芯数据.
@@ -139,5 +139,53 @@ CellTestOrderList &StateManager::GetOrderList(QString &host)
         return list;
     }
     return hosts[host];
+}
+
+QString StateManager::GetOrderName(QString &host,QString pressId, int pressChan)
+{
+
+    CellTestOrderList& orders =  GetOrderList(host);
+    if(orders.size() == 0){
+       return "";
+    }
+    QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
+
+    while (i != orders.constEnd()) {
+        QVector<CellState> cells = i.value();
+
+            for(int j = 0 ; j < cells.size(); j++)
+            {
+                if( (cells[j].PressDevId == pressId)
+                        && (cells[j].PressDevChan == pressChan)){
+                    return cells[j].CellNo;
+                }
+            }
+            i++;
+    }
+    return "";
+}
+
+bool StateManager::GetCellInfo(QString &host, QString pressId, int pressChan, CellState &cell)
+{
+    CellTestOrderList& orders =  GetOrderList(host);
+    if(orders.size() == 0){
+       return false;
+    }
+    QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
+
+    while (i != orders.constEnd()) {
+        QVector<CellState> cells = i.value();
+
+            for(int j = 0 ; j < cells.size(); j++)
+            {
+                if( (cells[j].PressDevId == pressId)
+                        && (cells[j].PressDevChan == pressChan)){
+                    cell = cells[j];
+                    return true;
+                }
+            }
+            i++;
+    }
+    return false;
 }
 

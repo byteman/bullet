@@ -249,7 +249,7 @@ background-color: rgb(255, 85, 127);</string>
          <string>000</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>

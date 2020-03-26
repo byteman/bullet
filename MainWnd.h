@@ -100,7 +100,7 @@ private:
      QJsonDocument buildReportInputJson(QString order);
      QString buildReportInput(QString order);
      void updateOrderState();
-     bool CheckPassWord();
+     bool CheckPassWord(QString password="123456");
      void outputVer();
      void updateTimes();
      QVector<int> GetMainSelectChannel();
@@ -116,11 +116,16 @@ private:
      void StartServer();
      QString GetNetFile(QString temp,QString order,QString orderKey);
      bool SaveNetFile(QString netFile, QString localFile);
-     void listOrders(QString host);
+     void listOrders(QString host,QString dev,bool local=true);
      void closeHandle();
      void updateDevInfo(Device* dev,DeviceStatInfo info);
      void alarmParse(Device *dev, DeviceStatInfo info);
      void setStyle(int line, int shape);
+     void loadDeviceName(QString host);
+     QString GetNetDir(QString order);
+     void loadLocalDevice();
+     QString getLocalFile(QString orderKey, QString order, QString temp);
+     QString getFixFile(QString orderKey, QString order, QString temp);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -261,6 +266,14 @@ private slots:
 
     void on_cbxShape_currentIndexChanged(int index);
 
+    void onFail(QString serialNo, QString err);
+    void on_chkLocal_clicked(bool checked);
+
+    void on_cbxDevice_currentIndexChanged(const QString &arg1);
+
+    void on_opennetdir_click(QString dir);
+    void on_cbxLocal_currentTextChanged(const QString &arg1);
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -288,6 +301,7 @@ protected slots:
     void on_query_report_response(AjaxResponse r);
 
     // QWidget interface
+    void on_btnOpenNetReport_clicked();
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *event);
 };

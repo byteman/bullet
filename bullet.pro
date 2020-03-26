@@ -22,8 +22,11 @@ LIBS+=-L./ext/lib -lWS2_32
 win32:LIBS += -lIphlpapi
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
+    dialogcheck.cpp \
     dialogcorpmanager.cpp \
+    dialogfix.cpp \
     dialogfixvalue.cpp \
+    orderchecker.cpp \
     tcpserver.cpp \
     device.cpp \
     devicemanager.cpp \
@@ -71,6 +74,7 @@ SOURCES += main.cpp\
     dialogmerge.cpp \
     chanselect.cpp \
     mergemanager.cpp \
+    widgetsegment.cpp \
     writedbthread.cpp \
     xlsx/statemanager.cpp \
     xlsx/stateinfo.cpp \
@@ -98,11 +102,14 @@ SOURCES += main.cpp\
     qurlinfo.cpp
 
 HEADERS  += tcpserver.h \
+    dialogcheck.h \
     dialogcorpmanager.h \
+    dialogfix.h \
     dialogfixvalue.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
+    orderchecker.h \
     tcpsession.h \
     session.h \
     sessmessage.h \
@@ -147,6 +154,7 @@ HEADERS  += tcpserver.h \
     dialogmerge.h \
     chanselect.h \
     mergemanager.h \
+    widgetsegment.h \
     writedbthread.h \
     xlsx/statemanager.h \
     xlsx/stateinfo.h \
@@ -167,7 +175,9 @@ HEADERS  += tcpserver.h \
 
 FORMS    += MainWnd.ui \
     channelwidget.ui \
+    dialogcheck.ui \
     dialogcorpmanager.ui \
+    dialogfix.ui \
     dialogfixvalue.ui \
     dialogparams.ui \
     dialogcalib.ui \
@@ -180,7 +190,8 @@ FORMS    += MainWnd.ui \
     chanselect.ui \
     dialogreport.ui \
     dialogclearup.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    widgetsegment.ui
 #BASEDIR=c:\Qt\Qt5.5.0\5.5\msvc2012
 ##INCLUDEPATH += $$BASEDIR\include\Qwt
 #LIBS += -L$$BASEDIR\lib -lqwtd

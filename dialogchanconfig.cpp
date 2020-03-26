@@ -26,6 +26,9 @@ void DialogChanConfig::SetChanConfig(QString serialNo,QString name,int chan,Devi
     devName = name;
     ui->edtMaxValue->setText(QString("%1").arg(cfg.maxValue));
     ui->edtMinValue->setText(QString("%1").arg(cfg.minValue));
+    ui->edtCellNo->setText(cfg.cellName);
+    ui->edtCircle->setText(cfg.circleName);
+
 }
 
 bool DialogChanConfig::GetChanConfig(DeviceChnConfig &cfg)

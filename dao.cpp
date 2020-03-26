@@ -107,13 +107,10 @@ QSqlError DAO::ConnectDataDB(QString host,
     if(dbx.open())
     {
        dataDbMap[DeviceName] = dbx;
-       qDebug()<<"success!";
     }else{
-       qDebug()<<"failure";
-
+       qDebug()<<"failure" << dbx.lastError();
        return dbx.lastError();
     }
-    qDebug() << "err=" << dbx.lastError().text();
     return dbx.lastError();
 
 }
@@ -436,7 +433,8 @@ QSqlError DAO::DeviceDataAdd2(QString serialNo, DeviceDataList &data,int &total)
         }
     }
     if(!dbimport.commit()){
-        qDebug() << "commit failed";
+        dbimport.rollback();
+        qDebug() << "dbimport commit failed";
 
     }
     dbimport.close();
@@ -461,7 +459,13 @@ QSqlError DAO::DeviceDataAdd(QString serialNo, DeviceDataList &data)
         }
     }
     if(!dataDbMap[serialNo].commit()){
-        qDebug() << "commit failed";
+        //这里如果在做查询的话，会导致提交超时，但是又没有回滚操作，所以会导致后面再也写不进去数据.
+        QSqlError err =  dataDbMap[serialNo].lastError();
+        //查询导致写不进去的前提是 写入操作是delete模式的日志模式
+        dataDbMap[serialNo].rollback(); //如果不回滚，就会导致下次写入不成功.
+        //回滚后，有错误产生，那么就不会通知写入成功，设备会重发数据过来.
+        qDebug() << "commit failed:" <<err.text();
+        return err;
     }
     return QSqlError();
 }
@@ -564,7 +568,7 @@ QSqlError DAO::DeviceDataQueryByConn(
 
     //QString conn = QString("%1_%2").arg(serialNo).arg(chan);
     if(!dbconns.contains(chan)){
-        return QSqlError();
+        return QSqlError(QString("can not find chan %1").arg(chan));
     }
     QSqlDatabase db = dbconns[chan];
 
@@ -577,8 +581,8 @@ QSqlError DAO::DeviceDataQueryByConn(
     }
     QSqlQuery query(db);
     query.prepare(sql);
-    qDebug() << sql;
-    qDebug() << serialNo << chan << from << to;
+    //qDebug() << sql;
+    //qDebug() << serialNo << chan << from << to;
 
     query.addBindValue(chan);
     query.addBindValue(from);
@@ -633,7 +637,7 @@ QSqlError DAO::ChannelValueFix(QString serialNo,
     }else{
         sql = QString("update tbl_%1_data set value= value-%2 where chan=%3 and value>%4;").arg(serialNo).arg(-fixValue).arg(chan).arg(maxValue);
     }
-    qDebug() << "sql=" << sql;
+    //qDebug() << "sql=" << sql;
     if(!dataDbMap.contains(serialNo)){
         return QSqlError(serialNo+QStringLiteral("不存在"));
     }
@@ -672,8 +676,8 @@ QSqlError DAO::DeviceDataQuery(QString serialNo,
     }
     QSqlQuery query(dbquery);
     query.prepare(sql);
-    qDebug() << sql;
-    qDebug() << serialNo << chan << from << to;
+    //qDebug() << sql;
+    //qDebug() << serialNo << chan << from << to;
 
     query.addBindValue(chan);
     query.addBindValue(from);
@@ -790,7 +794,7 @@ QSqlError DAO::LogAdd(QString serialNo, QString name, QString oper,int result,QS
     QSqlQuery query(db);
 
     query.prepare(sql);
-    qDebug() << "sql = " << sql;
+    //qDebug() << "sql = " << sql;
 
     query.addBindValue(serialNo);
     query.addBindValue(name);
@@ -904,6 +908,7 @@ QSqlError DAO::CreateDataTableIndex(QString serialNo)
 QSqlError DAO::CreateDataTable(QString serialNo)
 {
     QString sql_create = "CREATE TABLE IF NOT EXISTS `" + QString("tbl_%1_data").arg(serialNo) + "` ( `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `time` INTEGER NOT NULL, `chan` INTEGER NOT NULL, `value` INTEGER NOT NULL, UNIQUE(time, chan))";
+    QString sql_wal = "PRAGMA journal_mode = WAL;";
     if(dataDbMap.contains(serialNo)){
         return QSqlError(serialNo+QStringLiteral("已经存在"));
     }
@@ -915,8 +920,9 @@ QSqlError DAO::CreateDataTable(QString serialNo)
         return QSqlError(serialNo+QStringLiteral("不存在"));
     }
     QSqlQuery query(dataDbMap[serialNo]);
-
+    query.exec(sql_wal);
     query.exec(sql_create);
+
     return query.lastError();
 
 }

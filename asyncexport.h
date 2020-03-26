@@ -20,6 +20,7 @@ public:
                 int format,
                 QString serialNo,
                  QString name,
+            QString cell,
                  QVector<int> chans,
                  qint64 from,
                  qint64 to,

@@ -246,6 +246,18 @@ bool DeviceManager::GetDeviceStatInfo(QString &dev_id, DeviceStatInfo &info)
     return false;
 }
 
+bool DeviceManager::IsContainsDevice(QString &dev_name)
+{
+    QMapIterator<QString,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+        if(dev_name == i.value()->name()){
+            return true;
+        }
+    }
+    return false;
+}
+
 void DeviceManager::SetWriteEnable(QString dev_id, bool en)
 {
     Device* dev= GetDevice(dev_id);

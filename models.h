@@ -11,6 +11,8 @@ typedef QList<DeviceInfo> DeviceInfoList;
 struct DeviceChnConfig{
 
     QString chanName; //通道的名称.
+    QString cellName; //订单名.
+    QString circleName; //循环名称.
     int chanNr;
     int maxValue;
     int minValue;

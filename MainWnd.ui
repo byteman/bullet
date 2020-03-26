@@ -351,7 +351,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -838,8 +838,8 @@ color: rgb(255, 255, 255);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1802</width>
-            <height>698</height>
+            <width>848</width>
+            <height>237</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -1954,7 +1954,46 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
             <string>选择</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_4">
-            <item row="0" column="0" colspan="2">
+            <item row="2" column="2">
+             <widget class="QComboBox" name="cbxHost">
+              <property name="font">
+               <font>
+                <family>微软雅黑</family>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="btnReload">
+              <property name="font">
+               <font>
+                <family>微软雅黑</family>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>刷新</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QPushButton" name="btnSelFile">
+              <property name="font">
+               <font>
+                <family>微软雅黑</family>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>选择...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
              <widget class="QLabel" name="label_13">
               <property name="font">
                <font>
@@ -1970,7 +2009,7 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
+            <item row="1" column="2">
              <widget class="QLineEdit" name="edtDataDir">
               <property name="font">
                <font>
@@ -1980,20 +2019,7 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="btnSelFile">
-              <property name="font">
-               <font>
-                <family>微软雅黑</family>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>选择...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
+            <item row="2" column="1">
              <widget class="QLabel" name="label_10">
               <property name="font">
                <font>
@@ -2009,8 +2035,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QComboBox" name="cbxHost">
+            <item row="3" column="2">
+             <widget class="QComboBox" name="cbxLocal">
               <property name="font">
                <font>
                 <family>微软雅黑</family>
@@ -2019,19 +2045,29 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
               </property>
              </widget>
             </item>
-            <item row="1" column="3">
-             <widget class="QPushButton" name="btnReload">
+            <item row="3" column="3">
+             <widget class="QCheckBox" name="chkLocal">
               <property name="font">
                <font>
                 <family>微软雅黑</family>
                 <pointsize>14</pointsize>
                </font>
               </property>
-              <property name="styleSheet">
-               <string notr="true"/>
+              <property name="text">
+               <string>本地订单</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_19">
+              <property name="font">
+               <font>
+                <family>微软雅黑</family>
+                <pointsize>14</pointsize>
+               </font>
               </property>
               <property name="text">
-               <string>刷新</string>
+               <string>模块筛选</string>
               </property>
              </widget>
             </item>
@@ -2097,10 +2133,24 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
            </column>
            <column>
             <property name="text">
-             <string>打开目录</string>
+             <string>循环数据</string>
             </property>
             <property name="font">
              <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="textAlignment">
+             <set>AlignCenter</set>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>检测订单</string>
+            </property>
+            <property name="font">
+             <font>
+              <family>微软雅黑</family>
               <pointsize>12</pointsize>
              </font>
             </property>
@@ -2243,8 +2293,8 @@ background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #646464,stop:1 
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="img.qrc"/>
   <include location="main.qrc"/>
+  <include location="img.qrc"/>
  </resources>
  <connections/>
 </ui>

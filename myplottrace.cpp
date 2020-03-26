@@ -50,7 +50,7 @@ void MyPlotTrace::UpdatePosition(double x_val, double y_val)
         if(!m_tracers[i].m_enable){
             continue;
         }
-        qDebug() << "update" << i;
+        //qDebug() << "update" << i;
         m_tracers[i].m_xTracer->updatePosition(x_val, y_val);
 
 

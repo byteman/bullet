@@ -13,15 +13,17 @@
 #include "xlsxrichstring.h"
 #include "xlsxworkbook.h"
 #include "utils.h"
-
+#include "xlsx/statemanager.h"
 AsyncExportTask::AsyncExportTask(FileFormat format,QString serialNo,
                                  QString name,
+                                 QString cell,
                                  QVector<int> chans,
                                  qint64 from,
                                  qint64 to,
                                  QString dest):
                                 _serialNo(serialNo),
                                 _name(name),
+                                _cell(cell),
                                 _chans(chans),
                                 _from(from),
                                 _to(to),
@@ -99,9 +101,9 @@ bool AsyncExportTask::writeCsvFile(int chan,DeviceDataList ddl,QString filePath)
 
     //tm.restart();
 
-    QtCSV::Writer::write(filePath, strData,QString(","),QString("\""),QtCSV::Writer::REWRITE,strHeader);
+    return QtCSV::Writer::write(filePath, strData,QString(","),QString("\""),QtCSV::Writer::REWRITE,strHeader);
 
-    return true;
+
 }
 
 bool AsyncExportTask::writeFile(int chan,
@@ -115,12 +117,14 @@ bool AsyncExportTask::writeFile(int chan,
     if(err.isValid())
     {
         qDebug() << "DeviceDataQueryByConn err" << err.text();
+        emit onFail(this,err.text() );
     }
-
+    //emit onFail(this,"can not find name");
 
     emit onProgress(this,++_prog*100 / _total );
     //写入数据.
-    qDebug() << _serialNo << _from << _to  << chan << "size="<<ddl.size();
+    //qDebug() << _serialNo << _from << _to  << chan << "size="<<ddl.size();
+
     if(ddl.size() > 0){
         if(format == FF_XLSX){
             //多线程写xlsx会崩溃.
@@ -131,6 +135,10 @@ bool AsyncExportTask::writeFile(int chan,
 
         }else{
             result= writeCsvFile(chan,ddl,filePath);
+            if(!result){
+                 emit onFail(this,QString("from %1 to %2 chan=%3 size=%4").arg(_from).arg(_to).arg(chan).arg(ddl.size()));
+                 emit onFail(this,QString("write to file %1 failed").arg(filePath));
+            }
             emit onProgress(this,++_prog*100 / _total );
         }
     }
@@ -151,8 +159,20 @@ bool AsyncExportTask::writeCsv()
     for(int i = 0; i < _chans.size(); i++)
     {
         int chan = _chans[i];
-        QString filepath = QString("%1/%2_%3.csv").
-                arg(_dest).arg(_name).arg(chan);
+        QString filepath = "";
+        qDebug() << "_cell" << _cell << "name=" <<_name << chan;
+        QString cname = StateManager::instance().GetOrderName(_cell,_name,chan);
+        if(cname == ""){
+            filepath = QString("%1/%2_%3.csv").
+                    arg(_dest).arg(_name).arg(chan);
+        }else{
+            filepath = QString("%1/%2_%3_%4.csv").
+                    arg(_dest).arg(cname).arg(_name).arg(chan);
+        }
+        qDebug() << "filepath" << filepath;
+//        filepath = QString("%1/%2_%3.csv").
+//                arg(_dest).arg(_name).arg(chan);
+
 
         QFuture<bool> future = QtConcurrent::run(&pool,
                                                 this,

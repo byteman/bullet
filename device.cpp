@@ -114,7 +114,10 @@ bool Device::IsPaused(int chan)
 
     return m_channels[chan].config.paused;
 }
-
+bool Device::IsNotConnect(int chan)
+{
+    return !m_channels[chan].config.cellName.isEmpty();
+}
 void Device::ReadParam()
 {
     QByteArray data;
@@ -433,10 +436,10 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
              //判断是否可以存储了
 
          }
-         ddl.push_back(dd);
+         m_ddl.push_back(dd);
     }
     //qDebug() << "elapsed" << last.elapsed();
-    if(ddl.size() < cfg.m_buf_num &&  last.elapsed() < cfg.m_buf_time){
+    if(m_ddl.size() < cfg.m_buf_num &&  last.elapsed() < cfg.m_buf_time){
         //数据已经缓存了80条，或者上次接收的时间超过3s 两个条件都没有满足，
        return true;
     }
@@ -444,16 +447,51 @@ bool Device::WriteValuesBuf(MsgSensorData& msg)
     last.restart();
 
     //WriteDBThread::instance().WriteData(msg.m_dev_serial,ddl);
-    QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
+    QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,m_ddl);
 
     //写入后需要清空数据
-    ddl.clear();
+    m_ddl.clear();
 
     if(err.isValid()){
         qDebug() << "DeviceDataAdd err=" << err.text();
         return false;
     }
     return true;
+}
+bool Device::IsEqual(DeviceDataList &ddl)
+{
+    if(ddl.size() != m_last_ddl.size()) return false;
+    for(int i= 0; i < ddl.size() ; i++)
+    {
+        if(ddl[i].timestamp != m_last_ddl[i].timestamp){
+            return false;
+        }
+        if(ddl[i].chan != m_last_ddl[i].chan){
+            return false;
+        }
+        if(ddl[i].value != m_last_ddl[i].value){
+            return false;
+        }
+
+    }
+    return true;
+}
+//连续相同的数据包超过5次后，就丢掉此数据包
+bool Device::CheckErrorCnt(DeviceDataList &ddl)
+{
+    qDebug("写入数据失败 count=%d",m_err_cont);
+    if(IsEqual(ddl)){
+        m_err_cont++;
+        if(m_err_cont > 5){
+            m_err_cont = 0;
+            return true;
+        }
+    }else{
+        m_err_cont = 0;
+        m_last_ddl = ddl;
+    }
+
+    return false;
 }
 bool Device::WriteValues(MsgSensorData& msg)
 {
@@ -479,10 +517,16 @@ bool Device::WriteValues(MsgSensorData& msg)
         //如果这个设备的这个通道已经禁用了。
          if(IsPaused(msg.channels[i].addr)){
              //通道禁用了不存储
-             continue;
+             //禁用了通道还是要存储，为了防止用户不小心忘记启用了，导致数据丢失.
+             //continue;
          }
+
          if(msg.channels[i].weight == 65535){
              //通道数据值为65535 也不存储
+             if(IsNotConnect(msg.channels[i].addr))
+             {
+                 //该通道上有电芯，但是没有连接传感器.
+             }
              continue;
          }
          DeviceData dd;
@@ -496,13 +540,15 @@ bool Device::WriteValues(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
-
+    m_last_ddl = ddl;
     QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
 
     if(err.isValid()){
         qDebug() << "DeviceDataAdd err=" << err.text();
-        return false;
+        return CheckErrorCnt(ddl);
+       // return false;
     }
+    m_err_cont = 0;
     return true;
 
 }
@@ -515,7 +561,11 @@ bool Device::ProcessRealWave(QByteArray &data)
     while(data.size() >= sizeof(SensorData)){
         SensorData value = *(SensorData*)data.left(sizeof(SensorData)).data();
         data.remove(0,sizeof(SensorData));
+        if(IsNotConnect(value.addr)){
+            value.valid=0xff;
+        }
         msd.channels.push_back(value);
+
     }
 
     emit OnSensorData(this,msd);
@@ -546,13 +596,18 @@ bool Device::ProcessWave(int index,QByteArray &data)
        // }
 
     }
+    bool result = false;
     if(m_writeEnable){
-        if(Config::instance().m_enable_buffer){
-             WriteValuesBuf(msd);
-        }else{
-            //写入数据库
-             WriteValues(msd);
-        }
+
+//        if(Config::instance().m_enable_buffer){
+//             result = WriteValuesBuf(msd);
+//        }else{
+//            //写入数据库
+//             result = WriteValues(msd);
+//        }
+        //只有写入成功了，才能返回true，才能继续接收下一条数据.
+        result = WriteValues(msd);
+
     }
 
 
@@ -611,11 +666,11 @@ bool Device::ParseRealWave(ProtoMessage &msg)
 
 void Device::Sync()
 {
-    if(ddl.size() == 0 ) return;
-    QSqlError err=DAO::instance().DeviceDataAdd(m_dev_id,ddl);
-    qDebug() <<m_dev_id << " sync count=" << ddl.size();
+    if(m_ddl.size() == 0 ) return;
+    QSqlError err=DAO::instance().DeviceDataAdd(m_dev_id,m_ddl);
+    qDebug() <<m_dev_id << " sync count=" << m_ddl.size();
     //写入后需要清空数据
-    ddl.clear();
+    m_ddl.clear();
 
 }
 

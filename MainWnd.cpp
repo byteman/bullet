@@ -8,7 +8,7 @@
 #include "myhelper.h"
 #include "dao.h"
 #include "dialogparams.h"
-#include "dialogdevice.h" 
+#include "dialogdevice.h"
 #include "dialogchanconfig.h"
 #include "utils.h"
 #include "config.h"
@@ -31,7 +31,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.1.3").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.1.7").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
@@ -252,6 +252,17 @@ void MainWnd::onChannelClick(int addr)
        return;
     }
     dvm.GetDeviceChan(m_cur_dev_id,addr,cfg);
+    QString host = ui->cbxHost->currentText();
+
+    CellState cell;
+    if(StateManager::instance().GetCellInfo(host,
+                                          devname,addr,cell)){
+        cfg.cellName = cell.CellNo;
+        cfg.circleName = cell.ChargeDev;
+    }
+
+
+
     dlg.SetChanConfig(m_cur_dev_id,devname,addr,cfg);
     int result = dlg.exec();
     if(result == QDialog::Accepted){
@@ -372,9 +383,9 @@ void MainWnd::on_remove_device_click(bool)
 
 }
 #include "dialogclearup.h"
-bool MainWnd::CheckPassWord()
+bool MainWnd::CheckPassWord(QString password)
 {
-    if("123456" != QInputDialog::getText(this,
+    if(password != QInputDialog::getText(this,
                           QStringLiteral("权限验证"),
                           QStringLiteral("请输入密码")))
     {
@@ -421,24 +432,29 @@ void MainWnd::on_stop_menu_click(bool)
 
 }
 #include "dialogfixvalue.h"
+#include "dialogfix.h"
 void MainWnd::on_fix_menu_click(bool)
 {
-    QString name;
-    QString id;
-    if(!GetCurrentDeviceName(name)){
-        qDebug()<<"Can not GetCurrentDeviceName";
-        return;
+    if(CheckPassWord("654321")){
+        DialogFix fix;
+        fix.exec();
     }
-    if(!GetCurrentDeviceId(id)){
-        qDebug()<<"Can not GetCurrentDeviceName";
-        return;
-    }
-    if(!IsOk(QStringLiteral("注意"),QString(QStringLiteral("是否修正%1号设备历史数据")).arg(name))){
-        return;
-    }
-    DialogFixValue dlg;
-    dlg.SetDeviceId(id);
-    dlg.exec();
+//    QString name;
+//    QString id;
+//    if(!GetCurrentDeviceName(name)){
+//        qDebug()<<"Can not GetCurrentDeviceName";
+//        return;
+//    }
+//    if(!GetCurrentDeviceId(id)){
+//        qDebug()<<"Can not GetCurrentDeviceName";
+//        return;
+//    }
+//    if(!IsOk(QStringLiteral("注意"),QString(QStringLiteral("是否修正%1号设备历史数据")).arg(name))){
+//        return;
+//    }
+//    DialogFixValue dlg;
+//    dlg.SetDeviceId(id);
+//    dlg.exec();
 
 }
 void MainWnd::on_opendata_menu_click(bool)
@@ -555,6 +571,9 @@ void MainWnd::on_update_menu_click(bool)
     }
     QString ip;
     dev->GetHostAddr(ip);
+    if(ip == "0.0.0.0"){
+        ip="10.10.10.2";
+    }
     qDebug() << "ip=" << ip;
     DialogUpdate dlg;
 
@@ -709,7 +728,7 @@ void MainWnd::refreshOrderState(QString res)
                    break;
            }
 
-           item->setText(5,msg);
+           item->setText(6,msg);
        }
 
     }
@@ -808,6 +827,13 @@ void MainWnd::changeDevice(QString dev_id)
         if(dvm.GetDeviceChan(dev_id,i,cfg)){
             devices->SetChanSetting(i,cfg);
             Device* dev = dvm.GetDevice(dev_id);
+            QString host = ui->cbxHost->currentText();
+            CellState cell;
+            if(StateManager::instance().GetCellInfo(host,
+                                                  dev->name(),i,cell)){
+                cfg.cellName = cell.CellNo;
+                cfg.circleName = cell.ChargeDev;
+            }
             if(cfg.chanName.length() > 0){
                 //已经配置了名字，用新的名字
                 if(dev!=NULL){
@@ -852,7 +878,7 @@ void MainWnd::onSensorMsg(Device *dev, MsgSensorData data)
     }
     for(int i = 0; i < data.channels.size(); i++)
     {
-        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,0,0);
+        devices->DisplayWeight(data.channels[i].addr,data.channels[i].weight,data.channels[i].valid,0);
     }
     //wave->AppendData(0,get_random_number());
     //wave->DisplayChannel(0,true);
@@ -1195,7 +1221,7 @@ void MainWnd::myMoveEvent(QMouseEvent *event) {
 //这里如果是float x_val 和 y_val 会导致精度损失很大，导致显示跳.这个问题找了一整天.
     double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
     double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
-    qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
+    //qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
     m_tracer->UpdatePosition(x_val,y_val);
     ui->plot3->replot();//曲线重绘
 }
@@ -1229,6 +1255,7 @@ void MainWnd::initDeviceChannels()
     connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));
 
 }
+#include "orderchecker.h"
 void MainWnd::initUI()
 {
     qDebug() << "MainWnd id=" << QThread::currentThreadId();
@@ -1362,6 +1389,7 @@ void MainWnd::initUI()
 
     connect(&AsyncExportManager::instance(),SIGNAL(onProgress(QString,int,int)),this,SLOT(onProgress(QString,int,int)));
     connect(&AsyncExportManager::instance(),SIGNAL(onSucc(QString,QString)),this,SLOT(onSucc(QString,QString)));
+    connect(&AsyncExportManager::instance(),SIGNAL(onFail(QString,QString)),this,SLOT(onFail(QString,QString)));
 
     connect(UsbImport::instance(),SIGNAL(onSucc(int)),this,SLOT(onUsbImportSucc(int)));
     connect(UsbImport::instance(),SIGNAL(onProgress(int)),this,SLOT(onUsbImportProgress(int)));
@@ -1372,6 +1400,9 @@ void MainWnd::initUI()
     loadChannels();
     loadSysConfig();
     loadDeviceUI();
+    //如果文件放在网上，而又打不开网络，则可能会卡在这里.
+    //loadStateFile();
+
 }
 void MainWnd::fileChange(const QString &path)
 {
@@ -1391,6 +1422,13 @@ void MainWnd::onSucc(QString serialNo, QString err)
     ui->btnQuery->setEnabled(true);
     ui->btnImport->setEnabled(true);
 }
+
+void MainWnd::onFail(QString serialNo, QString err)
+{
+    AddLog(QString("export error %1->%2").arg(serialNo).arg(err));
+}
+
+
 void MainWnd::loadSysConfig()
 {
     //ui->cbxCorp->clear();
@@ -1400,8 +1438,20 @@ void MainWnd::loadSysConfig()
     ui->edtFtpBase->setText(Config::instance().m_ftp_base);
     ui->cbxFileFormat->setCurrentIndex(Config::instance().m_file_format);
     ui->edtHost->setText(Config::instance().m_host_name);
+
 }
 static bool loading = false;
+void MainWnd::loadLocalDevice()
+{
+    QList<Device*> devices;
+    dvm.ListDevice(devices);
+    ui->cbxLocal->clear();
+    ui->cbxLocal->addItem(QStringLiteral("全部模块"));
+    for(int i = 0; i < devices.size();i++)
+    {
+        ui->cbxLocal->addItem(devices[i]->name());
+    }
+}
 //加载状态文件.
 void MainWnd::loadStateFile(bool create)
 {
@@ -1449,6 +1499,8 @@ void MainWnd::loadStateFile(bool create)
     ui->cbxHost->setCurrentText(Config::instance().m_host_name);
     qDebug() << "loadStateFile ok";
     emit on_cbxHost_currentIndexChanged(Config::instance().m_host_name);
+    ui->cbxLocal->setEnabled(ui->chkLocal->isChecked());
+    loadLocalDevice();
 
 }
 void MainWnd::buttonClick()
@@ -1786,7 +1838,15 @@ void MainWnd::on_btnExport_clicked()
         return;
     }
     qDebug() << "from="<<from << "to=" <<to;
-    AsyncExportManager::instance().AddTask(Config::instance().m_file_format,id,name,chans,from,to,fileName);
+    QString cell = ui->cbxHost->currentText();
+    AsyncExportManager::instance().AddTask(Config::instance().m_file_format,
+                                           id,
+                                           name,
+                                           cell,
+                                           chans,
+                                           from,
+                                           to,
+                                           fileName);
     ui->btnExport->setText(QStringLiteral("正在导出"));
     ui->btnExport->setEnabled(false);
     ui->btnQuery->setEnabled(false);
@@ -1822,7 +1882,11 @@ void MainWnd::on_btnHelp_clicked()
 {
 
 }
-void MainWnd::listOrders(QString host)
+void MainWnd::loadDeviceName(QString host)
+{
+
+}
+void MainWnd::listOrders(QString host,QString dev,bool local)
 {
     CellTestOrderList& orders =  StateManager::instance().GetOrderList(host);
     if(orders.size() == 0){
@@ -1830,6 +1894,8 @@ void MainWnd::listOrders(QString host)
     }
     QSignalMapper *signalMapper = new QSignalMapper(this);
     QSignalMapper *signalMapper2 = new QSignalMapper(this);
+    QSignalMapper *signalMapper3 = new QSignalMapper(this);
+
     ui->orderList->clear();
 
     QMap<QString,QVector<CellState> >::const_iterator i = orders.constBegin();
@@ -1837,6 +1903,8 @@ void MainWnd::listOrders(QString host)
     while (i != orders.constEnd()) {
 
         QStringList row;
+
+
         //订单名,把这个名字去掉后面的温度后缀.
         row.push_back(i.key());
         //只要有订单存在就
@@ -1846,15 +1914,48 @@ void MainWnd::listOrders(QString host)
         }else{
 
         }
+        QVector<CellState> cells = i.value();
+
+        if(local){
+            bool find = false;
+            for(int j = 0 ; j < cells.size(); j++)
+            {
+
+                if(dvm.IsContainsDevice( cells[j].PressDevId)){
+                    if(dev!=QStringLiteral("全部模块")){
+                        if(cells[j].PressDevId == dev){
+                            find = true;
+                        }
+                    }else{
+                        find = true;
+                    }
+
+                }
+            }
+            if(!find){
+                ++i;
+                continue;
+            }
+        }else{
+
+        }
+
         //订单个数
         row.push_back(QString("%1").arg(i.value().size()));
         QTreeWidgetItem* item = new QTreeWidgetItem(row);
-        QVector<CellState> cells = i.value();
 
         for(int j = 0 ; j < cells.size(); j++)
         {
-             QTreeWidgetItem* subItem = new QTreeWidgetItem(QStringList(cells[j].CellNo));
+            QStringList qsl;
+            qsl.push_back(cells[j].CellNo);
+            qsl.push_back(cells[j].PressDev);
+            qsl.push_back(cells[j].ChargeDev);
+
+             QTreeWidgetItem* subItem = new QTreeWidgetItem(qsl);
+             //QTreeWidgetItem* subItem2 = new QTreeWidgetItem(QStringList(cells[j].PressDev));
+
              item->addChild(subItem);
+
         }
 
         ui->orderList->addTopLevelItem(item);
@@ -1864,22 +1965,48 @@ void MainWnd::listOrders(QString host)
          QPushButton *btnOpenDir = new QPushButton(QStringLiteral("打开目录"));
           btnOpenDir->setGeometry(0,0,80,40);
 
+          QPushButton * btnOpenNetDir = new QPushButton(QStringLiteral("检查"));
+          btnOpenNetDir->setGeometry(0,0,80,40);
+
+
         connect(btnOpenDir, SIGNAL(clicked()), signalMapper2, SLOT(map()));
+
         //QString dir = QString("%1").arg(1);
          QString dir = QString(QStringLiteral("%1/%2/%3"))
                         .arg(Config::instance().m_data_dir)
                         .arg(host)
                         .arg(i.key());
 
+         QString report="";
+         if(i.value().size() > 0){
+             report = getLocalFile(i.key(),
+                                   i.value().at(0).TestNo,
+                                   i.value().at(0).Temp);
+         }
+
+
+
         signalMapper2->setMapping(btnOpenDir, dir);
+
+        connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
+
+        signalMapper->setMapping(btnReport, i.key());
+
+
+        connect(btnOpenNetDir, SIGNAL(clicked()), signalMapper3, SLOT(map()));
+
+        qDebug() << "report=" << report;
+        signalMapper3->setMapping(btnOpenNetDir, report);
 
         connect(btnReport, SIGNAL(clicked()), signalMapper, SLOT(map()));
         signalMapper->setMapping(btnReport, i.key());
 
 
 
+
         ui->orderList->setItemWidget(item, 3, btnReport);
         ui->orderList->setItemWidget(item, 4, btnOpenDir);
+        ui->orderList->setItemWidget(item, 5, btnOpenNetDir);
 
 
         ++i;
@@ -1888,15 +2015,30 @@ void MainWnd::listOrders(QString host)
                 this, SLOT(on_report_click(QString)));
     connect(signalMapper2, SIGNAL(mapped(QString)),
                 this, SLOT(on_opendir_click(QString)));
+    connect(signalMapper3, SIGNAL(mapped(QString)),
+                this, SLOT(on_opennetdir_click(QString)));
 
 }
 void MainWnd::on_cbxHost_currentIndexChanged(const QString &arg1)
 {
     qDebug() << "onchage" << arg1 << loading;
      if(loading) return;
-    listOrders(arg1);
+    listOrders(arg1,ui->cbxLocal->currentText(), ui->chkLocal->isChecked());
 }
+#include "dialogcheck.h"
+void MainWnd::on_opennetdir_click(QString dir)
+{
+//    DialogCheck dlg;
+//    dlg.Check(dir);
+    qDebug() << "checkfile" << dir;
+//    OrderChecker check;
+//    OrderInfo orderInfo;
+//    check.Check(dir,orderInfo);
 
+    DialogCheck dlg;
+    dlg.Check(dir);
+   //打开文件去检查.
+}
 void MainWnd::on_opendir_click(QString dir)
 {
     //QString dir_gbk = utils::UTF82GBK(dir);
@@ -2031,6 +2173,15 @@ QString MainWnd::GetNetFile(QString temp,QString order,QString orderKey)
                     .arg(parseDateTime(order))
                     .arg(order).arg(order).arg(temp);
 }
+QString MainWnd::GetNetDir(QString order)
+{
+    order = order.left(order.length()-7);
+    return QString(QStringLiteral("%1/%2/%3/%4/"))
+                    .arg(Config::instance().m_ftp_base)
+                    .arg(ui->edtCorpName->text())
+                    .arg(parseDateTime(order)).arg(order);
+
+}
 bool MainWnd::SaveNetFile(QString netFile,QString localFile)
 {
     if(utils::ExistFile(netFile)){
@@ -2042,7 +2193,22 @@ bool MainWnd::SaveNetFile(QString netFile,QString localFile)
     }
     return false;
 }
-
+QString MainWnd::getLocalFile(QString orderKey,QString order, QString temp)
+{
+    QString localfile = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
+            .arg(Config::instance().m_data_dir)
+            .arg(ui->cbxHost->currentText())
+            .arg(orderKey).arg(order).arg(temp);
+    return localfile;
+}
+QString MainWnd::getFixFile(QString orderKey,QString order, QString temp)
+{
+    QString localfile = QString(QStringLiteral("%1/%2/%3/修复数据/待修复数据.xlsx"))
+            .arg(Config::instance().m_data_dir)
+            .arg(ui->cbxHost->currentText())
+            .arg(orderKey);
+    return localfile;
+}
 QJsonDocument MainWnd::buildReportInputJson(QString orderKey)
 {
     QString name = ui->cbxHost->currentText();
@@ -2062,13 +2228,10 @@ QJsonDocument MainWnd::buildReportInputJson(QString orderKey)
 
         QString netfile = GetNetFile(temp,order,orderKey);
 
-        QString localfile = QString(QStringLiteral("%1/%2/%3/%4_%5压力测试表.xlsx"))
-                .arg(Config::instance().m_data_dir)
-                .arg(ui->cbxHost->currentText())
-                .arg(orderKey).arg(order).arg(temp);
+
        // qDebug() <<"temp=" << temp<< " localfile=" << localfile;
         root["ftp_dir"] = netfile;
-        root["target_file"] =localfile;
+        root["target_file"] =getLocalFile(orderKey,order,temp);
         root["db"] = utils::GetWorkDir()+"/config.db";
         root["data_dir"] = QString("%1/data").arg(utils::GetWorkDir());
         root["corp_name"] = ui->edtCorpName->text();
@@ -2158,6 +2321,8 @@ void MainWnd::on_btnReload_clicked()
 {
     //重新加载数据
     loadStateFile(true);
+
+
 }
 #include "websetclient.h"
 static  WebSetClient* client=NULL ;
@@ -2296,6 +2461,10 @@ void MainWnd::on_btnOpenReport_clicked()
     bool ok =QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
     qDebug() << "open " << dir << " result=" << ok;
 }
+void MainWnd::on_btnOpenNetReport_clicked()
+{
+
+}
 void MainWnd::updateDevInfo(Device* dev,DeviceStatInfo info)
 {
 
@@ -2427,9 +2596,9 @@ void MainWnd::setStyle(int line,int shape)
     QCPScatterStyle::ScatterShape sl = QCPScatterStyle::ssNone;
 
     if(shape == 0) sl = QCPScatterStyle::ssNone;
-    else if(shape == 0) sl = QCPScatterStyle::ssPlus;
-    else if(shape == 1) sl = QCPScatterStyle::ssCross;
-    else if(shape == 2) sl = QCPScatterStyle::ssDisc;
+    else if(shape == 1) sl = QCPScatterStyle::ssPlus;
+    else if(shape == 2) sl = QCPScatterStyle::ssCross;
+    else if(shape == 3) sl = QCPScatterStyle::ssDisc;
 
     qDebug() << line << shape;
     int s = ui->cbxSize->currentText().toInt();
@@ -2443,4 +2612,24 @@ void MainWnd::on_cbxLine_currentIndexChanged(int index)
 void MainWnd::on_cbxShape_currentIndexChanged(int index)
 {
     //setStyle(ui->cbxLine->currentIndex(),index);
+}
+
+void MainWnd::on_chkLocal_clicked(bool checked)
+{
+
+    ui->cbxLocal->setEnabled(checked);
+    listOrders(Config::instance().m_host_name,ui->cbxLocal->currentText(),checked);
+}
+
+void MainWnd::on_cbxDevice_currentIndexChanged(const QString &arg1)
+{
+
+}
+
+void MainWnd::on_cbxLocal_currentTextChanged(const QString &arg1)
+{
+    if(!ui->chkLocal->isChecked()){
+        return;
+    }
+    listOrders(Config::instance().m_host_name,arg1,true);
 }

@@ -200,10 +200,18 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
         return;
     }
     if(weight==65535){
-        ui->lbl_weight->setText(QStringLiteral("未连接"));
+        if(state == 0xff)
+        {
+            ui->lbl_weight->setStyleSheet("font:24pt;color:red");
+            ui->lbl_weight->setText(QStringLiteral("警告:连接异常"));
+        }else{
+            ui->lbl_weight->setStyleSheet("font:40pt;color:white");
+            ui->lbl_weight->setText(QStringLiteral("未连接"));
+        }
+
     }else{
         double wf = (double)weight;
-
+        ui->lbl_weight->setStyleSheet("font:40pt;color:white");
         QString ws = utils::float2string(wf, dot);
         if(ws.length() >= 6){
             //qDebug() << "----------0";
@@ -220,14 +228,7 @@ void ChannelWidget::DisplayWeight(int weight, quint16 state, quint16 dot)
           AlarmCheck(weight);
         }
     }
-
     resetTimeout();
-
-
-
-
-
-
 }
 void ChannelWidget::disable(bool dis)
 {

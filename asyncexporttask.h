@@ -19,6 +19,7 @@ public:
                     FileFormat format,
                     QString serialNo,
                     QString name,
+                    QString cellNo,
                     QVector<int> chans,
                     qint64 from,
                     qint64 to,
@@ -44,6 +45,7 @@ signals:
 private:
     QString         _serialNo;
     QString         _name;
+    QString         _cell;
     QVector<int>    _chans;
     qint64          _from;
     qint64          _to;
