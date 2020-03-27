@@ -113,6 +113,8 @@ void GPServer::onStart()
             catch (Poco::Exception& exc)
             {
                 QString err = exc.displayText().c_str();
+                //这里在升级后，或者ip冲突的时候，会一直报错.导致程序崩溃
+                //因为数据传输速度变快后，这里错误的几率也就变高了
                 onError(QString("gpserver err: %1").arg(exc.displayText().c_str()));
                 qDebug() << "gpserver" << err ;
                 //std::cerr << "UDPEchoServer: " << exc.displayText() << std::endl;

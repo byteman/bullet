@@ -14,7 +14,6 @@ QCustomPlotChannel::QCustomPlotChannel(int index,QCPGraph* graph):
         graph->setPen(pen);
     }
 
-    qDebug() << "is m_graph";
     Clear();
 
 }

@@ -134,10 +134,13 @@ type(_type),visible(false), QObject(parent)
 
 MyTracer::~MyTracer()
 {
-	if (tracer)
-		plot->removeItem(tracer);
-	if (label)
-		plot->removeItem(label);
+#if 0
+    //打开这里的话，在程序关闭的时候，会导致应用程序异常退出.
+    if (tracer)
+        plot->removeItem(tracer);
+    if (label)
+        plot->removeItem(label);
+#endif
 }
 
 void MyTracer::setPen(const QPen &pen)

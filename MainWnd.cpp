@@ -31,7 +31,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.1.7").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.1.8").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
@@ -916,6 +916,7 @@ MainWnd::MainWnd(QWidget *parent) :
     bFirst(true),
     ftp(NULL),
     proc(NULL),
+    m_tracer(NULL),
     bQueryOrderState(false),
     watcher(NULL)
 {
@@ -1096,9 +1097,11 @@ void MainWnd::chan_click(int chan)
     bool en = rbChanList[chan]->isChecked();
     wave->ShowChan(chan,en);
     if(ui->chkMeasure->isChecked()){
-        m_tracer->Show(chan,en);
+        if(m_tracer)
+            m_tracer->Show(chan,en);
     }else{
-        m_tracer->Show(chan,false);
+        if(m_tracer)
+            m_tracer->Show(chan,false);
     }
     updateTime();
     ui->plot3->replot();
@@ -1222,13 +1225,17 @@ void MainWnd::myMoveEvent(QMouseEvent *event) {
     double x_val = ui->plot3->xAxis->pixelToCoord(x_pos);
     double y_val = ui->plot3->yAxis->pixelToCoord(y_pos);
     //qDebug() << "x_pos" << x_pos << "x_value=" << qint64(x_val);
-    m_tracer->UpdatePosition(x_val,y_val);
+   if(m_tracer){
+        m_tracer->UpdatePosition(x_val,y_val);
+   }
+
     ui->plot3->replot();//曲线重绘
 }
 void MainWnd::initDeviceChannels()
 {
-    wave = new HistWaveWidget(ui->plot3);
 
+    wave = new HistWaveWidget(ui->plot3);
+#if 1
     rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->plot3);
 
     connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMoveEvent(QMouseEvent*)));
@@ -1238,13 +1245,11 @@ void MainWnd::initDeviceChannels()
 
 
     m_tracer = new MyPlotTrace(ui->plot3,MAX_CHAN_NR);
-
-    //connect(ui->plot3, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(myMouseMoveEvent(QMouseEvent*)));
     ui->dteFrom->setDateTime(QDateTime::currentDateTime().addDays(-1));
     ui->dteTo->setDateTime(QDateTime::currentDateTime());
-    //on_cbxTimeSpan_currentIndexChanged(0);
-   // ui->cbxTimeSpan->setVisible(false);
-    //ui->label_8->setVisible(false);
+#endif
+
+#if 1
     devices = new MyDevices(MAX_CHAN_NR+1,ui->gbDevices);
     devices->SetTimeRange(Config::instance().m_rt_wave_min*60);
     devices->SetMaxSampleNum(50);
@@ -1253,7 +1258,7 @@ void MainWnd::initDeviceChannels()
     connect(devices,SIGNAL(onChannelConfig(int)),this,SLOT(onChannelClick(int)));
     connect(devices,SIGNAL(onPlayClick(int,bool)),this,SLOT(onPlayClick(int,bool)));
     connect(devices,SIGNAL(onWaveShow(int,bool)) ,this,SLOT(onWaveShow(int,bool)));
-
+#endif
 }
 #include "orderchecker.h"
 void MainWnd::initUI()
@@ -1582,23 +1587,20 @@ void MainWnd::on_btnShou_clicked()
 //关闭前的处理工作
 void MainWnd::closeHandle()
 {
-    qDebug() << "close1";
+
     srv->stop();
-     qDebug() << "close2";
+
     WriteDBThread::instance().stopThread();
-     qDebug() << "close3";
+
     this->dvm.Sync();
-      qDebug() << "close4";
+
     if(proc!=NULL){
-         qDebug() << "close5";
         proc->kill();
-         qDebug() << "close6";
         proc->waitForFinished();
-         qDebug() << "close7";
     }
- qDebug() << "close8";
-    //utils::KillProcess(Config::instance().m_report_name);
-     qDebug() << "close9";
+
+    // utils::KillProcess(Config::instance().m_report_name);
+     qDebug() << "close succ";
 
 }
 void MainWnd::closeEvent(QCloseEvent *event)
@@ -1783,11 +1785,15 @@ void MainWnd::on_chkMeasure_clicked(bool checked)
 {
      qDebug() << checked;
      if(!checked){
-         m_tracer->ShowAll(false);
+         if(m_tracer){
+             m_tracer->ShowAll(false);
+         }
+
      }else{
          for(int i = 0 ; i < rbChanList.size();i++)
          {
-             m_tracer->Show(i,rbChanList[i]->isChecked());
+             if(m_tracer)
+                m_tracer->Show(i,rbChanList[i]->isChecked());
          }
      }
 
