@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "config.h"
+#include "utils.h"
+#include "qtcsv/writer.h"
+#include "qtcsv/stringdata.h"
 #define MAX_TIMEOUT 10
 
 /*
@@ -152,6 +155,18 @@ void Device::SetWriteEnable(bool en)
 bool Device::IsWriteEnable()
 {
     return m_writeEnable;
+}
+
+void Device::SetCsvPath(QString path)
+{
+    m_csv_path = path;
+}
+#include <QDate>
+//一个月保存一个文件.
+QString Device::GetCsvFilePath()
+{
+    QString path = QString("%1/%2-%3.csv").arg(m_csv_path).arg(QDate::currentDate().year()).arg(QDate::currentDate().month());
+    return path;
 }
 void Device::WriteParam(MsgDevicePara &para)
 {
@@ -311,7 +326,7 @@ bool Device::onMessage(ProtoMessage &req, ProtoMessage &resp)
     }
     else if(req.head.cmd_id == MSG_DEVICE_INFO_REQ)
     {
-        qDebug() << "MSG_DEVICE_INFO_RESP";
+        //qDebug() << "MSG_DEVICE_INFO_RESP";
         DeviceStatInfo di;
 
         if(req.getData(&di,sizeof(DeviceStatInfo)))
@@ -493,6 +508,80 @@ bool Device::CheckErrorCnt(DeviceDataList &ddl)
 
     return false;
 }
+bool Device::writeCsvFile(DeviceDataList &ddl)
+{
+    QtCSV::StringData strData;
+
+    if(!QFile::exists( GetCsvFilePath())){
+        QStringList strHeader;
+        strHeader << QStringLiteral("模块")+this->name();
+        strData.addRow(strHeader);
+        strHeader.clear();
+
+        for(int j = 0; j < 13; j++)
+        {
+            if(j==0){
+                strHeader << QStringLiteral("时间");
+            }else{
+                strHeader << QString(QStringLiteral("第%1路").arg(j));
+            }
+        }
+        strData.addRow(strHeader);
+    }
+
+    QStringList strList;
+    int ch = 0;
+    for(int j = 0; j < 13; j++)
+    {
+
+         if(j==0){
+             strList << utils::gettm(ddl[j].timestamp*1000);
+             continue;
+         }
+
+
+
+         if(j == ddl[ch].chan){
+             //qDebug() <<j<< "chan" << ddl[ch].chan << "value=" <<ddl[ch].value;
+             strList << QString("%1").arg(ddl[ch].value);
+             ch++;
+         }else{
+             strList << "32767";
+         }
+
+
+    }
+    strData.addRow(strList);
+    //qDebug() << QThread::currentThread() << "write csv" << tm.elapsed() << "ms";
+
+
+    /**
+     * @brief QtCSV::Writer::write
+     *  static bool write(const QString& filePath,
+                        const AbstractData& data,
+                        const QString& separator = QString(","),
+                        const QString& textDelimiter = QString("\""),
+                        const WriteMode& mode = REWRITE,
+                        const QStringList& header = QStringList(),
+                        const QStringList& footer = QStringList(),
+                        QTextCodec* codec = QTextCodec::codecForName("UTF-8"));
+
+     */
+
+    //tm.restart();
+
+    return QtCSV::Writer::write(GetCsvFilePath(),
+                                strData,
+                                QString(","),
+                                QString("\""),
+                                QtCSV::Writer::APPEND,
+                                QStringList(),
+                                QStringList(),
+                                QTextCodec::codecForName("GB2312"));
+
+
+}
+
 bool Device::WriteValues(MsgSensorData& msg)
 {
 
@@ -540,6 +629,7 @@ bool Device::WriteValues(MsgSensorData& msg)
          }
          ddl.push_back(dd);
     }
+    writeCsvFile(ddl);
     m_last_ddl = ddl;
     QSqlError err=DAO::instance().DeviceDataAdd(msg.m_dev_serial,ddl);
 

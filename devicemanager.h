@@ -54,6 +54,7 @@ public:
     void SetAllWriteEnable();
     bool GetDeviceStatInfo(QString& dev_id, DeviceStatInfo& info);
     bool IsContainsDevice(QString& dev_name);
+    bool CreateAllExcelDir();
 public slots:
     void onCommResult(Device* dev,int cmd, int result);
     void onWaveMsg(Device* dev,MsgWaveData wvData);
@@ -78,6 +79,8 @@ private:
     bool addOneDevice(QString &serialNo, QString &name);
     void removeOneDevice(Device *dev);
     void WriteValues(Device* dev,MsgSensorData &msg);
+    QString createExcelDir(QString name);
+
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void ReadParam(Device* dev,MsgDevicePara para);

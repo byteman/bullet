@@ -126,6 +126,7 @@ private:
      void loadLocalDevice();
      QString getLocalFile(QString orderKey, QString order, QString temp);
      QString getFixFile(QString orderKey, QString order, QString temp);
+     bool loadTask(QString _serialNo, int chan, qint64 _from, qint64 _to);
 private slots:
     void chan_click(int chan);
     void buttonClick();
@@ -274,6 +275,8 @@ private slots:
     void on_opennetdir_click(QString dir);
     void on_cbxLocal_currentTextChanged(const QString &arg1);
 
+    void on_btnSelectDir_clicked();
+
 protected:
     void timerEvent(QTimerEvent *);
 
@@ -302,6 +305,8 @@ protected slots:
 
     // QWidget interface
     void on_btnOpenNetReport_clicked();
+    void on_uploadfile_click(bool);
+    void on_sdcard_menu_click(bool);
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *event);
 };

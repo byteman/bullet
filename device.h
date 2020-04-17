@@ -66,8 +66,10 @@ public:
     //是否允许保存数据
     void SetWriteEnable(bool en);
     bool IsWriteEnable();
+    void SetCsvPath(QString path);
 private:
     DeviceDataList m_ddl;
+    QString m_csv_path;
     DeviceDataList m_last_ddl;
     int m_err_cont;
     QMap<int,DeviceChannel> m_channels;
@@ -111,6 +113,8 @@ private:
     bool CheckErrorCnt(DeviceDataList &ddl);
     bool IsEqual(DeviceDataList &ddl);
     bool IsNotConnect(int chan);
+    bool writeCsvFile(DeviceDataList &ddl);
+    QString GetCsvFilePath();
 signals:
     void CommResult(Device* dev,int cmd, int result);
     void showWave(Device* dev, MsgWaveData wave);

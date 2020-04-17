@@ -31,6 +31,8 @@ bool Config::Init()
     m_save_intS= DAO::instance().ReadIntParam("saveInt",3);
     m_host_name= DAO::instance().ReadStringParam("host_name","AI");
     m_data_dir= DAO::instance().ReadStringParam("data_dir",utils::GetWorkDir());
+    m_csv_dir= DAO::instance().ReadStringParam("csv_dir",utils::GetWorkDir()+"/csv/");
+
     m_ftp_host= DAO::instance().ReadStringParam("ftp_host","");
     m_ftp_user= DAO::instance().ReadStringParam("ftp_user","");
     m_ftp_pwd= DAO::instance().ReadStringParam("ftp_pwd","");
@@ -188,5 +190,12 @@ bool Config::SetCorpName(QString name)
 {
     m_corp_name = name;
     DAO::instance().WriteStringParam("corpName",name);
+    return true;
+}
+
+bool Config::SetPressDir(QString path)
+{
+    m_csv_dir = path;
+    DAO::instance().WriteStringParam("csv_dir",path);
     return true;
 }

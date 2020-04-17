@@ -44,6 +44,11 @@ void MainWindow::setHost(QString host)
 {
     ui->ftpServerLineEdit->setText(host);
 }
+
+void MainWindow::setBaseDir(QString dir)
+{
+    baseFile = dir;
+}
 void MainWindow::ftpCommandStarted(int)
 {
     int id = ftp->currentCommand();
@@ -82,7 +87,7 @@ void MainWindow::ftpCommandFinished(int, bool error)
             ui->downloadButton->setEnabled(true);
             ui->uploadButton->setEnabled(true);
             ui->label->setText(QStringLiteral("登录成功"));
-            currentPath="/mnt/usb/data";
+            currentPath=baseFile;
             ftp->cd(_ToSpecialEncoding(currentPath));
 
             ftp->list();

@@ -37,6 +37,7 @@ public:
     ~MainWindow();
     void initDisplay();
     void setHost(QString host);
+    void setBaseDir(QString dir);
 private:
     Ui::MainWindow *ui;
     QFtp *ftp;
@@ -61,7 +62,7 @@ private:
     //客户端，服务器端treeview右键菜单
     QMenu *m_server_menu;
     QMenu *m_client_menu;
-
+    QString baseFile;
     //记录上传和下载文件的个数
     int indexCount;
     int currentIndex;

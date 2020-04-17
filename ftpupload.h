@@ -13,7 +13,7 @@ struct UploadFileInfo{
     QDateTime fileUpTime; //文件上传时间.
 };
 struct UploadFileList{
-     int  AddFile(QString fileName,QString ftpUrl);
+     int  AddFile(QString fileName,QString  ftpUrl);
      bool RemoveFile(QString fileName);
      //获取一个未上传成功的文件
      bool PeekFirstUnUploadFile(UploadFileInfo& finfo);
@@ -32,14 +32,15 @@ public:
     //用户名和密码验证
     bool Auth(int port,QString user,QString password);
     //添加一个上传任务
-    void AddTask(QString fileName, QString ftpUrl,int maxRetry=3);
+    void AddTask(QString fileName,
+                 QString host,QString target,int maxRetry=3);
 signals:
     //某个文件上传完成.
-    void OnSuccess(QString fileName);
+    void OnSuccess(QString host);
     //某个文件上传失败
-    void OnError(QString fileName,QString reason);
+    void OnError(QString host,QString reason);
 protected:
-    bool doUpload(QString fileName, QString ftpurl);
+    bool doUpload(QString fileName,QString host,QString target);
 protected slots:
     void loadError(QNetworkReply::NetworkError err);
     void loadProgress(qint64 bytesSent, qint64 bytesTotal);

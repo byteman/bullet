@@ -22,10 +22,12 @@ LIBS+=-L./ext/lib -lWS2_32
 win32:LIBS += -lIphlpapi
 #DEFINES += QCUSTOMPLOT_USE_OPENGL
 SOURCES += main.cpp\
+    csvthread.cpp \
     dialogcheck.cpp \
     dialogcorpmanager.cpp \
     dialogfix.cpp \
     dialogfixvalue.cpp \
+    dialogmultiupload.cpp \
     orderchecker.cpp \
     tcpserver.cpp \
     device.cpp \
@@ -102,10 +104,12 @@ SOURCES += main.cpp\
     qurlinfo.cpp
 
 HEADERS  += tcpserver.h \
+    csvthread.h \
     dialogcheck.h \
     dialogcorpmanager.h \
     dialogfix.h \
     dialogfixvalue.h \
+    dialogmultiupload.h \
     imsginterface.h \
     device.h \
     devicemanager.h \
@@ -179,6 +183,7 @@ FORMS    += MainWnd.ui \
     dialogcorpmanager.ui \
     dialogfix.ui \
     dialogfixvalue.ui \
+    dialogmultiupload.ui \
     dialogparams.ui \
     dialogcalib.ui \
     frmmessagebox.ui \

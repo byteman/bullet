@@ -31,7 +31,7 @@ void MainWnd::AddLog(QString msg)
 #include "nettools.h"
 void MainWnd::outputVer()
 {
-    AddLog(QString("Ver-%1-%2").arg("1.1.8").arg(__DATE__));
+    AddLog(QString("Ver-%1-%2").arg("1.1.10").arg(__DATE__));
 }
 void MainWnd::StartServer()
 {
@@ -310,6 +310,30 @@ void MainWnd::on_reset_count_click(bool)
 {
     dvm.ResetDeviceCount(m_cur_dev_id);
 }
+#include "dialogmultiupload.h"
+void MainWnd::on_uploadfile_click(bool)
+{
+    if(!CheckPassWord("helloworld")){
+        return;
+    }
+    DialogMultiUpload dlg;
+    QList<Device *> devices;
+    dvm.ListDevice(devices);
+    QStringList list;
+    for(int i = 0; i < devices.size(); i++)
+    {
+        QString ip;
+        if(devices[i]->GetHostAddr(ip) && ip!="0.0.0.0"){
+
+            list.push_back(ip);
+        }
+
+    }
+    dlg.ListDevice(list);
+    dlg.exec();
+
+}
+
 //添加一个设备.
 void MainWnd::on_add_device_click(bool)
 {
@@ -490,7 +514,42 @@ void MainWnd::on_ftp_menu_click(bool)
     }
 
     ftp->setHost(host);
+    ftp->setBaseDir("/mnt/usb/data/");
+    //ftp.setWindowFlags(Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint | Qt::Dialog);
+    //ftp.setWindowModality(Qt::ApplicationModal);
+    ftp->setAttribute(Qt::WA_ShowModal, true);
+    ftp->setWindowFlags(ftp->windowFlags() | Qt::WindowStaysOnTopHint);
 
+    ftp->showNormal();
+
+
+}
+void MainWnd::on_sdcard_menu_click(bool)
+{
+    QString id;
+    if(!GetCurrentDeviceId(id)){
+        qDebug()<<"Can not GetCurrentDeviceName";
+        return;
+    }
+    Device* dev = dvm.GetDevice(id);
+    if(dev==NULL){
+        return;
+    }
+
+    QString host;
+    if(!dev->GetHostAddr(host)){
+        return;
+    }
+    if(ftp!=NULL){
+        delete ftp;
+        ftp = NULL;
+    }
+    if(ftp==NULL){
+        ftp = new MainWindow();
+    }
+
+    ftp->setHost(host);
+    ftp->setBaseDir("/mnt/mmc/data/");
     //ftp.setWindowFlags(Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint | Qt::Dialog);
     //ftp.setWindowModality(Qt::ApplicationModal);
     ftp->setAttribute(Qt::WA_ShowModal, true);
@@ -758,7 +817,7 @@ void MainWnd::timerEvent(QTimerEvent *)
         {
             if(devices[i]->online()){
                 if(devices[i]->alarm()){
-                    qDebug() << "is alarm";
+                    //qDebug() << "is alarm";
                     item->setIcon(0,icon_device[2]);
                 }else
                     item->setIcon(0,icon_device[0]);
@@ -1367,6 +1426,9 @@ void MainWnd::initUI()
     action = new QAction(QStringLiteral("下载U盘数据"),this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_ftp_menu_click(bool)));
+    action = new QAction(QStringLiteral("下载SD卡数据"),this);
+    menu->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_sdcard_menu_click(bool)));
 
     action = new QAction(QStringLiteral("修正压力值"),this);
     menu3->addAction(action);
@@ -1381,6 +1443,11 @@ void MainWnd::initUI()
     action = new QAction(QStringLiteral("添加设备"),this);
     menu2->addAction(action);
     connect(action, SIGNAL(triggered(bool)), this, SLOT(on_add_device_click(bool)));
+
+    action = new QAction(QStringLiteral("上传文件"),this);
+    menu2->addAction(action);
+    connect(action, SIGNAL(triggered(bool)), this, SLOT(on_uploadfile_click(bool)));
+
 
     ui->btnMain->click();
     on_btnMenu_Max_clicked();
@@ -1439,7 +1506,7 @@ void MainWnd::loadSysConfig()
     //ui->cbxCorp->clear();
     ui->edtPort->setText(QString("%1").arg(Config::instance().m_local_port));
     ui->edtCorpName->setText(Config::instance().m_corp_name);
-
+    ui->edtPressDir->setText(Config::instance().m_csv_dir);
     ui->edtFtpBase->setText(Config::instance().m_ftp_base);
     ui->cbxFileFormat->setCurrentIndex(Config::instance().m_file_format);
     ui->edtHost->setText(Config::instance().m_host_name);
@@ -1679,17 +1746,50 @@ void MainWnd::handleLoadWaveFinished()
     ui->btnImport->setEnabled(true);
     ui->btnQuery->setText(QStringLiteral("查询"));
 }
+#include <QtConcurrent/QtConcurrent>
+bool MainWnd::loadTask(QString _serialNo, int chan, qint64 _from, qint64 _to)
+{
+    DeviceDataList ddl;
+    //查询设备和对应的通道数据
+    QSqlError err = DAO::instance().DeviceDataQueryByConn(_serialNo,
+                                                          chan,
+                                                          _from,
+                                                          _to,
+                                                          ddl);
+    if(err.isValid())
+    {
+        qDebug() << "DeviceDataQueryByConn err" << err.text();
+    }
+    m_ddl[chan] = ddl;
+    return true;
+}
 //在后台线程进行数据查询
-bool MainWnd::LoadWave(QString id, QVector<int> chan, qint64 from, qint64 to)
+bool MainWnd::LoadWave(QString id, QVector<int> chans, qint64 from, qint64 to)
 {
     m_ddl.clear();
-    for(int i = 0; i < chan.size(); i++)
+
+    QVector<QFuture<bool> > results;
+    QThreadPool pool;
+    pool.setMaxThreadCount(chans.size());
+
+    QThread::msleep(1);
+    for(int i = 0; i < chans.size(); i++)
     {
-        DeviceDataList dll;
-        m_ddl[chan[i]] = dll;
+        int chan = chans[i];
+
+        QFuture<bool> future = QtConcurrent::run(&pool,
+                                                this,
+                                                &MainWnd::loadTask,
+                                                 id,
+                                                chan,
+                                                from,to);
+        results.push_back(future);
     }
-    QSqlError err = DAO::instance().DeviceDataQuery(id,from,to, m_ddl);
-    return !err.isValid();
+    for(int i = 0 ; i < results.size(); i++)
+    {
+        results[i].waitForFinished();
+    }
+    return true;
 }
 
 void MainWnd::on_btnQuery_clicked()
@@ -2638,4 +2738,14 @@ void MainWnd::on_cbxLocal_currentTextChanged(const QString &arg1)
         return;
     }
     listOrders(Config::instance().m_host_name,arg1,true);
+}
+#include <QFileDialog>
+void MainWnd::on_btnSelectDir_clicked()
+{
+    QString fpath = QFileDialog::getExistingDirectory(this);
+    if(fpath.isEmpty()) return;
+    if(fpath == Config::instance().m_csv_dir) return;
+    ui->edtPressDir->setText(fpath);
+    Config::instance().SetPressDir(fpath);
+    dvm.CreateAllExcelDir();
 }

@@ -2,6 +2,8 @@
 #include <QSettings>
 #include "dao.h"
 #include "config.h"
+#include "Logger.h"
+#include "utils.h"
 DeviceManager::DeviceManager():
     m_use_sys_time(true),
     m_save_int_s(3)
@@ -13,6 +15,24 @@ DeviceManager::DeviceManager():
 QString DeviceManager::GetLastError()
 {
     return m_last_err;
+}
+QString DeviceManager::createExcelDir(QString name)
+{
+    QString path = Config::instance().m_csv_dir + QStringLiteral("/模块") + name;
+    LOG_DEBUG() << "create dir-->" << path;
+    utils::MkMutiDir(path);
+    return path;
+}
+bool DeviceManager::CreateAllExcelDir()
+{
+    bool ok = true;
+    QMapIterator<QString,Device*> i(dev_map);
+    while (i.hasNext()) {
+        i.next();
+
+       i.value()->SetCsvPath(createExcelDir(i.value()->name()));
+    }
+    return ok;
 }
 bool DeviceManager::addOneDevice(QString& serialNo, QString& name)
 {
@@ -41,7 +61,7 @@ bool DeviceManager::addOneDevice(QString& serialNo, QString& name)
         DAO::instance().DeviceChannalGet(serialNo,i,cfg);
         dev->UpdateChanConfig(i,cfg);
     }
-
+    dev->SetCsvPath(createExcelDir(name));
     dev_lock.unlock();
     return true;
 }
